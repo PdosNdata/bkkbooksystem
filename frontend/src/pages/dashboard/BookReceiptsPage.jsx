@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import * as React from 'react'
 import { supabase } from '../../lib/supabase'
 import { Search, Plus, Package, Loader2, Calendar, Truck, CheckCircle, Save, Eye, BookOpen } from 'lucide-react'
 import Swal from 'sweetalert2'
@@ -8,33 +8,33 @@ const gradeOptions = ['kg2', 'kg3', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'm1', 'm
 const PAGE_SIZE = 10
 
 export default function BookReceiptsPage() {
-  const [receipts, setReceipts] = useState([])
-  const [allOrderItems, setAllOrderItems] = useState([])
-  const [typeofbooks, setTypeofbooks] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
+  const [receipts, setReceipts] = React.useState([])
+  const [allOrderItems, setAllOrderItems] = React.useState([])
+  const [typeofbooks, setTypeofbooks] = React.useState([])
+  const [loading, setLoading] = React.useState(true)
+  const [search, setSearch] = React.useState('')
+  const [currentPage, setCurrentPage] = React.useState(1)
 
   // Main receive modal states
-  const [showReceiveModal, setShowReceiveModal] = useState(false)
-  const [selectedGrade, setSelectedGrade] = useState('')
-  const [selectedSubject, setSelectedSubject] = useState('')
-  const [receiptDate, setReceiptDate] = useState(new Date().toISOString().slice(0, 10))
-  const [deliveryNumber, setDeliveryNumber] = useState(1)
-  const [filteredBooks, setFilteredBooks] = useState([])
-  const [receiveItems, setReceiveItems] = useState({})
-  const [saving, setSaving] = useState(false)
-  const [notes, setNotes] = useState('')
-  const [loadingBooks, setLoadingBooks] = useState(false)
+  const [showReceiveModal, setShowReceiveModal] = React.useState(false)
+  const [selectedGrade, setSelectedGrade] = React.useState('')
+  const [selectedSubject, setSelectedSubject] = React.useState('')
+  const [receiptDate, setReceiptDate] = React.useState(new Date().toISOString().slice(0, 10))
+  const [deliveryNumber, setDeliveryNumber] = React.useState(1)
+  const [filteredBooks, setFilteredBooks] = React.useState([])
+  const [receiveItems, setReceiveItems] = React.useState({})
+  const [saving, setSaving] = React.useState(false)
+  const [notes, setNotes] = React.useState('')
+  const [loadingBooks, setLoadingBooks] = React.useState(false)
 
   // Detail modal
-  const [showDetailModal, setShowDetailModal] = useState(false)
-  const [selectedReceipt, setSelectedReceipt] = useState(null)
+  const [showDetailModal, setShowDetailModal] = React.useState(false)
+  const [selectedReceipt, setSelectedReceipt] = React.useState(null)
 
-  useEffect(() => { fetchData(); fetchTypeofbooks() }, [])
+  React.useEffect(() => { fetchData(); fetchTypeofbooks() }, [])
 
   // Fetch books when grade or subject changes
-  useEffect(() => {
+  React.useEffect(() => {
     if (selectedGrade && showReceiveModal) {
       fetchFilteredBooks()
     } else {
