@@ -1,3 +1,4 @@
+// BookReceiptsPage - v2.0
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Search, Plus, Package, Loader2, Calendar, Truck, CheckCircle, Save, Eye, BookOpen } from 'lucide-react'
