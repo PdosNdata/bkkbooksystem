@@ -107,8 +107,10 @@ CREATE POLICY "Staff can update order_items" ON order_items FOR UPDATE USING (tr
 -- =====================================================
 -- 8. Trigger สำหรับ updated_at
 -- =====================================================
-CREATE TRIGGER IF NOT EXISTS trg_typeofbooks_updated_at
+DROP TRIGGER IF EXISTS trg_typeofbooks_updated_at ON typeofbooks;
+CREATE TRIGGER trg_typeofbooks_updated_at
   BEFORE UPDATE ON typeofbooks FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER IF NOT EXISTS trg_book_receipts_updated_at
+DROP TRIGGER IF EXISTS trg_book_receipts_updated_at ON book_receipts;
+CREATE TRIGGER trg_book_receipts_updated_at
   BEFORE UPDATE ON book_receipts FOR EACH ROW EXECUTE FUNCTION update_updated_at();
