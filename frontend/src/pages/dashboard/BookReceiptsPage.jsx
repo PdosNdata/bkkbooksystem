@@ -47,24 +47,44 @@ export default function BookReceiptsPage() {
     setLoading(true)
 
     // ดึงประวัติการรับหนังสือ
-    const { data: receiptsData } = await supabase
+    const { data: receiptsData, error: receiptsError } = await supabase
       .from('book_receipts')
       .select(`
         *,
-        book_receipt_items(book_id, received_qty, books(title, typeofbooks(name)))
+        book_receipt_items(book_id, received_qty, books(title, subject))
       `)
       .order('receipt_date', { ascending: false })
 
-    setReceipts(receiptsData || [])
+    if (receiptsError) {
+      console.log('book_receipts table may not exist yet:', receiptsError.message)
+      setReceipts([])
+    } else {
+      setReceipts(receiptsData || [])
+    }
     setLoading(false)
   }
 
   const fetchTypeofbooks = async () => {
-    const { data } = await supabase
+    // ลองดึงจาก typeofbooks table ก่อน
+    const { data: typeData, error: typeError } = await supabase
       .from('typeofbooks')
       .select('id, name')
       .order('name')
-    setTypeofbooks(data || [])
+
+    if (!typeError && typeData && typeData.length > 0) {
+      setTypeofbooks(typeData)
+    } else {
+      // ถ้าไม่มี typeofbooks table ให้ดึงจาก books.subject แทน
+      const { data: booksData } = await supabase
+        .from('books')
+        .select('subject')
+        .not('subject', 'is', null)
+
+      if (booksData) {
+        const uniqueSubjects = [...new Set(booksData.map(b => b.subject).filter(Boolean))]
+        setTypeofbooks(uniqueSubjects.map((name, idx) => ({ id: idx, name })))
+      }
+    }
   }
 
   const fetchFilteredBooks = async () => {
@@ -99,12 +119,12 @@ export default function BookReceiptsPage() {
 
       const orderIds = validOrders.map(o => o.id)
 
-      // ดึง order_items สำหรับ orders เหล่านั้น พร้อม typeofbooks
+      // ดึง order_items สำหรับ orders เหล่านั้น (ใช้ books.subject แทน typeofbooks)
       const { data: orderItemsData, error: itemsError } = await supabase
         .from('order_items')
         .select(`
           id, book_id, quantity, received_quantity, order_id,
-          books(id, title, price, type_id, typeofbooks(id, name))
+          books(id, title, price, subject)
         `)
         .in('order_id', orderIds)
 
@@ -120,7 +140,7 @@ export default function BookReceiptsPage() {
       // กรองตามกลุ่มสาระ (ถ้าเลือก)
       let filteredItems = orderItemsData
       if (selectedSubject) {
-        filteredItems = orderItemsData.filter(item => item.books?.typeofbooks?.name === selectedSubject)
+        filteredItems = orderItemsData.filter(item => item.books?.subject === selectedSubject)
       }
 
       console.log('Filtered items:', filteredItems)
@@ -133,7 +153,7 @@ export default function BookReceiptsPage() {
           bookMap[bookId] = {
             book_id: bookId,
             title: item.books?.title,
-            subject_group: item.books?.typeofbooks?.name || '-',
+            subject_group: item.books?.subject || '-',
             price: item.books?.price,
             total_ordered: 0,
             total_received: 0,
