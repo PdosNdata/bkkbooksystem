@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
-import { lazy, Suspense } from 'react'
 
 import PublicLayout from './layouts/PublicLayout'
 import DashboardLayout from './layouts/DashboardLayout'
@@ -20,7 +19,7 @@ import ReportsPage from './pages/dashboard/ReportsPage'
 import ClassBooksPage from './pages/dashboard/ClassBooksPage'
 import MyOrdersPage from './pages/dashboard/MyOrdersPage'
 import WithdrawalsPage from './pages/dashboard/WithdrawalsPage'
-const BookReceiptsPage = lazy(() => import('./pages/dashboard/BookReceiptsPage'))
+import BookReceiptsPage from './pages/dashboard/BookReceiptsPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import BudgetPage from './pages/admin/BudgetPage'
 
@@ -78,7 +77,7 @@ export default function App() {
         <Route path="/class-books" element={<ClassBooksPage />} />
         <Route path="/my-orders" element={<MyOrdersPage />} />
         <Route path="/withdrawals" element={<WithdrawalsPage />} />
-        <Route path="/book-receipts" element={<Suspense fallback={<div className="flex items-center justify-center h-64">กำลังโหลด...</div>}><BookReceiptsPage /></Suspense>} />
+        <Route path="/book-receipts" element={<BookReceiptsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />
