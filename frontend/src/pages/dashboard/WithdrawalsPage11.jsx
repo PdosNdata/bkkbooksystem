@@ -1274,8 +1274,8 @@ export default function WithdrawalsPage11() {
             <tbody className="divide-y divide-gray-100">
               {paginated.map(w => {
                 const teacherName = w.requested_by_user?.full_name || w.orders?.users?.full_name || '-'
-                const classroom = w.orders?.classroom || '-'
-                
+                const classroom = gradeLabel[w.orders?.grade] || w.orders?.classroom || '-'
+
                 return (
                   <tr key={w.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-blue-600">{w.withdrawal_number}</td>
@@ -1718,6 +1718,7 @@ export default function WithdrawalsPage11() {
               <p><span className="text-gray-500">เลขที่:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_number}</span></p>
               <p><span className="text-gray-500">วันที่เบิก:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_date ? new Date(selectedWithdrawal.withdrawal_date).toLocaleDateString('th-TH') : '-'}</span></p>
               <p><span className="text-gray-500">ผู้เบิก:</span> <span className="font-medium">{selectedWithdrawal.requested_by_user?.full_name || selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
+              <p><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
               <p><span className="text-gray-500">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
             </div>
 
