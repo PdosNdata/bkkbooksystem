@@ -23,6 +23,9 @@ export default function WithdrawalsPage11() {
   const [selectedWithdrawal, setSelectedWithdrawal] = useState(null)
   const [withdrawItems, setWithdrawItems] = useState({})
   const [editingItems, setEditingItems] = useState([])
+  const [showAddBookToEditModal, setShowAddBookToEditModal] = useState(false)
+  const [availableBooksForEdit, setAvailableBooksForEdit] = useState([])
+  const [loadingBooksForEdit, setLoadingBooksForEdit] = useState(false)
   const [signatureFile, setSignatureFile] = useState(null)
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef(null)
@@ -406,6 +409,7 @@ export default function WithdrawalsPage11() {
       // อัปเดตแต่ละรายการ
       for (const item of editingItems) {
         if (item.id) {
+          // รายการเดิม - อัปเดต
           const { error: itemError } = await supabase
             .from('withdrawal_items')
             .update({
@@ -416,6 +420,49 @@ export default function WithdrawalsPage11() {
             .eq('id', item.id)
 
           if (itemError) throw itemError
+        } else if (item.isNew) {
+          // รายการใหม่ - insert
+          const { error: insertError } = await supabase
+            .from('withdrawal_items')
+            .insert({
+              withdrawal_id: selectedWithdrawal.id,
+              book_id: item.book_id,
+              requested_qty: item.requested_qty,
+              approved_qty: item.approved_qty,
+              notes: item.notes || null
+            })
+
+          if (insertError) {
+            console.error('Insert new item error:', insertError)
+            stockUpdateErrors.push(`เพิ่มรายการหนังสือ ${item.book_title} ไม่สำเร็จ`)
+          } else {
+            // อัปเดต stock สำหรับรายการใหม่
+            if (item.approved_qty > 0) {
+              const { data: stockData, error: stockFetchError } = await supabase
+                .from('book_stock')
+                .select('id, available_quantity, distributed_quantity')
+                .eq('book_id', item.book_id)
+                .eq('grade', selectedWithdrawal.orders?.grade)
+                .eq('academic_year', currentYear)
+                .maybeSingle()
+
+              if (!stockFetchError && stockData) {
+                const newAvailable = Math.max(0, stockData.available_quantity - item.approved_qty)
+                const newDistributed = (stockData.distributed_quantity || 0) + item.approved_qty
+
+                await supabase
+                  .from('book_stock')
+                  .update({
+                    available_quantity: newAvailable,
+                    distributed_quantity: newDistributed,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', stockData.id)
+
+                console.log(`Stock updated for new item ${item.book_id}: available → ${newAvailable}, distributed → ${newDistributed}`)
+              }
+            }
+          }
         }
       }
 
@@ -532,6 +579,94 @@ export default function WithdrawalsPage11() {
       }
       return newItems
     })
+  }
+
+  // ฟังก์ชันดึงหนังสือที่สามารถเพิ่มได้ (ยังไม่มีในใบเบิก)
+  const fetchAvailableBooksForEdit = async () => {
+    if (!selectedWithdrawal) return
+
+    setLoadingBooksForEdit(true)
+    try {
+      const currentYear = (new Date().getFullYear() + 543).toString()
+      const grade = selectedWithdrawal.orders?.grade
+
+      if (!grade) {
+        Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูลชั้นเรียน' })
+        setLoadingBooksForEdit(false)
+        return
+      }
+
+      // ดึงข้อมูล stock ที่มีจำนวนคงเหลือ
+      const { data: stockData, error: stockError } = await supabase
+        .from('book_stock')
+        .select(`
+          id,
+          book_id,
+          available_quantity,
+          distributed_quantity,
+          quantity,
+          books(id, title, price)
+        `)
+        .eq('grade', grade)
+        .eq('academic_year', currentYear)
+        .gt('available_quantity', 0)
+
+      if (stockError) {
+        console.error('Error fetching stock for edit:', stockError)
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: stockError.message })
+        setLoadingBooksForEdit(false)
+        return
+      }
+
+      // กรอง book_id ที่มีอยู่ใน editingItems แล้ว
+      const existingBookIds = editingItems.map(item => item.book_id)
+      const filteredBooks = (stockData || []).filter(
+        stock => !existingBookIds.includes(stock.book_id)
+      )
+
+      setAvailableBooksForEdit(filteredBooks)
+    } catch (err) {
+      console.error('Fetch error:', err)
+      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message })
+    }
+    setLoadingBooksForEdit(false)
+  }
+
+  // ฟังก์ชันเพิ่มหนังสือใหม่เข้า editingItems
+  const handleAddBookToEdit = async (stock) => {
+    if (!selectedWithdrawal) return
+
+    // เพิ่มเข้า editingItems ก่อน (ยังไม่บันทึกลงฐานข้อมูล)
+    const newItem = {
+      id: null, // ยังไม่มี id เพราะยังไม่ได้บันทึก
+      book_id: stock.book_id,
+      book_title: stock.books?.title || '-',
+      requested_qty: 1,
+      approved_qty: 1,
+      notes: '',
+      isNew: true, // flag บอกว่าเป็นรายการใหม่
+      stock_id: stock.id,
+      available_quantity: stock.available_quantity
+    }
+
+    setEditingItems(prev => [...prev, newItem])
+
+    // ลบออกจาก availableBooksForEdit
+    setAvailableBooksForEdit(prev => prev.filter(b => b.book_id !== stock.book_id))
+
+    Swal.fire({
+      icon: 'success',
+      title: 'เพิ่มรายการแล้ว',
+      text: `${stock.books?.title}`,
+      timer: 1000,
+      showConfirmButton: false
+    })
+  }
+
+  // เปิด modal เพิ่มหนังสือ
+  const openAddBookToEditModal = () => {
+    fetchAvailableBooksForEdit()
+    setShowAddBookToEditModal(true)
   }
 
   const handleCreateWithdrawal = async () => {
@@ -1588,8 +1723,15 @@ export default function WithdrawalsPage11() {
 
             {/* รายการหนังสือที่แก้ไขได้ */}
             <div className="border rounded-lg overflow-hidden mb-4">
-              <div className="bg-gray-50 px-4 py-3 border-b">
+              <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
                 <h4 className="font-medium text-sm">รายการหนังสือ</h4>
+                <button
+                  onClick={openAddBookToEditModal}
+                  className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+                  title="เพิ่มรายการหนังสือ"
+                >
+                  <Plus size={14} /> เพิ่มรายการ
+                </button>
               </div>
               
               {editingItems.length > 0 ? (
@@ -1695,6 +1837,84 @@ export default function WithdrawalsPage11() {
                 ) : (
                   <><Check size={16} /> บันทึกการแก้ไข</>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Book to Edit Modal */}
+      {showAddBookToEditModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">เพิ่มรายการหนังสือ</h3>
+              <button
+                onClick={() => setShowAddBookToEditModal(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-500 mb-4">
+              เลือกหนังสือจากคลังพัสดุที่ยังไม่มีในใบเบิกนี้
+            </p>
+
+            {loadingBooksForEdit ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin text-blue-600" size={24} />
+                <span className="ml-2 text-gray-500">กำลังโหลดรายการหนังสือ...</span>
+              </div>
+            ) : availableBooksForEdit.length > 0 ? (
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="text-left px-3 py-2">รายการหนังสือ</th>
+                      <th className="text-center px-3 py-2 w-28">คงเหลือ</th>
+                      <th className="text-center px-3 py-2 w-24">เพิ่ม</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {availableBooksForEdit.map(stock => (
+                      <tr key={stock.book_id} className="border-b hover:bg-gray-50">
+                        <td className="px-3 py-3">
+                          <div className="font-medium">{stock.books?.title || '-'}</div>
+                        </td>
+                        <td className="px-3 py-3 text-center font-medium text-green-600">
+                          {stock.available_quantity} เล่ม
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <button
+                            onClick={() => handleAddBookToEdit(stock)}
+                            className="p-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            title="เพิ่มรายการนี้"
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-8 text-center">
+                <FileText size={40} className="text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">ไม่มีหนังสือเพิ่มเติมในคลังพัสดุ</p>
+                <p className="text-sm text-gray-400 mt-1">หนังสือทั้งหมดถูกเพิ่มในใบเบิกนี้แล้ว</p>
+              </div>
+            )}
+
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowAddBookToEditModal(false)}
+                className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50"
+              >
+                ปิด
               </button>
             </div>
           </div>
