@@ -156,7 +156,7 @@ export default function WithdrawalsPage11() {
     try {
       // ดึงข้อมูล stock ที่มีจำนวนคงเหลือจากตาราง book_stock
       // ใช้ available_quantity แทน order_items.received_quantity
-      const currentYear = new Date().getFullYear()
+      const currentYear = (new Date().getFullYear() + 543).toString() // ปี พ.ศ.
       const { data: stockData, error: stockError } = await supabase
         .from('book_stock')
         .select(`
@@ -168,7 +168,7 @@ export default function WithdrawalsPage11() {
           books(id, title, price)
         `)
         .eq('grade', selectedGrade)
-        .eq('academic_year', currentYear.toString())
+        .eq('academic_year', currentYear)
         .gt('available_quantity', 0)
 
       if (stockError) {
@@ -340,9 +340,9 @@ export default function WithdrawalsPage11() {
       })
 
       // อัปเดต stock ตามการเปลี่ยนแปลง
-      const currentYear = new Date().getFullYear()
+      const currentYear = (new Date().getFullYear() + 543).toString() // ปี พ.ศ.
       const stockUpdateErrors = []
-      
+
       for (const change of changes) {
         try {
           const { data: stockData, error: stockFetchError } = await supabase
@@ -350,7 +350,7 @@ export default function WithdrawalsPage11() {
             .select('id, available_quantity, distributed_quantity')
             .eq('book_id', change.book_id)
             .eq('grade', selectedWithdrawal.orders?.grade)
-            .eq('academic_year', currentYear.toString())
+            .eq('academic_year', currentYear)
             .maybeSingle()
 
           if (stockFetchError) {
@@ -467,13 +467,13 @@ export default function WithdrawalsPage11() {
     try {
       if (itemId) {
         // คืน stock
-        const currentYear = new Date().getFullYear()
+        const currentYear = (new Date().getFullYear() + 543).toString() // ปี พ.ศ.
         const { data: stockData, error: stockFetchError } = await supabase
           .from('book_stock')
           .select('id, available_quantity, distributed_quantity')
           .eq('book_id', item.book_id)
           .eq('grade', selectedWithdrawal.orders?.grade)
-          .eq('academic_year', currentYear.toString())
+          .eq('academic_year', currentYear)
           .maybeSingle()
 
         if (!stockFetchError && stockData) {
@@ -783,10 +783,10 @@ export default function WithdrawalsPage11() {
     }
 
     // อัปเดต book_stock: ลด available_quantity และเพิ่ม distributed_quantity
-    const currentYear = new Date().getFullYear()
+    const currentYear = (new Date().getFullYear() + 543).toString() // ปี พ.ศ.
     const stockUpdateErrors = []
     const stockUpdateSuccess = []
-    
+
     for (const [bookId, item] of Object.entries(selectedBooks)) {
       if (item.approved > 0) {
         try {
@@ -796,7 +796,7 @@ export default function WithdrawalsPage11() {
             .select('id, available_quantity, distributed_quantity, quantity')
             .eq('book_id', bookId)
             .eq('grade', selectedGrade)
-            .eq('academic_year', currentYear.toString())
+            .eq('academic_year', currentYear)
             .maybeSingle()
 
           if (stockFetchError) {
@@ -859,7 +859,7 @@ export default function WithdrawalsPage11() {
                 .insert({
                   book_id: bookId,
                   grade: selectedGrade,
-                  academic_year: currentYear.toString(),
+                  academic_year: currentYear,
                   quantity: 0,
                   available_quantity: 0,
                   distributed_quantity: item.approved,
@@ -1527,7 +1527,7 @@ export default function WithdrawalsPage11() {
                   <div className="bg-gray-50 rounded-lg p-8 text-center">
                     <FileText size={40} className="text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500">ไม่พบหนังสือในคลังพัสดุ</p>
-                    <p className="text-sm text-gray-400 mt-1">ชั้น {gradeLabel[selectedGrade]} ปีการศึกษา {new Date().getFullYear()}</p>
+                    <p className="text-sm text-gray-400 mt-1">ชั้น {gradeLabel[selectedGrade]} ปีการศึกษา {new Date().getFullYear() + 543}</p>
                     <p className="text-sm text-gray-400">กรุณาตรวจสอบการรับหนังสือและอัปเดต stock</p>
                   </div>
                 )}
