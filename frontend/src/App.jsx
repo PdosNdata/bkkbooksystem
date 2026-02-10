@@ -22,6 +22,29 @@ import WithdrawalsPage from './pages/dashboard/WithdrawalsPage'
 import BookReceiptsPage from './pages/dashboard/BookReceiptsPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import BudgetPage from './pages/admin/BudgetPage'
+import BookReceiptsPageNew from './pages/dashboard/BookReceiptsPageNew'
+import BookReceiptsPage1 from './pages/dashboard/BookReceiptsPage1'
+import BookReceiptsPageNew1 from './pages/dashboard/BookReceiptsPageNew1'
+import BookReceiptsPageNew2 from './pages/dashboard/BookReceiptsPageNew2'
+import BookReceiptsPageNew3 from './pages/dashboard/BookReceiptsPageNew3'
+import InventoryPage1 from './pages/dashboard/InventoryPage1'
+import InventoryPage2 from './pages/dashboard/InventoryPage2'
+import InventoryPage3 from './pages/dashboard/InventoryPage3'
+import WithdrawalsPage1 from './pages/dashboard/WithdrawalsPage1'
+import WithdrawalsPage2 from './pages/dashboard/WithdrawalsPage2'
+import WithdrawalsPage3 from './pages/dashboard/WithdrawalsPage3'
+import WithdrawalsPage4 from './pages/dashboard/WithdrawalsPage4'
+import WithdrawalsPage5 from './pages/dashboard/WithdrawalsPage5'
+import SettingDoc from './pages/dashboard/settingdoc'
+import WithdrawalsPage6 from './pages/dashboard/WithdrawalsPage6'
+import WithdrawalsPage7 from './pages/dashboard/WithdrawalsPage7'
+import WithdrawalsPage8 from './pages/dashboard/WithdrawalsPage8'
+import WithdrawalsPage9 from './pages/dashboard/WithdrawalsPage9'
+import WithdrawalsPage11 from './pages/dashboard/WithdrawalsPage10'
+import BookReceiptsPageNew4 from './pages/dashboard/BookReceiptsPageNew4'
+import BookReceiptsPageNew5 from './pages/dashboard/BookReceiptsPageNew5'
+import SettingDoc1 from './pages/dashboard/settingdoc1'
+import OrdersPage1 from './pages/dashboard/OrdersPage1'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -69,15 +92,16 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/students" element={<StudentsPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/orders" element={<OrdersPage1 />} />
+        <Route path="/inventory" element={<InventoryPage3 />} />
         <Route path="/users" element={<UserManagementPage />} />
         <Route path="/budget" element={<BudgetSettingsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/class-books" element={<ClassBooksPage />} />
         <Route path="/my-orders" element={<MyOrdersPage />} />
-        <Route path="/withdrawals" element={<WithdrawalsPage />} />
-        <Route path="/book-receipts" element={<BookReceiptsPage />} />
+        <Route path="/withdrawals" element={<WithdrawalsPage11/>} />
+        <Route path="/settingdoc" element={<SettingDoc1/>} />
+        <Route path="/book-receipts" element={<BookReceiptsPageNew5 />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />

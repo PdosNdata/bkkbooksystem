@@ -3,7 +3,12 @@ import { supabase } from '../../lib/supabase'
 import { Search, Edit3, Trash2, UserPlus, Shield, Loader2, User } from 'lucide-react'
 import Swal from 'sweetalert2'
 
-const roleLabels = { admin: 'ผู้ดูแลระบบ', teacher: 'ครู' }
+const roleLabels = { 
+  admin: 'ผู้ดูแลระบบ', 
+  teacher: 'ครู', 
+  staff: 'เจ้าหน้าที่พัสดุ',
+  warehouse: 'เจ้าหน้าที่คลัง'
+}
 const gradeLabel = { kg2: 'อนุบาล 2', kg3: 'อนุบาล 3', p1: 'ป.1', p2: 'ป.2', p3: 'ป.3', p4: 'ป.4', p5: 'ป.5', p6: 'ป.6', m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' }
 const gradeOptions = ['', 'kg2','kg3','p1','p2','p3','p4','p5','p6','m1','m2','m3']
 
@@ -33,8 +38,8 @@ export default function UserManagementPage() {
         console.error('fetchUsers error:', error)
         setUsers([])
       } else {
-        const filtered = (data || []).filter(u => u.role === 'admin' || u.role === 'teacher')
-        setUsers(filtered)
+        // แสดงทุก role: admin, teacher, staff, warehouse
+        setUsers(data || [])
       }
     } catch (err) {
       console.error('fetchUsers exception:', err)
@@ -181,16 +186,26 @@ export default function UserManagementPage() {
           <p className="text-gray-500 text-sm mt-1">จัดการบัญชีผู้ใช้ทั้งหมดในระบบ ({users.length} คน)</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
-          <UserPlus size={16} /> เพิ่มครู
+          <UserPlus size={16} /> เพิ่มผู้ใช้
         </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(roleLabels).map(([role, label]) => (
           <div key={role} className="bg-white rounded-xl border p-4 flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl ${role === 'admin' ? 'bg-purple-50' : 'bg-blue-50'}`}>
-              <User size={20} className={role === 'admin' ? 'text-purple-600' : 'text-blue-600'} />
+            <div className={`p-2.5 rounded-xl ${
+              role === 'admin' ? 'bg-purple-50' : 
+              role === 'staff' ? 'bg-orange-50' : 
+              role === 'warehouse' ? 'bg-green-50' : 
+              'bg-blue-50'
+            }`}>
+              <User size={20} className={
+                role === 'admin' ? 'text-purple-600' : 
+                role === 'staff' ? 'text-orange-600' : 
+                role === 'warehouse' ? 'text-green-600' : 
+                'text-blue-600'
+              } />
             </div>
             <div>
               <p className="text-xs text-gray-500">{label}</p>
@@ -303,7 +318,7 @@ export default function UserManagementPage() {
         )}
       </div>
 
-      {/* Add Teacher Modal */}
+      {/* Add User Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 mx-4">
@@ -325,6 +340,8 @@ export default function UserManagementPage() {
                 <label className="text-sm font-medium">ตำแหน่ง *</label>
                 <select className="input-field mt-1" value={addForm.role} onChange={e => setAddForm(p => ({...p, role: e.target.value}))}>
                   <option value="teacher">ครู</option>
+                  <option value="staff">เจ้าหน้าที่พัสดุ</option>
+                  <option value="warehouse">เจ้าหน้าที่คลัง</option>
                   <option value="admin">ผู้ดูแลระบบ</option>
                 </select>
               </div>

@@ -5,25 +5,15 @@ import Swal from 'sweetalert2'
 
 const gradeLabel = { kg2: 'อนุบาล 2', kg3: 'อนุบาล 3', p1: 'ป.1', p2: 'ป.2', p3: 'ป.3', p4: 'ป.4', p5: 'ป.5', p6: 'ป.6', m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' }
 const gradeOptions = ['kg2', 'kg3', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'm1', 'm2', 'm3']
-const subjectGroups = [
-  'ภาษาไทย',
-  'คณิตศาสตร์',
-  'วิทยาศาสตร์และเทคโนโลยี',
-  'สังคมศึกษา ศาสนาและวัฒนธรรม',
-  'สุขศึกษาและพลศึกษา',
-  'ศิลปะ',
-  'การงานอาชีพ',
-  'ภาษาต่างประเทศ',
-  'กิจกรรมพัฒนาผู้เรียน',
-]
 const PAGE_SIZE = 10
 
-export default function BookReceiptsPage() {
+export default function BookReceiptsPageNew() {
   const [receipts, setReceipts] = useState([])
   const [allOrderItems, setAllOrderItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [subjectGroups, setSubjectGroups] = useState([])
 
   // Main receive modal states
   const [showReceiveModal, setShowReceiveModal] = useState(false)
@@ -56,12 +46,20 @@ export default function BookReceiptsPage() {
   const fetchData = async () => {
     setLoading(true)
 
+    // ดึงข้อมูลประเภทหนังสือ (กลุ่มสาระ)
+    const { data: typeofbooksData } = await supabase
+      .from('typeofbooks')
+      .select('id, name')
+      .order('name')
+    
+    setSubjectGroups(typeofbooksData || [])
+
     // ดึงประวัติการรับหนังสือ
     const { data: receiptsData } = await supabase
       .from('book_receipts')
       .select(`
         *,
-        book_receipt_items(book_id, received_qty, books(title, subject_group))
+        book_receipt_items(book_id, received_qty, books(title, typeofbooks(name)))
       `)
       .order('receipt_date', { ascending: false })
 
@@ -106,7 +104,7 @@ export default function BookReceiptsPage() {
         .from('order_items')
         .select(`
           id, book_id, quantity, received_quantity, order_id,
-          books(id, title, price, subject_group)
+          books(id, title, price, typeofbooks(id, name))
         `)
         .in('order_id', orderIds)
 
@@ -122,7 +120,7 @@ export default function BookReceiptsPage() {
       // กรองตามกลุ่มสาระ (ถ้าเลือก)
       let filteredItems = orderItemsData
       if (selectedSubject) {
-        filteredItems = orderItemsData.filter(item => item.books?.subject_group === selectedSubject)
+        filteredItems = orderItemsData.filter(item => item.books?.typeofbooks?.name === selectedSubject)
       }
 
       console.log('Filtered items:', filteredItems)
@@ -135,7 +133,7 @@ export default function BookReceiptsPage() {
           bookMap[bookId] = {
             book_id: bookId,
             title: item.books?.title,
-            subject_group: item.books?.subject_group,
+            typeofbooks: item.books?.typeofbooks,
             price: item.books?.price,
             total_ordered: 0,
             total_received: 0,
@@ -490,7 +488,7 @@ export default function BookReceiptsPage() {
                 >
                   <option value="">ทุกกลุ่มสาระ</option>
                   {subjectGroups.map(s => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s.id} value={s.name}>{s.name}</option>
                   ))}
                 </select>
               </div>
