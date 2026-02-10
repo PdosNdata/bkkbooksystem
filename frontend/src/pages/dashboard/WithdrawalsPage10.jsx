@@ -154,22 +154,32 @@ export default function WithdrawalsPage10() {
   const fetchAvailableBooks = async () => {
     setLoadingBooks(true)
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          id, order_number, classroom, status,
-          order_items(book_id, quantity, received_quantity, books(title, price))
-        `)
-        .eq('teacher_id', selectedTeacher)
-        .eq('grade', selectedGrade)
-        .order('created_at', { ascending: false })
+      // ดึงปีการศึกษาปัจจุบัน (พ.ศ.)
+      const currentYear = (new Date().getFullYear() + 543).toString()
 
-      if (error) {
-        console.error('Error fetching books:', error)
-        Swal.fire({ 
-          icon: 'error', 
-          title: 'เกิดข้อผิดพลาด', 
-          text: error.message 
+      // ดึงข้อมูลจาก book_stock ตามชั้นและปีการศึกษา
+      const { data: stockData, error: stockError } = await supabase
+        .from('book_stock')
+        .select(`
+          id,
+          book_id,
+          grade,
+          academic_year,
+          quantity,
+          available_quantity,
+          distributed_quantity,
+          books(id, title, price)
+        `)
+        .eq('grade', selectedGrade)
+        .eq('academic_year', currentYear)
+        .gt('available_quantity', 0)
+
+      if (stockError) {
+        console.error('Error fetching stock:', stockError)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: stockError.message
         })
         setAvailableBooks([])
         setSelectedBooks({})
@@ -177,29 +187,29 @@ export default function WithdrawalsPage10() {
         return
       }
 
-      const validOrders = (data || []).filter(order => 
-        order.status && 
-        order.status !== 'pending' && 
-        order.status !== 'draft' && 
-        order.status !== 'cancelled'
-      )
+      // ดึงข้อมูล order ของครูเพื่อใช้อ้างอิง
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('id, order_number, classroom')
+        .eq('teacher_id', selectedTeacher)
+        .eq('grade', selectedGrade)
+        .not('status', 'in', '("pending","draft","cancelled")')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
 
-      if (validOrders.length > 0) {
-        const allBooks = []
-        validOrders.forEach(order => {
-          if (order.order_items) {
-            order.order_items.forEach(item => {
-              if ((item.received_quantity || 0) > 0) {
-                allBooks.push({
-                  ...item,
-                  order_id: order.id,
-                  order_number: order.order_number,
-                  classroom: order.classroom
-                })
-              }
-            })
-          }
-        })
+      if (stockData && stockData.length > 0) {
+        const allBooks = stockData.map(stock => ({
+          book_id: stock.book_id,
+          books: stock.books,
+          available_quantity: stock.available_quantity,
+          quantity: stock.quantity,
+          distributed_quantity: stock.distributed_quantity,
+          stock_id: stock.id,
+          order_id: orderData?.id || null,
+          order_number: orderData?.order_number || '-',
+          classroom: orderData?.classroom || '-'
+        }))
 
         setAvailableBooks(allBooks)
       } else {
@@ -634,8 +644,8 @@ export default function WithdrawalsPage10() {
       const allSelected = {}
       availableBooks.forEach(item => {
         allSelected[item.book_id] = {
-          requested: item.received_quantity,
-          approved: item.received_quantity,
+          requested: item.available_quantity,
+          approved: item.available_quantity,
           notes: ''
         }
       })
@@ -1377,7 +1387,7 @@ export default function WithdrawalsPage10() {
                           <tr className="bg-gray-100">
                             <th className="w-10 px-3 py-2"></th>
                             <th className="text-left px-3 py-2">รายการ</th>
-                            <th className="text-center px-3 py-2 w-32">จำนวนที่ได้รับ</th>
+                            <th className="text-center px-3 py-2 w-32">คงเหลือพร้อมเบิก</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1385,13 +1395,13 @@ export default function WithdrawalsPage10() {
                             <tr
                               key={item.book_id}
                               className="border-b cursor-pointer hover:bg-blue-50"
-                              onClick={() => toggleBookSelection(item.book_id, item.received_quantity)}
+                              onClick={() => toggleBookSelection(item.book_id, item.available_quantity)}
                             >
                               <td className="px-3 py-3 text-center">
                                 <Square size={18} className="text-gray-400 mx-auto" />
                               </td>
                               <td className="px-3 py-3">{item.books?.title}</td>
-                              <td className="px-3 py-3 text-center font-medium">{item.received_quantity}</td>
+                              <td className="px-3 py-3 text-center font-medium text-green-600">{item.available_quantity}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1413,7 +1423,7 @@ export default function WithdrawalsPage10() {
                               <tr key={item.book_id} className="border-b bg-blue-50">
                                 <td className="px-3 py-3 text-center">
                                   <button
-                                    onClick={() => toggleBookSelection(item.book_id, item.received_quantity)}
+                                    onClick={() => toggleBookSelection(item.book_id, item.available_quantity)}
                                     className="text-blue-600 hover:text-blue-800"
                                   >
                                     <CheckSquare size={18} className="mx-auto" />
@@ -1421,13 +1431,13 @@ export default function WithdrawalsPage10() {
                                 </td>
                                 <td className="px-3 py-3">
                                   <div className="font-medium">{item.books?.title}</div>
-                                  <div className="text-xs text-gray-500">มีในคลัง: {item.received_quantity} เล่ม</div>
+                                  <div className="text-xs text-gray-500">คงเหลือพร้อมเบิก: <span className="text-green-600 font-medium">{item.available_quantity}</span> เล่ม</div>
                                 </td>
                                 <td className="px-3 py-3">
                                   <input
                                     type="number"
                                     min="0"
-                                    max={item.received_quantity}
+                                    max={item.available_quantity}
                                     value={selectedBooks[item.book_id]?.requested || 0}
                                     onChange={(e) => {
                                       e.stopPropagation()
@@ -1495,8 +1505,8 @@ export default function WithdrawalsPage10() {
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-8 text-center">
                     <FileText size={40} className="text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">ไม่พบรายการหนังสือที่ได้รับจากสำนักพิมพ์</p>
-                    <p className="text-sm text-gray-400 mt-1">กรุณาเพิ่มจำนวน "ได้รับแล้ว" ในหน้าจัดการคำสั่งซื้อ</p>
+                    <p className="text-gray-500">ไม่พบหนังสือพร้อมเบิกในสต๊อก</p>
+                    <p className="text-sm text-gray-400 mt-1">กรุณาโอนหนังสือจากใบรับไปสต๊อกก่อนในหน้า "รับหนังสือจากสำนักพิมพ์"</p>
                   </div>
                 )}
               </>
