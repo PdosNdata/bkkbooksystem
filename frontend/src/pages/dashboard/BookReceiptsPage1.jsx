@@ -18,7 +18,7 @@ const subjectGroups = [
 ]
 const PAGE_SIZE = 10
 
-export default function BookReceiptsPage() {
+export default function BookReceiptsPage1() {
   const [receipts, setReceipts] = useState([])
   const [allOrderItems, setAllOrderItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -57,12 +57,29 @@ export default function BookReceiptsPage() {
     setLoading(true)
 
     // ดึงประวัติการรับหนังสือ
-    const { data: receiptsData } = await supabase
+    // const { data: receiptsData } = await supabase
+    //   .from('book_receipts')
+    //   .select(`
+    //     *,
+    //     book_receipt_items(book_id, received_qty, books(title, subject_group))
+    //   `)
+    //   .order('receipt_date', { ascending: false })
+    const { data, error } = await supabase
       .from('book_receipts')
       .select(`
-        *,
-        book_receipt_items(book_id, received_qty, books(title, subject_group))
-      `)
+          *,
+          book_receipt_items (
+            book_id,
+            received_qty,
+            books (
+              title,
+              typeofbooks (
+                id,
+                name
+              )
+            )
+          )
+        `)
       .order('receipt_date', { ascending: false })
 
     setReceipts(receiptsData || [])
@@ -103,10 +120,28 @@ export default function BookReceiptsPage() {
 
       // ดึง order_items สำหรับ orders เหล่านั้น
       const { data: orderItemsData, error: itemsError } = await supabase
+        // .from('order_items')
+        // .select(`
+        //   id, book_id, quantity, received_quantity, order_id,
+        //   books(id, title, price, subject_group)
+        // `)
+        // .in('order_id', orderIds)
         .from('order_items')
         .select(`
-          id, book_id, quantity, received_quantity, order_id,
-          books(id, title, price, subject_group)
+          id,
+          book_id,
+          quantity,
+          received_quantity,
+          order_id,
+          books (
+            id,
+            title,
+            price,
+            typeofbooks (
+              id,
+              name
+            )
+          )
         `)
         .in('order_id', orderIds)
 
@@ -122,7 +157,7 @@ export default function BookReceiptsPage() {
       // กรองตามกลุ่มสาระ (ถ้าเลือก)
       let filteredItems = orderItemsData
       if (selectedSubject) {
-        filteredItems = orderItemsData.filter(item => item.books?.subject_group === selectedSubject)
+        filteredItems = orderItemsData.filter(item => item.books?.typeofbooks?.name === selectedSubject)
       }
 
       console.log('Filtered items:', filteredItems)
@@ -135,7 +170,7 @@ export default function BookReceiptsPage() {
           bookMap[bookId] = {
             book_id: bookId,
             title: item.books?.title,
-            subject_group: item.books?.subject_group,
+            subject_group: item.books?.typeofbooks?.name,
             price: item.books?.price,
             total_ordered: 0,
             total_received: 0,
@@ -545,7 +580,7 @@ export default function BookReceiptsPage() {
                         <tr key={book.book_id} className="border-b">
                           <td className="px-3 py-3">{idx + 1}</td>
                           <td className="px-3 py-3">{book.title}</td>
-                          <td className="px-3 py-3 text-xs text-gray-500">{book.typeofbooks?.name || '-'}</td>
+                          <td className="px-3 py-3 text-xs text-gray-500">{book.subject_group || '-'}</td>
                           <td className="px-3 py-3 text-center">{book.total_ordered}</td>
                           <td className="px-3 py-3 text-center text-green-600 font-medium">{book.total_received}</td>
                           <td className="px-3 py-3 text-center">
