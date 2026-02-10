@@ -338,9 +338,9 @@ export default function WithdrawalsPage10() {
       })
 
       // อัปเดต stock ตามการเปลี่ยนแปลง
-      const currentYear = new Date().getFullYear()
+      const currentYear = (new Date().getFullYear() + 543).toString() // ปี พ.ศ.
       const stockUpdateErrors = []
-      
+
       for (const change of changes) {
         try {
           const { data: stockData, error: stockFetchError } = await supabase
@@ -348,7 +348,7 @@ export default function WithdrawalsPage10() {
             .select('id, available_quantity, distributed_quantity')
             .eq('book_id', change.book_id)
             .eq('grade', selectedWithdrawal.orders?.grade)
-            .eq('academic_year', currentYear.toString())
+            .eq('academic_year', currentYear)
             .maybeSingle()
 
           if (stockFetchError) {
@@ -465,13 +465,13 @@ export default function WithdrawalsPage10() {
     try {
       if (itemId) {
         // คืน stock
-        const currentYear = new Date().getFullYear()
+        const currentYear = (new Date().getFullYear() + 543).toString() // ปี พ.ศ.
         const { data: stockData, error: stockFetchError } = await supabase
           .from('book_stock')
           .select('id, available_quantity, distributed_quantity')
           .eq('book_id', item.book_id)
           .eq('grade', selectedWithdrawal.orders?.grade)
-          .eq('academic_year', currentYear.toString())
+          .eq('academic_year', currentYear)
           .maybeSingle()
 
         if (!stockFetchError && stockData) {
@@ -781,10 +781,10 @@ export default function WithdrawalsPage10() {
     }
 
     // อัปเดต book_stock: ลด available_quantity และเพิ่ม distributed_quantity
-    const currentYear = new Date().getFullYear()
+    const currentYear = (new Date().getFullYear() + 543).toString() // ปี พ.ศ.
     const stockUpdateErrors = []
     const stockUpdateSuccess = []
-    
+
     for (const [bookId, item] of Object.entries(selectedBooks)) {
       if (item.approved > 0) {
         try {
@@ -792,14 +792,14 @@ export default function WithdrawalsPage10() {
           console.log('🔍 Searching stock with:', {
             book_id: bookId,
             grade: selectedGrade,
-            academic_year: currentYear.toString()
+            academic_year: currentYear
           })
           const { data: stockData, error: stockFetchError } = await supabase
             .from('book_stock')
             .select('id, available_quantity, distributed_quantity, quantity')
             .eq('book_id', bookId)
             .eq('grade', selectedGrade)
-            .eq('academic_year', currentYear.toString())
+            .eq('academic_year', currentYear)
             .maybeSingle()
                // 🔍 เพิ่ม Debug Log
             console.log('📦 Stock data found:', stockData)
