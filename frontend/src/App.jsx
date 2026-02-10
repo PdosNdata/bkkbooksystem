@@ -11,40 +11,19 @@ import AuthCallbackPage from './pages/public/AuthCallbackPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import ProfilePage from './pages/dashboard/ProfilePage'
 import StudentsPage from './pages/dashboard/StudentsPage'
-import OrdersPage from './pages/dashboard/OrdersPage'
-import InventoryPage from './pages/dashboard/InventoryPage'
+
+import WithdrawalsPage11 from './pages/dashboard/WithdrawalsPage11'
 import UserManagementPage from './pages/dashboard/UserManagementPage'
 import BudgetSettingsPage from './pages/dashboard/BudgetSettingsPage'
 import ReportsPage from './pages/dashboard/ReportsPage'
 import ClassBooksPage from './pages/dashboard/ClassBooksPage'
-import MyOrdersPage from './pages/dashboard/MyOrdersPage'
-import WithdrawalsPage from './pages/dashboard/WithdrawalsPage'
-import BookReceiptsPage from './pages/dashboard/BookReceiptsPage'
+import MyOrdersPage from './pages/dashboard/MyOrdersPage' 
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import BudgetPage from './pages/admin/BudgetPage'
-import BookReceiptsPageNew from './pages/dashboard/BookReceiptsPageNew'
-import BookReceiptsPage1 from './pages/dashboard/BookReceiptsPage1'
-import BookReceiptsPageNew1 from './pages/dashboard/BookReceiptsPageNew1'
-import BookReceiptsPageNew2 from './pages/dashboard/BookReceiptsPageNew2'
-import BookReceiptsPageNew3 from './pages/dashboard/BookReceiptsPageNew3'
-import InventoryPage1 from './pages/dashboard/InventoryPage1'
-import InventoryPage2 from './pages/dashboard/InventoryPage2'
 import InventoryPage3 from './pages/dashboard/InventoryPage3'
-import WithdrawalsPage1 from './pages/dashboard/WithdrawalsPage1'
-import WithdrawalsPage2 from './pages/dashboard/WithdrawalsPage2'
-import WithdrawalsPage3 from './pages/dashboard/WithdrawalsPage3'
-import WithdrawalsPage4 from './pages/dashboard/WithdrawalsPage4'
-import WithdrawalsPage5 from './pages/dashboard/WithdrawalsPage5'
-import SettingDoc from './pages/dashboard/settingdoc'
-import WithdrawalsPage6 from './pages/dashboard/WithdrawalsPage6'
-import WithdrawalsPage7 from './pages/dashboard/WithdrawalsPage7'
-import WithdrawalsPage8 from './pages/dashboard/WithdrawalsPage8'
-import WithdrawalsPage9 from './pages/dashboard/WithdrawalsPage9'
-import WithdrawalsPage11 from './pages/dashboard/WithdrawalsPage10'
-import BookReceiptsPageNew4 from './pages/dashboard/BookReceiptsPageNew4'
-import BookReceiptsPageNew5 from './pages/dashboard/BookReceiptsPageNew5'
-import SettingDoc1 from './pages/dashboard/settingdoc1'
+import BookReceiptsPageNew5 from './pages/dashboard/BookReceiptsPageNew5' 
 import OrdersPage1 from './pages/dashboard/OrdersPage1'
+import SettingDoc from './pages/dashboard/settingdoc'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -99,8 +78,8 @@ export default function App() {
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/class-books" element={<ClassBooksPage />} />
         <Route path="/my-orders" element={<MyOrdersPage />} />
-        <Route path="/withdrawals" element={<WithdrawalsPage11/>} />
-        <Route path="/settingdoc" element={<SettingDoc1/>} />
+        <Route path="/withdrawals" element={<WithdrawalsPage11 />} />
+        <Route path="/settingdoc" element={<SettingDoc />} />
         <Route path="/book-receipts" element={<BookReceiptsPageNew5 />} />
       </Route>
 

@@ -98,80 +98,97 @@ export default function BookReceiptsPageNew5() {
   }
 
   // ฟังก์ชันสร้างเลขที่เอกสารจาก document_types และ document_sequences
-  const generateReceiptNumber = async () => {
-    try {
+// ฟังก์ชันสร้างเลขที่เอกสารจาก document_types และ document_sequences
+const generateReceiptNumber = async () => {
+  try {
+    // 1. ดึงข้อมูล document_type สำหรับใบรับ (code = 'R')
+    const { data: docType, error: docTypeError } = await supabase
+      .from('document_types')
+      .select('code, prefix')
+      .eq('code', 'R')
+      .single()
+
+    if (docTypeError || !docType) {
+      console.error('❌ ไม่พบ document_type สำหรับใบรับ:', docTypeError)
+      // Fallback
       const currentYear = new Date().getFullYear()
       const buddhistYear = currentYear + 543
-
-      // ดึงข้อมูล document_type สำหรับใบรับ (code = 'R')
-      const { data: docType, error: docTypeError } = await supabase
-        .from('document_types')
-        .select('code, prefix')
-        .eq('code', 'R')
-        .single()
-
-      if (docTypeError || !docType) {
-        console.error('❌ ไม่พบ document_type สำหรับใบรับ:', docTypeError)
-        // Fallback: สร้างเลขเอกสารแบบเดิม
-        return `ร${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}/${buddhistYear}`
-      }
-
-      // ตรวจสอบว่ามี sequence สำหรับปีนี้หรือยัง
-      const { data: sequence, error: seqError } = await supabase
-        .from('document_sequences')
-        .select('*')
-        .eq('document_type_code', docType.code)
-        .eq('year', currentYear)
-        .single()
-
-      let nextNumber = 1
-
-      if (sequence) {
-        // มี sequence อยู่แล้ว เพิ่มเลขลำดับ
-        nextNumber = sequence.last_number + 1
-
-        const { error: updateError } = await supabase
-          .from('document_sequences')
-          .update({ 
-            last_number: nextNumber,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', sequence.id)
-
-        if (updateError) {
-          console.error('❌ Error updating sequence:', updateError)
-          throw updateError
-        }
-      } else {
-        // ยังไม่มี sequence สำหรับปีนี้ สร้างใหม่
-        const { error: insertError } = await supabase
-          .from('document_sequences')
-          .insert({
-            document_type_code: docType.code,
-            year: currentYear,
-            last_number: nextNumber
-          })
-
-        if (insertError) {
-          console.error('❌ Error creating sequence:', insertError)
-          throw insertError
-        }
-      }
-
-      // สร้างเลขที่เอกสาร: prefix + เลขลำดับ(3หลัก) / ปี พ.ศ.(4หลัก)
-      // เช่น: ร001/2569
-      const receiptNumber = `${docType.prefix}${nextNumber.toString().padStart(3, '0')}/${buddhistYear}`
-      
-      console.log('✅ Generated receipt number:', receiptNumber)
-      return receiptNumber
-
-    } catch (err) {
-      console.error('💥 Error generating receipt number:', err)
-      // Fallback: สร้างเลขเอกสารแบบเดิม
       return `ร${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}/${buddhistYear}`
     }
-  }
 
+    console.log('✅ Document type:', docType)
+
+    // 2. ดึง sequence ล่าสุดของประเภท R (เรียงตาม year มากที่สุด)
+    const { data: latestSequence, error: seqError } = await supabase
+      .from('document_sequences')
+      .select('*')
+      .eq('document_type_code', docType.code)
+      .order('year', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    let fiscalYear
+    let nextNumber = 1
+    let sequenceId = null
+
+    if (latestSequence) {
+      // มี sequence อยู่แล้ว ใช้ปีจาก sequence นั้น
+      fiscalYear = latestSequence.year
+      nextNumber = latestSequence.last_number + 1
+      sequenceId = latestSequence.id
+
+      console.log(`✅ ใช้ sequence ปี ${fiscalYear} เลขลำดับ: ${latestSequence.last_number} -> ${nextNumber}`)
+
+      // อัปเดตเลขลำดับ
+      const { error: updateError } = await supabase
+        .from('document_sequences')
+        .update({ 
+          last_number: nextNumber,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', sequenceId)
+
+      if (updateError) {
+        console.error('❌ Error updating sequence:', updateError)
+        throw updateError
+      }
+    } else {
+      // ยังไม่มี sequence เลย สร้างใหม่ด้วยปีปัจจุบัน
+      const currentYear = new Date().getFullYear()
+      fiscalYear = currentYear + 543
+
+      console.log(`🆕 สร้าง sequence ใหม่สำหรับปี ${fiscalYear}`)
+
+      const { error: insertError } = await supabase
+        .from('document_sequences')
+        .insert({
+          document_type_code: docType.code,
+          year: fiscalYear,
+          last_number: nextNumber
+        })
+
+      if (insertError) {
+        console.error('❌ Error creating sequence:', insertError)
+        throw insertError
+      }
+    }
+
+    // 3. สร้างเลขที่เอกสาร: ร001/2568
+    const receiptNumber = `${docType.prefix}${nextNumber.toString().padStart(3, '0')}/${fiscalYear}`
+    
+    console.log('✅ เลขที่ใบรับ:', receiptNumber)
+    return receiptNumber
+
+  } catch (err) {
+    console.error('💥 Error generating receipt number:', err)
+    // Fallback
+    const currentYear = new Date().getFullYear()
+    const buddhistYear = currentYear + 543
+    const fallbackNumber = `ร${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}/${buddhistYear}`
+    console.log('🚨 ใช้เลขฉุกเฉิน:', fallbackNumber)
+    return fallbackNumber
+  }
+}
   // ฟังก์ชันโอนรายการที่เลือกไปสต๊อก
   const handleTransferSelectedToStock = async () => {
     const selectedBookIds = Object.keys(selectedForTransfer).filter(id => selectedForTransfer[id])

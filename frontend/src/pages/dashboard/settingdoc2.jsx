@@ -155,7 +155,7 @@ const Switch = ({ checked, onCheckedChange, disabled }) => (
   </button>
 );
 
-const SettingDoc = () => {
+const SettingDoc2 = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -274,37 +274,19 @@ const SettingDoc = () => {
 
   const loadApprovedOrdersTotal = async () => {
     try {
-      setLoading(true);
-      console.log('📊 Loading budget total from budgets table...');
-      
-      // ดึงงบประมาณรวมจากตาราง budgets
+      // ดึงยอดรวมจากคำสั่งซื้อที่ได้รับการอนุมัติแล้ว
       const { data, error } = await supabase
-        .from('budgets')
-        .select('amount');
+        .from('orders')
+        .select('total_amount')
+        .in('status', ['approved', 'shipped', 'completed']);
 
-      if (error) {
-        console.error('❌ Error loading budgets:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('✅ Budgets data:', data);
-
-      const total = data?.reduce((sum, budget) => sum + (parseFloat(budget.amount) || 0), 0) || 0;
+      const total = data?.reduce((sum, order) => sum + (parseFloat(order.total_amount) || 0), 0) || 0;
       setApprovedOrdersTotal(total);
-      
-      console.log('💰 Total budget calculated:', total);
-      
-      if (data && data.length > 0) {
-        showMessage('success', `โหลดงบประมาณสำเร็จ: ${data.length} รายการ รวม ฿${total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`);
-      } else {
-        showMessage('warning', 'ไม่พบข้อมูลในตาราง budgets');
-      }
     } catch (error) {
-      console.error('💥 Error loading budget total:', error);
+      console.error('Error loading approved orders total:', error);
       setApprovedOrdersTotal(0);
-      showMessage('error', `ไม่สามารถโหลดงบประมาณได้: ${error.message}`);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -488,7 +470,7 @@ const SettingDoc = () => {
 
   const handleUseBudgetFromOrders = () => {
     setTotalBudget(approvedOrdersTotal.toString());
-    showMessage('success', `นำเข้างบประมาณจากตาราง Budgets: ฿${approvedOrdersTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`);
+    showMessage('success', `นำเข้างบประมาณจากคำสั่งซื้อ: ฿${approvedOrdersTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`);
   };
 
   const getSequenceNumber = (docTypeCode) => {
@@ -524,24 +506,14 @@ const SettingDoc = () => {
       </div>
 
       {message.text && (
-        <Alert className={`mb-6 ${
-          message.type === 'success' ? 'bg-green-50 border-green-500' : 
-          message.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
-          'bg-red-50 border-red-500'
-        }`}>
+        <Alert className={`mb-6 ${message.type === 'success' ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
           <div className="flex items-center gap-2">
             {message.type === 'success' ? (
               <CheckCircle2 className="h-5 w-5 text-green-600" />
-            ) : message.type === 'warning' ? (
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
             ) : (
               <AlertCircle className="h-5 w-5 text-red-600" />
             )}
-            <AlertDescription className={
-              message.type === 'success' ? 'text-green-800' : 
-              message.type === 'warning' ? 'text-yellow-800' :
-              'text-red-800'
-            }>
+            <AlertDescription className={message.type === 'success' ? 'text-green-800' : 'text-red-800'}>
               {message.text}
             </AlertDescription>
           </div>
@@ -780,53 +752,30 @@ const SettingDoc = () => {
             <CardContent className="space-y-6">
               {/* งบประมาณ */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-bold text-green-900 text-lg flex items-center gap-2">
-                    <Wallet className="h-5 w-5" />
-                    งบประมาณรวม
-                  </h4>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={loadApprovedOrdersTotal}
-                    disabled={loading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    รีเฟรชงบประมาณ
-                  </Button>
-                </div>
+                <h4 className="font-bold text-green-900 mb-4 text-lg flex items-center gap-2">
+                  <Wallet className="h-5 w-5" />
+                  งบประมาณรวม
+                </h4>
                 
-                {/* แสดงยอดรวมจากตาราง budgets */}
+                {/* แสดงยอดรวมจากคำสั่งซื้อที่อนุมัติแล้ว */}
                 <div className="mb-4 bg-white border-2 border-green-300 rounded-lg p-4">
-                  {loading ? (
-                    <div className="text-center py-4">
-                      <RefreshCw className="h-6 w-6 animate-spin mx-auto text-green-600" />
-                      <p className="mt-2 text-sm text-gray-600">กำลังโหลดข้อมูลงบประมาณ...</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="text-sm text-gray-600">งบประมาณรวมจากตาราง Budgets</p>
-                          <p className="text-2xl font-bold text-green-700">
-                            ฿{approvedOrdersTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                          </p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleUseBudgetFromOrders}
-                          className="border-green-500 text-green-700 hover:bg-green-50"
-                        >
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          นำเข้างบประมาณ
-                        </Button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        รวมจากฟิลด์ amount ทุกแถวในตาราง budgets
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="text-sm text-gray-600">งบประมาณจากคำสั่งซื้อที่อนุมัติแล้ว</p>
+                      <p className="text-2xl font-bold text-green-700">
+                        ฿{approvedOrdersTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </p>
-                    </>
-                  )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleUseBudgetFromOrders}
+                      className="border-green-500 text-green-700 hover:bg-green-50"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      นำเข้างบประมาณ
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -968,7 +917,7 @@ const SettingDoc = () => {
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="font-semibold text-gray-700">งบประมาณจากตาราง Budgets:</span>
+                    <span className="font-semibold text-gray-700">งบประมาณจากคำสั่งซื้อที่อนุมัติ:</span>
                     <span className="font-bold text-blue-700 text-lg">
                       ฿{approvedOrdersTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </span>
@@ -1012,4 +961,4 @@ const SettingDoc = () => {
   );
 };
 
-export default SettingDoc;
+export default SettingDoc2;

@@ -40,11 +40,11 @@ export default function WithdrawalsPage11() {
   const [loadingBooks, setLoadingBooks] = useState(false)
   const [nextWithdrawalNumber, setNextWithdrawalNumber] = useState('')
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchData()
     fetchTeachers()
     fetchOfficers()
-    
+
     // ตั้งค่าผู้จ่ายพัสดุอัตโนมัติเป็น user ที่ login อยู่
     if (user && (user.role === 'staff' || user.role === 'admin')) {
       setSelectedOfficer(user.id)
@@ -72,7 +72,7 @@ export default function WithdrawalsPage11() {
   const generateWithdrawalNumber = async () => {
     try {
       const { data, error } = await supabase
-        .rpc('generate_document_number', { 
+        .rpc('generate_document_number', {
           doc_type_code: 'W'
         })
 
@@ -95,7 +95,7 @@ export default function WithdrawalsPage11() {
   const previewNextWithdrawalNumber = async () => {
     try {
       const currentYear = new Date().getFullYear() + 543
-      
+
       // ดึงข้อมูล sequence ปัจจุบัน
       const { data, error } = await supabase
         .from('document_sequences')
@@ -127,7 +127,7 @@ export default function WithdrawalsPage11() {
       .select('id, full_name')
       .eq('role', 'teacher')
       .order('full_name')
-    
+
     if (error) {
       console.error('fetchTeachers error:', error)
       setTeachers([])
@@ -142,7 +142,7 @@ export default function WithdrawalsPage11() {
       .select('id, full_name')
       .in('role', ['admin', 'staff'])
       .order('full_name')
-    
+
     if (error) {
       console.error('fetchOfficers error:', error)
       setOfficers([])
@@ -154,9 +154,12 @@ export default function WithdrawalsPage11() {
   const fetchAvailableBooks = async () => {
     setLoadingBooks(true)
     try {
-      // ดึงข้อมูล stock ที่มีจำนวนคงเหลือจากตาราง book_stock
-      // ใช้ available_quantity แทน order_items.received_quantity
+      // ใช้ปีปัจจุบัน + 543 เป็นปีการศึกษา (พ.ศ.)
       const currentYear = new Date().getFullYear()
+      const academicYear = currentYear + 543 // แปลงเป็น พ.ศ.
+
+      console.log('🔍 Fetching books for:', { grade: selectedGrade, academicYear })
+
       const { data: stockData, error: stockError } = await supabase
         .from('book_stock')
         .select(`
@@ -168,21 +171,23 @@ export default function WithdrawalsPage11() {
           books(id, title, price)
         `)
         .eq('grade', selectedGrade)
-        .eq('academic_year', currentYear.toString())
+        .eq('academic_year', academicYear.toString()) // ใช้ปี พ.ศ.
         .gt('available_quantity', 0)
 
       if (stockError) {
         console.error('Error fetching stock:', stockError)
-        Swal.fire({ 
-          icon: 'error', 
-          title: 'เกิดข้อผิดพลาด', 
-          text: stockError.message 
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: stockError.message
         })
         setAvailableBooks([])
         setSelectedBooks({})
         setLoadingBooks(false)
         return
       }
+
+      console.log('📦 Stock data found:', stockData?.length || 0, 'items')
 
       if (stockData && stockData.length > 0) {
         // ดึงข้อมูล order เพื่อเอา order_id (ใช้ order แรกที่เจอ)
@@ -213,8 +218,10 @@ export default function WithdrawalsPage11() {
           distributed_quantity: stock.distributed_quantity
         }))
 
+        console.log('✅ Available books:', allBooks.length, 'items')
         setAvailableBooks(allBooks)
       } else {
+        console.warn('⚠️ No stock found for grade:', selectedGrade, 'year:', academicYear)
         setAvailableBooks([])
       }
       setSelectedBooks({})
@@ -225,7 +232,6 @@ export default function WithdrawalsPage11() {
     }
     setLoadingBooks(false)
   }
-
   const fetchData = async () => {
     setLoading(true)
 
@@ -273,10 +279,10 @@ export default function WithdrawalsPage11() {
       console.error('Error fetching orders:', oError)
     }
 
-    const validOrders = (oData || []).filter(order => 
-      order.status && 
-      order.status !== 'pending' && 
-      order.status !== 'draft' && 
+    const validOrders = (oData || []).filter(order =>
+      order.status &&
+      order.status !== 'pending' &&
+      order.status !== 'draft' &&
       order.status !== 'cancelled'
     )
 
@@ -326,7 +332,7 @@ export default function WithdrawalsPage11() {
       // คำนวณการเปลี่ยนแปลงของ stock
       const oldItems = selectedWithdrawal.withdrawal_items || []
       const changes = []
-      
+
       editingItems.forEach(newItem => {
         const oldItem = oldItems.find(o => o.id === newItem.id)
         if (oldItem && oldItem.approved_qty !== newItem.approved_qty) {
@@ -342,7 +348,7 @@ export default function WithdrawalsPage11() {
       // อัปเดต stock ตามการเปลี่ยนแปลง
       const currentYear = new Date().getFullYear()
       const stockUpdateErrors = []
-      
+
       for (const change of changes) {
         try {
           const { data: stockData, error: stockFetchError } = await supabase
@@ -420,30 +426,30 @@ export default function WithdrawalsPage11() {
       }
 
       if (stockUpdateErrors.length > 0) {
-        Swal.fire({ 
-          icon: 'warning', 
-          title: 'แก้ไขใบเบิกสำเร็จ', 
+        Swal.fire({
+          icon: 'warning',
+          title: 'แก้ไขใบเบิกสำเร็จ',
           html: `แก้ไขใบเบิกสำเร็จ<br><small class="text-yellow-600">หมายเหตุ: บางรายการอาจไม่สามารถอัปเดต stock ได้</small>`,
-          timer: 2000, 
-          showConfirmButton: false 
+          timer: 2000,
+          showConfirmButton: false
         })
       } else {
-        Swal.fire({ 
-          icon: 'success', 
-          title: 'แก้ไขใบเบิกสำเร็จ', 
-          timer: 1500, 
-          showConfirmButton: false 
+        Swal.fire({
+          icon: 'success',
+          title: 'แก้ไขใบเบิกสำเร็จ',
+          timer: 1500,
+          showConfirmButton: false
         })
       }
-      
+
       setShowEditModal(false)
       fetchData()
     } catch (error) {
       console.error('Update error:', error)
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'แก้ไขไม่สำเร็จ', 
-        text: error.message 
+      Swal.fire({
+        icon: 'error',
+        title: 'แก้ไขไม่สำเร็จ',
+        text: error.message
       })
     }
     setSaving(false)
@@ -463,7 +469,7 @@ export default function WithdrawalsPage11() {
     if (!result.isConfirmed) return
 
     const item = editingItems[itemIndex]
-    
+
     try {
       if (itemId) {
         // คืน stock
@@ -485,7 +491,7 @@ export default function WithdrawalsPage11() {
               updated_at: new Date().toISOString()
             })
             .eq('id', stockData.id)
-          
+
           console.log(`Stock restored for book ${item.book_id}: +${item.approved_qty} to available`)
         }
 
@@ -502,19 +508,19 @@ export default function WithdrawalsPage11() {
       const newItems = editingItems.filter((_, index) => index !== itemIndex)
       setEditingItems(newItems)
 
-      Swal.fire({ 
-        icon: 'success', 
-        title: 'ลบรายการสำเร็จ', 
+      Swal.fire({
+        icon: 'success',
+        title: 'ลบรายการสำเร็จ',
         text: 'จำนวนถูกคืนเข้า stock แล้ว',
-        timer: 1500, 
-        showConfirmButton: false 
+        timer: 1500,
+        showConfirmButton: false
       })
     } catch (error) {
       console.error('Delete error:', error)
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'ลบไม่สำเร็จ', 
-        text: error.message 
+      Swal.fire({
+        icon: 'error',
+        title: 'ลบไม่สำเร็จ',
+        text: error.message
       })
     }
   }
@@ -627,13 +633,13 @@ export default function WithdrawalsPage11() {
         delete newState[bookId]
         return newState
       } else {
-        return { 
-          ...prev, 
-          [bookId]: { 
-            requested: receivedQty, 
+        return {
+          ...prev,
+          [bookId]: {
+            requested: receivedQty,
             approved: receivedQty,
-            notes: '' 
-          } 
+            notes: ''
+          }
         }
       }
     })
@@ -689,13 +695,13 @@ export default function WithdrawalsPage11() {
   const handleApprovedQtyKeyDown = (e, currentBookId) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      
+
       const selectedBookIds = availableBooks
         .filter(item => selectedBooks[item.book_id])
         .map(item => item.book_id)
-      
+
       const currentIndex = selectedBookIds.indexOf(currentBookId)
-      
+
       if (currentIndex < selectedBookIds.length - 1) {
         const nextBookId = selectedBookIds[currentIndex + 1]
         const nextInput = document.querySelector(`input[data-approved-qty="${nextBookId}"]`)
@@ -725,17 +731,17 @@ export default function WithdrawalsPage11() {
       Swal.fire({ icon: 'warning', title: 'กรุณาเลือกรายการหนังสือ' })
       return
     }
-
+  
     if (!selectedTeacher) {
       Swal.fire({ icon: 'warning', title: 'กรุณาเลือกผู้เบิก (ครู)' })
       return
     }
-
+  
     if (!selectedOfficer) {
       Swal.fire({ icon: 'warning', title: 'กรุณาเลือกผู้จ่ายพัสดุ' })
       return
     }
-
+  
     setSaving(true)
     
     const firstBook = availableBooks.find(book => selectedBooks[book.book_id])
@@ -745,10 +751,10 @@ export default function WithdrawalsPage11() {
       setSaving(false)
       return
     }
-
+  
     // ใช้ฟังก์ชันสร้างเลขที่ใบเบิกจาก document_sequences
     const withdrawalNumber = await generateWithdrawalNumber()
-
+  
     const { data: wData, error: wError } = await supabase.from('withdrawals').insert({
       order_id: firstBook.order_id,
       withdrawal_number: withdrawalNumber,
@@ -759,13 +765,13 @@ export default function WithdrawalsPage11() {
       total_requested: totalRequested,
       total_approved: totalApproved,
     }).select().single()
-
+  
     if (wError) {
       Swal.fire({ icon: 'error', title: 'สร้างใบเบิกไม่สำเร็จ', text: wError.message })
       setSaving(false)
       return
     }
-
+  
     const items = Object.entries(selectedBooks).map(([bookId, item]) => ({
       withdrawal_id: wData.id,
       book_id: bookId,
@@ -773,17 +779,18 @@ export default function WithdrawalsPage11() {
       approved_qty: item.approved,
       notes: item.notes || null,
     }))
-
+  
     const { error: itemError } = await supabase.from('withdrawal_items').insert(items)
-
+  
     if (itemError) {
       Swal.fire({ icon: 'error', title: 'เพิ่มรายการไม่สำเร็จ', text: itemError.message })
       setSaving(false)
       return
     }
-
-    // อัปเดต book_stock: ลด available_quantity และเพิ่ม distributed_quantity
+  
+    // อัปเดต book_stock: ลด available_quantity เท่านั้น (distributed_quantity จะคำนวณเอง)
     const currentYear = new Date().getFullYear()
+    const academicYear = currentYear + 543
     const stockUpdateErrors = []
     const stockUpdateSuccess = []
     
@@ -796,9 +803,9 @@ export default function WithdrawalsPage11() {
             .select('id, available_quantity, distributed_quantity, quantity')
             .eq('book_id', bookId)
             .eq('grade', selectedGrade)
-            .eq('academic_year', currentYear.toString())
+            .eq('academic_year', academicYear.toString())
             .maybeSingle()
-
+  
           if (stockFetchError) {
             console.error('Error fetching stock:', stockFetchError)
             stockUpdateErrors.push({
@@ -807,7 +814,7 @@ export default function WithdrawalsPage11() {
             })
             continue
           }
-
+  
           if (stockData) {
             // ตรวจสอบว่ามี available_quantity เพียงพอหรือไม่
             if (stockData.available_quantity < item.approved) {
@@ -816,23 +823,20 @@ export default function WithdrawalsPage11() {
                 error: `จำนวนคงเหลือไม่เพียงพอ (มี ${stockData.available_quantity} เบิก ${item.approved})`
               })
               console.warn(`Insufficient stock for book ${bookId}: available=${stockData.available_quantity}, requested=${item.approved}`)
-              // ดำเนินการต่อแต่แจ้งเตือน
             }
-
-            // คำนวณจำนวนใหม่
+  
+            // คำนวณจำนวนใหม่ (ลดเฉพาะ available_quantity)
             const newAvailable = Math.max(0, stockData.available_quantity - item.approved)
-            const newDistributed = (stockData.distributed_quantity || 0) + item.approved
-
-            // อัปเดต stock
+  
+            // อัปเดต stock (ไม่ต้อง update distributed_quantity เพราะมันคำนวณอัตโนมัติ)
             const { error: stockUpdateError } = await supabase
               .from('book_stock')
               .update({
                 available_quantity: newAvailable,
-                distributed_quantity: newDistributed,
                 updated_at: new Date().toISOString()
               })
               .eq('id', stockData.id)
-
+  
             if (stockUpdateError) {
               console.error('Error updating stock:', stockUpdateError)
               stockUpdateErrors.push({
@@ -840,6 +844,7 @@ export default function WithdrawalsPage11() {
                 error: `อัปเดตไม่สำเร็จ: ${stockUpdateError.message}`
               })
             } else {
+              const newDistributed = stockData.quantity - newAvailable // คำนวณ distributed ที่คาดว่าจะเป็น
               stockUpdateSuccess.push({
                 bookId,
                 oldAvailable: stockData.available_quantity,
@@ -847,50 +852,15 @@ export default function WithdrawalsPage11() {
                 oldDistributed: stockData.distributed_quantity || 0,
                 newDistributed
               })
-              console.log(`Stock updated for book ${bookId}: available ${stockData.available_quantity} → ${newAvailable}, distributed ${stockData.distributed_quantity || 0} → ${newDistributed}`)
+              console.log(`✅ Stock updated for book ${bookId}: available ${stockData.available_quantity} → ${newAvailable}, distributed ${stockData.distributed_quantity || 0} → ${newDistributed} (auto-calculated)`)
             }
           } else {
-            // ไม่พบ stock record - สร้างใหม่อัตโนมัติ
-            console.warn(`Stock record not found for book ${bookId}, grade ${selectedGrade}, year ${currentYear} - creating new record`)
-            
-            try {
-              const { error: createStockError } = await supabase
-                .from('book_stock')
-                .insert({
-                  book_id: bookId,
-                  grade: selectedGrade,
-                  academic_year: currentYear.toString(),
-                  quantity: 0,
-                  available_quantity: 0,
-                  distributed_quantity: item.approved,
-                  source: 'adjustment',
-                  notes: `สร้างอัตโนมัติจากใบเบิก ${withdrawalNumber}`
-                })
-
-              if (createStockError) {
-                console.error('Error creating stock:', createStockError)
-                stockUpdateErrors.push({
-                  bookId,
-                  error: `ไม่สามารถสร้าง stock ได้: ${createStockError.message}`
-                })
-              } else {
-                stockUpdateSuccess.push({
-                  bookId,
-                  oldAvailable: 0,
-                  newAvailable: 0,
-                  oldDistributed: 0,
-                  newDistributed: item.approved,
-                  created: true
-                })
-                console.log(`Stock created for book ${bookId}: distributed = ${item.approved}`)
-              }
-            } catch (createErr) {
-              console.error('Create stock error:', createErr)
-              stockUpdateErrors.push({
-                bookId,
-                error: `เกิดข้อผิดพลาดในการสร้าง stock: ${createErr.message}`
-              })
-            }
+            // ไม่พบ stock record
+            console.warn(`⚠️ Stock record not found for book ${bookId}, grade ${selectedGrade}, year ${academicYear}`)
+            stockUpdateErrors.push({
+              bookId,
+              error: `ไม่พบข้อมูล stock ในระบบ (กรุณาตรวจสอบการโอนจากใบรับ)`
+            })
           }
         } catch (err) {
           console.error('Stock update error:', err)
@@ -901,18 +871,17 @@ export default function WithdrawalsPage11() {
         }
       }
     }
-
+  
     // แสดงผลการอัปเดต
     console.log('Stock update summary:', {
       success: stockUpdateSuccess.length,
       errors: stockUpdateErrors.length,
       details: { stockUpdateSuccess, stockUpdateErrors }
     })
-
+  
     if (stockUpdateErrors.length > 0) {
-      // มี error บางรายการ
       const errorDetails = stockUpdateErrors
-        .map(e => `- หนังสือ ID ${e.bookId}: ${e.error}`)
+        .map(e => `- ${e.error}`)
         .join('<br>')
       
       await Swal.fire({ 
@@ -924,7 +893,7 @@ export default function WithdrawalsPage11() {
             <p class="mb-2 text-sm text-gray-600">อัปเดต stock สำเร็จ: ${stockUpdateSuccess.length} รายการ</p>
             ${stockUpdateErrors.length > 0 ? `
               <div class="mt-3 p-3 bg-yellow-50 rounded">
-                <p class="text-sm font-medium text-yellow-800 mb-2">คำเตือน (${stockUpdateErrors.length} รายการ):</p>
+                <p class="text-sm font-medium text-yellow-800 mb-2">⚠️ คำเตือน (${stockUpdateErrors.length} รายการ):</p>
                 <div class="text-xs text-yellow-700">${errorDetails}</div>
               </div>
             ` : ''}
@@ -934,7 +903,6 @@ export default function WithdrawalsPage11() {
         width: '600px'
       })
     } else {
-      // สำเร็จทั้งหมด
       await Swal.fire({ 
         icon: 'success', 
         title: 'สร้างใบเบิกสำเร็จ', 
@@ -945,8 +913,7 @@ export default function WithdrawalsPage11() {
         confirmButtonColor: '#2563eb' 
       })
     }
-
-    // ปิด modal และรีเซ็ต
+  
     setShowNewWithdrawalModal(false)
     setSelectedTeacher('')
     setSelectedOfficer('')
@@ -1022,10 +989,10 @@ export default function WithdrawalsPage11() {
     const withdrawalNumber = (w.withdrawal_number || '').toLowerCase()
     const classroom = (w.orders?.classroom || '').toLowerCase()
     const teacherName = (w.requested_by_user?.full_name || w.orders?.users?.full_name || '').toLowerCase()
-    
+
     return withdrawalNumber.includes(searchLower) ||
-           classroom.includes(searchLower) ||
-           teacherName.includes(searchLower)
+      classroom.includes(searchLower) ||
+      teacherName.includes(searchLower)
   })
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
@@ -1140,7 +1107,7 @@ export default function WithdrawalsPage11() {
               {paginated.map(w => {
                 const teacherName = w.requested_by_user?.full_name || w.orders?.users?.full_name || '-'
                 const classroom = w.orders?.classroom || '-'
-                
+
                 return (
                   <tr key={w.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-blue-600">{w.withdrawal_number}</td>
@@ -1401,7 +1368,7 @@ export default function WithdrawalsPage11() {
                         </button>
                       )}
                     </div>
-                    
+
                     {Object.keys(selectedBooks).length === 0 ? (
                       <table className="w-full text-sm">
                         <thead>
@@ -1503,7 +1470,7 @@ export default function WithdrawalsPage11() {
                         </table>
                       </div>
                     )}
-                    
+
                     <div className="bg-gray-50 px-4 py-3 border-t">
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-600">
@@ -1541,7 +1508,14 @@ export default function WithdrawalsPage11() {
                 <p className="text-gray-500">กรุณาเลือกผู้เบิก, ผู้จ่ายพัสดุ และชั้นเรียน</p>
               </div>
             )}
-
+            {!loadingBooks && selectedTeacher && selectedGrade && availableBooks.length === 0 && (
+              <div className="bg-gray-50 rounded-lg p-8 text-center">
+                <FileText size={40} className="text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">ไม่พบหนังสือในคลังพัสดุ</p>
+                <p className="text-sm text-gray-400 mt-1">ชั้น {gradeLabel[selectedGrade]} ปีการศึกษา {new Date().getFullYear() + 543}</p>
+                <p className="text-sm text-gray-400">กรุณาตรวจสอบการรับหนังสือและโอนไปสต๊อก</p>
+              </div>
+            )}
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => {
@@ -1591,7 +1565,7 @@ export default function WithdrawalsPage11() {
               <div className="bg-gray-50 px-4 py-3 border-b">
                 <h4 className="font-medium text-sm">รายการหนังสือ</h4>
               </div>
-              
+
               {editingItems.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
