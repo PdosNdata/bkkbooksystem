@@ -693,15 +693,14 @@ export default function WithdrawalsPage9() {
           }
 
           if (stockData) {
-            // อัปเดต stock ที่มีอยู่
+            // อัปเดต stock ที่มีอยู่ - อัปเดตเฉพาะ available_quantity
+            // หมายเหตุ: distributed_quantity เป็น generated column ที่คำนวณอัตโนมัติจาก quantity - available_quantity
             const newAvailable = Math.max(0, stockData.available_quantity - item.approved)
-            const newDistributed = (stockData.distributed_quantity || 0) + item.approved
 
             const { error: stockUpdateError } = await supabase
               .from('book_stock')
               .update({
                 available_quantity: newAvailable,
-                distributed_quantity: newDistributed,
                 updated_at: new Date().toISOString()
               })
               .eq('id', stockData.id)
