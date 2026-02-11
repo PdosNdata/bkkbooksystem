@@ -352,7 +352,7 @@ export default function WithdrawalsPage11() {
             .from('book_stock')
             .select('id, available_quantity, distributed_quantity')
             .eq('book_id', change.book_id)
-            .eq('grade', selectedWithdrawal.orders?.grade)
+            .eq('grade', selectedWithdrawal.grade || selectedWithdrawal.orders?.grade)
             .eq('academic_year', currentYear)
             .maybeSingle()
 
@@ -442,7 +442,7 @@ export default function WithdrawalsPage11() {
                 .from('book_stock')
                 .select('id, available_quantity, distributed_quantity')
                 .eq('book_id', item.book_id)
-                .eq('grade', selectedWithdrawal.orders?.grade)
+                .eq('grade', selectedWithdrawal.grade || selectedWithdrawal.orders?.grade)
                 .eq('academic_year', currentYear)
                 .maybeSingle()
 
@@ -519,7 +519,7 @@ export default function WithdrawalsPage11() {
           .from('book_stock')
           .select('id, available_quantity, distributed_quantity')
           .eq('book_id', item.book_id)
-          .eq('grade', selectedWithdrawal.orders?.grade)
+          .eq('grade', selectedWithdrawal.grade || selectedWithdrawal.orders?.grade)
           .eq('academic_year', currentYear)
           .maybeSingle()
 
@@ -588,10 +588,11 @@ export default function WithdrawalsPage11() {
     setLoadingBooksForEdit(true)
     try {
       const currentYear = (new Date().getFullYear() + 543).toString()
-      const grade = selectedWithdrawal.orders?.grade
+      // ใช้ grade จาก withdrawal โดยตรง หรือ fallback ไปที่ orders.grade
+      const grade = selectedWithdrawal.grade || selectedWithdrawal.orders?.grade
 
       if (!grade) {
-        Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูลชั้นเรียน' })
+        Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูลชั้นเรียน', text: 'กรุณาตรวจสอบข้อมูลใบเบิก' })
         setLoadingBooksForEdit(false)
         return
       }
@@ -893,6 +894,7 @@ export default function WithdrawalsPage11() {
       issued_by: selectedOfficer,
       total_requested: totalRequested,
       total_approved: totalApproved,
+      grade: selectedGrade, // เก็บ grade ไว้โดยตรงเพื่อใช้เมื่อแก้ไข
     }).select().single()
 
     if (wError) {
@@ -1274,7 +1276,7 @@ export default function WithdrawalsPage11() {
             <tbody className="divide-y divide-gray-100">
               {paginated.map(w => {
                 const teacherName = w.requested_by_user?.full_name || w.orders?.users?.full_name || '-'
-                const classroom = gradeLabel[w.orders?.grade] || w.orders?.classroom || '-'
+                const classroom = gradeLabel[w.grade] || gradeLabel[w.orders?.grade] || w.orders?.classroom || '-'
 
                 return (
                   <tr key={w.id} className="hover:bg-gray-50">
@@ -1387,7 +1389,7 @@ export default function WithdrawalsPage11() {
               <p><span className="text-gray-500">วันที่เบิก:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_date ? new Date(selectedWithdrawal.withdrawal_date).toLocaleDateString('th-TH') : '-'}</span></p>
               <p><span className="text-gray-500">ผู้เบิก:</span> <span className="font-medium">{selectedWithdrawal.requested_by_user?.full_name || selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
               <p><span className="text-gray-500">ผู้จ่ายพัสดุ:</span> <span className="font-medium">{selectedWithdrawal.issued_by_user?.full_name || '-'}</span></p>
-              <p><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{selectedWithdrawal.orders?.classroom || '-'}</span></p>
+              <p><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{gradeLabel[selectedWithdrawal.grade] || gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
               <p><span className="text-gray-500">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
               <p><span className="text-gray-500">รวมขอเบิก:</span> <span className="font-medium text-blue-600">{selectedWithdrawal.total_requested || 0} เล่ม</span></p>
               <p><span className="text-gray-500">รวมเบิกได้:</span> <span className="font-medium text-green-600">{selectedWithdrawal.total_approved || 0} เล่ม</span></p>
@@ -1718,7 +1720,7 @@ export default function WithdrawalsPage11() {
               <p><span className="text-gray-500">เลขที่:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_number}</span></p>
               <p><span className="text-gray-500">วันที่เบิก:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_date ? new Date(selectedWithdrawal.withdrawal_date).toLocaleDateString('th-TH') : '-'}</span></p>
               <p><span className="text-gray-500">ผู้เบิก:</span> <span className="font-medium">{selectedWithdrawal.requested_by_user?.full_name || selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
-              <p><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
+              <p><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{gradeLabel[selectedWithdrawal.grade] || gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
               <p><span className="text-gray-500">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
             </div>
 
