@@ -139,6 +139,7 @@ export default function WithdrawalsPage() {
       withdrawal_number: withdrawalNumber,
       status: 'pending',
       requested_by: selectedOrder.teacher_id,
+      grade: selectedOrder.grade,
     }).select().single()
 
     if (wError) {
@@ -258,6 +259,7 @@ export default function WithdrawalsPage() {
       withdrawal_number: withdrawalNumber,
       status: 'pending',
       requested_by: selectedTeacher,
+      grade: selectedGrade,
     }).select().single()
 
     if (wError) {
@@ -310,7 +312,7 @@ export default function WithdrawalsPage() {
     doc.text(`วันที่ ${today.getDate()} เดือน ${thaiMonths[today.getMonth()]} พ.ศ. ${today.getFullYear() + 543}`, pageW - 80, 47)
 
     const teacherName = withdrawal.orders?.users?.full_name || '-'
-    const classroom = withdrawal.orders?.classroom || '-'
+    const classroom = gradeLabel[withdrawal.grade] || gradeLabel[withdrawal.orders?.grade] || withdrawal.orders?.classroom || '-'
     doc.text(`ข้าพเจ้าของเบิกพัสดุตามรายการต่อไปนี้ เพื่อใช้ในงานการเรียนการสอนในชั้น${classroom}`, 14, 57)
 
     // Table header
@@ -355,7 +357,7 @@ export default function WithdrawalsPage() {
 
   const filtered = withdrawals.filter(w =>
     (w.withdrawal_number || '').toLowerCase().includes(search.toLowerCase()) ||
-    (w.orders?.classroom || '').toLowerCase().includes(search.toLowerCase()) ||
+    (gradeLabel[w.grade] || gradeLabel[w.orders?.grade] || w.orders?.classroom || '').toLowerCase().includes(search.toLowerCase()) ||
     (w.orders?.users?.full_name || '').toLowerCase().includes(search.toLowerCase())
   )
 
@@ -471,7 +473,7 @@ export default function WithdrawalsPage() {
                 <tr key={w.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-blue-600">{w.withdrawal_number}</td>
                   <td className="px-4 py-3">{w.orders?.users?.full_name || '-'}</td>
-                  <td className="px-4 py-3 text-center">{w.orders?.classroom || '-'}</td>
+                  <td className="px-4 py-3 text-center">{gradeLabel[w.grade] || gradeLabel[w.orders?.grade] || w.orders?.classroom || '-'}</td>
                   <td className="px-4 py-3 text-center">{new Date(w.created_at).toLocaleDateString('th-TH')}</td>
                   <td className="px-4 py-3 text-center">{statusBadge(w.status)}</td>
                   <td className="px-4 py-3">
@@ -571,7 +573,7 @@ export default function WithdrawalsPage() {
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <p className="text-sm"><span className="text-gray-500">เลขที่:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_number}</span></p>
               <p className="text-sm"><span className="text-gray-500">ผู้เบิก:</span> <span className="font-medium">{selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
-              <p className="text-sm"><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{selectedWithdrawal.orders?.classroom}</span></p>
+              <p className="text-sm"><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{gradeLabel[selectedWithdrawal.grade] || gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
               <p className="text-sm"><span className="text-gray-500">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
             </div>
 
