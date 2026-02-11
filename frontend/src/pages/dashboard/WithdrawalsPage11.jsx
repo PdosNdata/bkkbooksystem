@@ -285,6 +285,12 @@ export default function WithdrawalsPage11() {
 
     console.log('Fetched withdrawals:', wData)
     console.log('Fetched orders:', validOrders)
+    // Debug: แสดง grade ของแต่ละ withdrawal
+    if (wData) {
+      wData.forEach((w, i) => {
+        console.log(`Withdrawal[${i}]: id=${w.id}, grade=${w.grade}, order_id=${w.order_id}, orders.grade=${w.orders?.grade}`)
+      })
+    }
 
     setWithdrawals(wData || [])
     setOrders(validOrders)
@@ -307,7 +313,33 @@ export default function WithdrawalsPage11() {
   }
 
   const openEditModal = async (withdrawal) => {
-    setSelectedWithdrawal(withdrawal)
+    // Debug: log withdrawal data
+    console.log('=== Debug openEditModal ===')
+    console.log('withdrawal:', withdrawal)
+    console.log('withdrawal.grade:', withdrawal.grade)
+    console.log('withdrawal.order_id:', withdrawal.order_id)
+    console.log('withdrawal.orders:', withdrawal.orders)
+
+    // ถ้า grade ไม่มีทั้งใน withdrawal และ orders, ลองดึงจาก orders table โดยตรง
+    let enrichedWithdrawal = { ...withdrawal }
+    if (!withdrawal.grade && !withdrawal.orders?.grade && withdrawal.order_id) {
+      console.log('Grade not found, fetching from orders table...')
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .select('grade')
+        .eq('id', withdrawal.order_id)
+        .single()
+
+      if (!orderError && orderData?.grade) {
+        console.log('Found grade from orders:', orderData.grade)
+        enrichedWithdrawal = {
+          ...withdrawal,
+          orders: { ...withdrawal.orders, grade: orderData.grade }
+        }
+      }
+    }
+
+    setSelectedWithdrawal(enrichedWithdrawal)
     // แปลง withdrawal_items ให้เป็น array สำหรับแก้ไข
     const items = withdrawal.withdrawal_items?.map(item => ({
       id: item.id,
@@ -588,11 +620,41 @@ export default function WithdrawalsPage11() {
     setLoadingBooksForEdit(true)
     try {
       const currentYear = (new Date().getFullYear() + 543).toString()
+
+      // Debug: log selectedWithdrawal เพื่อดู structure
+      console.log('=== Debug fetchAvailableBooksForEdit ===')
+      console.log('selectedWithdrawal:', selectedWithdrawal)
+      console.log('selectedWithdrawal.grade:', selectedWithdrawal.grade)
+      console.log('selectedWithdrawal.orders:', selectedWithdrawal.orders)
+      console.log('selectedWithdrawal.orders?.grade:', selectedWithdrawal.orders?.grade)
+
       // ใช้ grade จาก withdrawal โดยตรง หรือ fallback ไปที่ orders.grade
-      const grade = selectedWithdrawal.grade || selectedWithdrawal.orders?.grade
+      let grade = selectedWithdrawal.grade || selectedWithdrawal.orders?.grade
+
+      // Fallback: ถ้ายังไม่มี grade, ลองดึงจาก withdrawal_items -> book_stock
+      if (!grade && selectedWithdrawal.withdrawal_items?.length > 0) {
+        console.log('Trying fallback: fetch grade from book_stock via first withdrawal_item')
+        const firstItem = selectedWithdrawal.withdrawal_items[0]
+        if (firstItem?.book_id) {
+          const { data: stockData, error: stockError } = await supabase
+            .from('book_stock')
+            .select('grade')
+            .eq('book_id', firstItem.book_id)
+            .eq('academic_year', currentYear)
+            .limit(1)
+            .single()
+
+          if (!stockError && stockData?.grade) {
+            grade = stockData.grade
+            console.log('Found grade from book_stock fallback:', grade)
+          }
+        }
+      }
+
+      console.log('Final grade:', grade)
 
       if (!grade) {
-        Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูลชั้นเรียน', text: 'กรุณาตรวจสอบข้อมูลใบเบิก' })
+        Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูลชั้นเรียน', text: 'กรุณาตรวจสอบข้อมูลใบเบิก หรือรัน SQL migration เพื่ออัปเดต grade' })
         setLoadingBooksForEdit(false)
         return
       }
