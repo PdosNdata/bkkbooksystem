@@ -1502,8 +1502,8 @@ export default function WithdrawalsPage11() {
               <thead>
                 <tr className="bg-gray-100">
                   <th className="text-left px-3 py-2">รายการ</th>
-                  <th className="text-center px-3 py-2 w-24">ขอเบิก</th>
-                  <th className="text-center px-3 py-2 w-24">เบิกได้</th>
+                  <th className="text-center px-2 py-2 w-16">ขอเบิก</th>
+                  <th className="text-center px-2 py-2 w-16">เบิกได้</th>
                 </tr>
               </thead>
               <tbody>
@@ -1562,8 +1562,8 @@ export default function WithdrawalsPage11() {
                 <tr className="bg-gray-100">
                   <th className="text-left px-3 py-2">#</th>
                   <th className="text-left px-3 py-2">รายการ</th>
-                  <th className="text-center px-3 py-2">ขอเบิก</th>
-                  <th className="text-center px-3 py-2">เบิกได้</th>
+                  <th className="text-center px-2 py-2 w-16">ขอเบิก</th>
+                  <th className="text-center px-2 py-2 w-16">เบิกได้</th>
                 </tr>
               </thead>
               <tbody>
@@ -1733,8 +1733,8 @@ export default function WithdrawalsPage11() {
                             <tr className="bg-gray-100">
                               <th className="w-10 px-3 py-2"></th>
                               <th className="text-left px-3 py-2">รายการหนังสือ</th>
-                              <th className="text-center px-3 py-2 w-28">จำนวนขอเบิก</th>
-                              <th className="text-center px-3 py-2 w-28">จำนวนเบิกได้</th>
+                              <th className="text-center px-2 py-2 w-20">จำนวนขอเบิก</th>
+                              <th className="text-center px-2 py-2 w-20">จำนวนเบิกได้</th>
                               <th className="text-left px-3 py-2 w-48">หมายเหตุ</th>
                             </tr>
                           </thead>
@@ -1906,8 +1906,8 @@ export default function WithdrawalsPage11() {
                       <tr className="bg-gray-100">
                         <th className="text-left px-3 py-2">#</th>
                         <th className="text-left px-3 py-2">รายการหนังสือ</th>
-                        <th className="text-center px-3 py-2 w-28">จำนวนขอเบิก</th>
-                        <th className="text-center px-3 py-2 w-28">จำนวนเบิกได้</th>
+                        <th className="text-center px-2 py-2 w-20">จำนวนขอเบิก</th>
+                        <th className="text-center px-2 py-2 w-20">จำนวนเบิกได้</th>
                         <th className="text-left px-3 py-2 w-48">หมายเหตุ</th>
                         <th className="text-center px-3 py-2 w-20">ลบ</th>
                       </tr>
