@@ -25,6 +25,7 @@ import BookReceiptsPageNew5 from './pages/dashboard/BookReceiptsPageNew5'
 import OrdersPage1 from './pages/dashboard/OrdersPage1'
 import SettingDoc from './pages/dashboard/settingdoc'
 
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
 
