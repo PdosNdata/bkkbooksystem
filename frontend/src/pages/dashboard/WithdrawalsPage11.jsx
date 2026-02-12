@@ -395,16 +395,15 @@ export default function WithdrawalsPage11() {
           }
 
           if (stockData) {
-            // ถ้า diff บวก = เบิกเพิ่ม (ลด available, เพิ่ม distributed)
-            // ถ้า diff ลบ = คืน (เพิ่ม available, ลด distributed)
+            // ถ้า diff บวก = เบิกเพิ่ม (ลด available)
+            // ถ้า diff ลบ = คืน (เพิ่ม available)
+            // หมายเหตุ: distributed_quantity เป็น generated column คำนวณอัตโนมัติจาก quantity - available_quantity
             const newAvailable = Math.max(0, stockData.available_quantity - change.diff)
-            const newDistributed = Math.max(0, stockData.distributed_quantity + change.diff)
 
             const { error: stockUpdateError } = await supabase
               .from('book_stock')
               .update({
                 available_quantity: newAvailable,
-                distributed_quantity: newDistributed,
                 updated_at: new Date().toISOString()
               })
               .eq('id', stockData.id)
@@ -413,7 +412,7 @@ export default function WithdrawalsPage11() {
               console.error('Error updating stock:', stockUpdateError)
               stockUpdateErrors.push(`หนังสือ ID ${change.book_id}`)
             } else {
-              console.log(`Stock updated for book ${change.book_id}: available ${stockData.available_quantity} → ${newAvailable}, distributed ${stockData.distributed_quantity} → ${newDistributed}`)
+              console.log(`Stock updated for book ${change.book_id}: available ${stockData.available_quantity} → ${newAvailable}`)
             }
           }
         } catch (err) {
@@ -480,18 +479,16 @@ export default function WithdrawalsPage11() {
 
               if (!stockFetchError && stockData) {
                 const newAvailable = Math.max(0, stockData.available_quantity - item.approved_qty)
-                const newDistributed = (stockData.distributed_quantity || 0) + item.approved_qty
 
                 await supabase
                   .from('book_stock')
                   .update({
                     available_quantity: newAvailable,
-                    distributed_quantity: newDistributed,
                     updated_at: new Date().toISOString()
                   })
                   .eq('id', stockData.id)
 
-                console.log(`Stock updated for new item ${item.book_id}: available → ${newAvailable}, distributed → ${newDistributed}`)
+                console.log(`Stock updated for new item ${item.book_id}: available → ${newAvailable}`)
               }
             }
           }
@@ -560,11 +557,10 @@ export default function WithdrawalsPage11() {
             .from('book_stock')
             .update({
               available_quantity: stockData.available_quantity + item.approved_qty,
-              distributed_quantity: Math.max(0, stockData.distributed_quantity - item.approved_qty),
               updated_at: new Date().toISOString()
             })
             .eq('id', stockData.id)
-          
+
           console.log(`Stock restored for book ${item.book_id}: +${item.approved_qty} to available`)
         }
 
@@ -1019,15 +1015,14 @@ export default function WithdrawalsPage11() {
             }
 
             // คำนวณจำนวนใหม่
+            // หมายเหตุ: distributed_quantity เป็น generated column คำนวณอัตโนมัติจาก quantity - available_quantity
             const newAvailable = Math.max(0, stockData.available_quantity - item.approved)
-            const newDistributed = (stockData.distributed_quantity || 0) + item.approved
 
             // อัปเดต stock
             const { error: stockUpdateError } = await supabase
               .from('book_stock')
               .update({
                 available_quantity: newAvailable,
-                distributed_quantity: newDistributed,
                 updated_at: new Date().toISOString()
               })
               .eq('id', stockData.id)
@@ -1042,16 +1037,15 @@ export default function WithdrawalsPage11() {
               stockUpdateSuccess.push({
                 bookId,
                 oldAvailable: stockData.available_quantity,
-                newAvailable,
-                oldDistributed: stockData.distributed_quantity || 0,
-                newDistributed
+                newAvailable
               })
-              console.log(`Stock updated for book ${bookId}: available ${stockData.available_quantity} → ${newAvailable}, distributed ${stockData.distributed_quantity || 0} → ${newDistributed}`)
+              console.log(`Stock updated for book ${bookId}: available ${stockData.available_quantity} → ${newAvailable}`)
             }
           } else {
             // ไม่พบ stock record - สร้างใหม่อัตโนมัติ
+            // หมายเหตุ: distributed_quantity เป็น generated column คำนวณอัตโนมัติจาก quantity - available_quantity
             console.warn(`Stock record not found for book ${bookId}, grade ${selectedGrade}, year ${currentYear} - creating new record`)
-            
+
             try {
               const { error: createStockError } = await supabase
                 .from('book_stock')
@@ -1059,9 +1053,8 @@ export default function WithdrawalsPage11() {
                   book_id: bookId,
                   grade: selectedGrade,
                   academic_year: currentYear,
-                  quantity: 0,
+                  quantity: item.approved,
                   available_quantity: 0,
-                  distributed_quantity: item.approved,
                   source: 'adjustment',
                   notes: `สร้างอัตโนมัติจากใบเบิก ${withdrawalNumber}`
                 })
@@ -1077,11 +1070,9 @@ export default function WithdrawalsPage11() {
                   bookId,
                   oldAvailable: 0,
                   newAvailable: 0,
-                  oldDistributed: 0,
-                  newDistributed: item.approved,
                   created: true
                 })
-                console.log(`Stock created for book ${bookId}: distributed = ${item.approved}`)
+                console.log(`Stock created for book ${bookId}: quantity = ${item.approved}, available = 0`)
               }
             } catch (createErr) {
               console.error('Create stock error:', createErr)
