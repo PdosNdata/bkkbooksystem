@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { Search, Plus, Eye, Printer, Upload, CheckCircle, Clock, Loader2, FileText, User, Check, Square, CheckSquare, Edit, Trash2 } from 'lucide-react'
 import Swal from 'sweetalert2'
 import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 import { useAuth } from '../../context/AuthContext'
 
 const gradeLabel = { kg2: 'อนุบาล 2', kg3: 'อนุบาล 3', p1: 'ป.1', p2: 'ป.2', p3: 'ป.3', p4: 'ป.4', p5: 'ป.5', p6: 'ป.6', m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' }
@@ -1153,63 +1154,60 @@ export default function WithdrawalsPage11() {
     setSaving(false)
   }
 
-  const exportPDF = (withdrawal) => {
-    const doc = new jsPDF('p', 'mm', 'a4')
-    const pageW = doc.internal.pageSize.getWidth()
+  const exportPDF = async (withdrawal) => {
+    if (!printRef.current) {
+      Swal.fire('ผิดพลาด', 'ไม่พบเนื้อหาสำหรับสร้าง PDF', 'error')
+      return
+    }
 
-    doc.setFont('Helvetica', 'bold')
-    doc.setFontSize(18)
-    doc.text('ใบเบิกพัสดุ', pageW / 2, 20, { align: 'center' })
+    try {
+      Swal.fire({
+        title: 'กำลังสร้าง PDF...',
+        text: 'กรุณารอสักครู่',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading()
+        }
+      })
 
-    doc.setFont('Helvetica', 'normal')
-    doc.setFontSize(10)
-    doc.text(`เล่มที่ ...............`, pageW - 50, 30)
-    doc.text(`โรงเรียนบ้านค้อดอนแคน สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน`, 14, 40)
-    doc.text(`เลขที่ ${withdrawal.withdrawal_number}`, pageW - 50, 40)
+      const element = printRef.current
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
 
-    const withdrawalDateObj = withdrawal.withdrawal_date ? new Date(withdrawal.withdrawal_date) : new Date()
-    const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
-    doc.text(`วันที่ ${withdrawalDateObj.getDate()} เดือน ${thaiMonths[withdrawalDateObj.getMonth()]} พ.ศ. ${withdrawalDateObj.getFullYear() + 543}`, pageW - 80, 47)
+      const imgData = canvas.toDataURL('image/png')
+      const doc = new jsPDF('p', 'mm', 'a4')
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
 
-    const teacherName = withdrawal.requested_by_user?.full_name || withdrawal.orders?.users?.full_name || '-'
-    const classroom = withdrawal.orders?.classroom || '-'
-    doc.text(`ข้าพเจ้าของเบิกพัสดุตามรายการต่อไปนี้ เพื่อใช้ในงานการเรียนการสอนในชั้น${classroom}`, 14, 57)
+      const imgWidth = pageWidth
+      const imgHeight = (canvas.height * pageWidth) / canvas.width
 
-    let y = 65
-    doc.setFillColor(240, 240, 240)
-    doc.rect(14, y, pageW - 28, 8, 'F')
-    doc.setFont('Helvetica', 'bold')
-    doc.text('เลขที่', 18, y + 6)
-    doc.text('รายการ', 35, y + 6)
-    doc.text('จำนวน/หน่วย', 120, y + 6)
-    doc.text('หมายเหตุ', 170, y + 6)
+      if (imgHeight <= pageHeight) {
+        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+      } else {
+        let heightLeft = imgHeight
+        let position = 0
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight
+          doc.addPage()
+          doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
+        }
+      }
 
-    doc.text('ขอเบิก', 120, y + 12)
-    doc.text('เบิกได้', 145, y + 12)
-    y += 16
-
-    doc.setFont('Helvetica', 'normal')
-    withdrawal.withdrawal_items?.forEach((item, idx) => {
-      doc.text(String(idx + 1), 18, y + 5)
-      doc.text((item.books?.title || '-').substring(0, 50), 35, y + 5)
-      doc.text(String(item.requested_qty), 125, y + 5)
-      doc.text(String(item.approved_qty), 150, y + 5)
-      y += 8
-    })
-
-    y = 200
-    doc.text('(ลงชื่อ)..........................................................ผู้เบิก', 14, y)
-    doc.text(`(${teacherName})`, 25, y + 7)
-    doc.text('ตำแหน่ง ครู', 25, y + 14)
-
-    const officerName = withdrawal.issued_by_user?.full_name || '......................................'
-    doc.text('อนุญาตให้เบิกได้', 120, y - 10)
-    doc.text('(ลงชื่อ)..........................................................ผู้จ่ายพัสดุ', 120, y)
-    doc.text(`(${officerName})`, 130, y + 7)
-    doc.text('ได้ตรวจหักจำนวนแล้ว', 120, y + 14)
-    doc.text('(ลงชื่อ)..........................................................เจ้าหน้าที่พัสดุ', 120, y + 24)
-
-    doc.save(`ใบเบิกพัสดุ_${withdrawal.withdrawal_number}.pdf`)
+      doc.save(`ใบเบิกพัสดุ_${withdrawal.withdrawal_number}.pdf`)
+      Swal.close()
+      Swal.fire('สำเร็จ', 'บันทึก PDF เรียบร้อยแล้ว', 'success')
+    } catch (error) {
+      console.error('PDF export error:', error)
+      Swal.fire('ผิดพลาด', 'ไม่สามารถสร้าง PDF ได้', 'error')
+    }
   }
 
   // Open print preview modal
@@ -1222,31 +1220,66 @@ export default function WithdrawalsPage11() {
   const handlePrint = () => {
     if (printRef.current) {
       const printContent = printRef.current.innerHTML
-      const printWindow = window.open('', '_blank')
+      const printWindow = window.open('', '_blank', 'width=800,height=600')
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
           <title>ใบเบิกพัสดุ ${printPreviewWithdrawal?.withdrawal_number || ''}</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
           <style>
-            @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Sarabun', sans-serif; padding: 20mm; font-size: 14px; line-height: 1.6; }
-            .print-container { max-width: 210mm; margin: 0 auto; }
+            body {
+              font-family: 'Sarabun', sans-serif;
+              padding: 15mm;
+              font-size: 14px;
+              line-height: 1.6;
+              word-wrap: break-word;
+              word-break: break-word;
+            }
+            .print-container { max-width: 180mm; margin: 0 auto; }
             .header { text-align: center; margin-bottom: 20px; }
             .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
             .doc-info { display: flex; justify-content: flex-end; margin-bottom: 5px; font-size: 13px; }
-            .school-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+            .school-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; flex-wrap: wrap; }
             .date-line { text-align: right; margin-bottom: 10px; font-size: 13px; }
             .purpose-line { margin-bottom: 15px; font-size: 13px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { border: 1px solid #333; padding: 8px; text-align: center; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
+            th, td { border: 1px solid #333; padding: 8px; text-align: center; font-size: 13px; word-wrap: break-word; }
             th { background-color: #f5f5f5; font-weight: 600; }
             td.text-left { text-align: left; }
             .signature-section { margin-top: 50px; display: flex; justify-content: space-between; }
             .signature-left, .signature-right { width: 45%; font-size: 13px; }
             .signature-line { margin-bottom: 8px; }
             .dotted { border-bottom: 1px dotted #333; display: inline-block; min-width: 180px; }
+            .flex { display: flex; }
+            .justify-between { justify-content: space-between; }
+            .text-right { text-align: right; }
+            .text-center { text-align: center; }
+            .text-left { text-align: left; }
+            .text-sm { font-size: 13px; }
+            .text-2xl { font-size: 24px; }
+            .font-bold { font-weight: 700; }
+            .font-medium { font-weight: 500; }
+            .mb-1 { margin-bottom: 4px; }
+            .mb-2 { margin-bottom: 8px; }
+            .mb-4 { margin-bottom: 16px; }
+            .mb-6 { margin-bottom: 24px; }
+            .mb-8 { margin-bottom: 32px; }
+            .mt-16 { margin-top: 64px; }
+            .pl-6 { padding-left: 24px; }
+            .p-2 { padding: 8px; }
+            .w-full { width: 100%; }
+            .w-16 { width: 64px; }
+            .w-20 { width: 80px; }
+            .w-24 { width: 96px; }
+            .w-5\\/12 { width: 41.666667%; }
+            .h-8 { height: 32px; }
+            .border { border: 1px solid #9ca3af; }
+            .border-gray-400 { border-color: #9ca3af; }
+            .bg-gray-50 { background-color: #f9fafb; }
             @media print {
               body { padding: 10mm; }
               @page { size: A4; margin: 10mm; }
@@ -1259,11 +1292,15 @@ export default function WithdrawalsPage11() {
         </html>
       `)
       printWindow.document.close()
-      printWindow.focus()
-      setTimeout(() => {
-        printWindow.print()
-        printWindow.close()
-      }, 250)
+
+      // Wait for fonts to load before printing
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.focus()
+          printWindow.print()
+          // Don't auto-close to let user choose printer
+        }, 500)
+      }
     }
   }
 
@@ -2087,7 +2124,10 @@ export default function WithdrawalsPage11() {
                   width: '210mm',
                   minHeight: '297mm',
                   padding: '20mm',
-                  fontFamily: 'Sarabun, sans-serif'
+                  fontFamily: 'Sarabun, sans-serif',
+                  wordWrap: 'break-word',
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word'
                 }}
               >
                 <div className="print-container">
@@ -2101,9 +2141,9 @@ export default function WithdrawalsPage11() {
                     <span>เล่มที่.................</span>
                   </div>
 
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>โรงเรียนบ้านค้อดอนแคน สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน</span>
-                    <span>เลขที่ ...{printPreviewWithdrawal.withdrawal_number}</span>
+                  <div className="flex justify-between text-sm mb-1 flex-wrap gap-2">
+                    <span style={{ wordBreak: 'keep-all' }}>โรงเรียนบ้านค้อดอนแคน สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน</span>
+                    <span style={{ whiteSpace: 'nowrap' }}>เลขที่ ...{printPreviewWithdrawal.withdrawal_number}</span>
                   </div>
 
                   <div className="text-right text-sm mb-4">
@@ -2123,27 +2163,27 @@ export default function WithdrawalsPage11() {
                   </div>
 
                   {/* Table */}
-                  <table className="w-full border-collapse text-sm mb-8">
+                  <table className="w-full border-collapse text-sm mb-8" style={{ tableLayout: 'fixed' }}>
                     <thead>
                       <tr>
-                        <th className="border border-gray-400 p-2 bg-gray-50 w-16" rowSpan="2">เลขที่</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50" style={{ width: '50px' }} rowSpan="2">เลขที่</th>
                         <th className="border border-gray-400 p-2 bg-gray-50" rowSpan="2">รายการ</th>
                         <th className="border border-gray-400 p-2 bg-gray-50" colSpan="2">จำนวน/หน่วย</th>
-                        <th className="border border-gray-400 p-2 bg-gray-50 w-24" rowSpan="2">หมายเหตุ</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50" style={{ width: '80px' }} rowSpan="2">หมายเหตุ</th>
                       </tr>
                       <tr>
-                        <th className="border border-gray-400 p-2 bg-gray-50 w-20">ขอเบิก</th>
-                        <th className="border border-gray-400 p-2 bg-gray-50 w-20">เบิกได้</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50" style={{ width: '65px' }}>ขอเบิก</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50" style={{ width: '65px' }}>เบิกได้</th>
                       </tr>
                     </thead>
                     <tbody>
                       {printPreviewWithdrawal.withdrawal_items?.map((item, idx) => (
                         <tr key={item.id || idx}>
                           <td className="border border-gray-400 p-2 text-center">{idx + 1}</td>
-                          <td className="border border-gray-400 p-2 text-left">{item.books?.title || '-'}</td>
+                          <td className="border border-gray-400 p-2 text-left" style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{item.books?.title || '-'}</td>
                           <td className="border border-gray-400 p-2 text-center">{item.requested_qty}</td>
                           <td className="border border-gray-400 p-2 text-center">{item.approved_qty}</td>
-                          <td className="border border-gray-400 p-2 text-center">{item.notes || ''}</td>
+                          <td className="border border-gray-400 p-2 text-center" style={{ wordWrap: 'break-word' }}>{item.notes || ''}</td>
                         </tr>
                       ))}
                       {/* Empty rows to fill the table */}
@@ -2160,9 +2200,9 @@ export default function WithdrawalsPage11() {
                   </table>
 
                   {/* Signature Section */}
-                  <div className="flex justify-between text-sm mt-16">
+                  <div className="flex justify-between text-sm mt-16 flex-wrap gap-4">
                     {/* Left Column - Requester */}
-                    <div className="w-5/12">
+                    <div className="w-5/12" style={{ minWidth: '200px' }}>
                       <div className="mb-2">
                         <span>(ลงชื่อ).........................................................ผู้เบิก</span>
                       </div>
@@ -2187,7 +2227,7 @@ export default function WithdrawalsPage11() {
                     </div>
 
                     {/* Right Column - Approver */}
-                    <div className="w-5/12">
+                    <div className="w-5/12" style={{ minWidth: '200px' }}>
                       <div className="mb-2 font-medium">
                         <span>อนุญาตให้เบิกได้</span>
                       </div>
