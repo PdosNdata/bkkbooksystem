@@ -43,6 +43,11 @@ export default function WithdrawalsPage11() {
   const [loadingBooks, setLoadingBooks] = useState(false)
   const [nextWithdrawalNumber, setNextWithdrawalNumber] = useState('')
 
+  // Print preview modal state
+  const [showPrintPreviewModal, setShowPrintPreviewModal] = useState(false)
+  const [printPreviewWithdrawal, setPrintPreviewWithdrawal] = useState(null)
+  const printRef = useRef(null)
+
   useEffect(() => { 
     fetchData()
     fetchTeachers()
@@ -1207,6 +1212,73 @@ export default function WithdrawalsPage11() {
     doc.save(`ใบเบิกพัสดุ_${withdrawal.withdrawal_number}.pdf`)
   }
 
+  // Open print preview modal
+  const openPrintPreview = (withdrawal) => {
+    setPrintPreviewWithdrawal(withdrawal)
+    setShowPrintPreviewModal(true)
+  }
+
+  // Print the preview document
+  const handlePrint = () => {
+    if (printRef.current) {
+      const printContent = printRef.current.innerHTML
+      const printWindow = window.open('', '_blank')
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ใบเบิกพัสดุ ${printPreviewWithdrawal?.withdrawal_number || ''}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Sarabun', sans-serif; padding: 20mm; font-size: 14px; line-height: 1.6; }
+            .print-container { max-width: 210mm; margin: 0 auto; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 15px; }
+            .doc-info { display: flex; justify-content: flex-end; margin-bottom: 5px; font-size: 13px; }
+            .school-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+            .date-line { text-align: right; margin-bottom: 10px; font-size: 13px; }
+            .purpose-line { margin-bottom: 15px; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #333; padding: 8px; text-align: center; font-size: 13px; }
+            th { background-color: #f5f5f5; font-weight: 600; }
+            td.text-left { text-align: left; }
+            .signature-section { margin-top: 50px; display: flex; justify-content: space-between; }
+            .signature-left, .signature-right { width: 45%; font-size: 13px; }
+            .signature-line { margin-bottom: 8px; }
+            .dotted { border-bottom: 1px dotted #333; display: inline-block; min-width: 180px; }
+            @media print {
+              body { padding: 10mm; }
+              @page { size: A4; margin: 10mm; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+        </html>
+      `)
+      printWindow.document.close()
+      printWindow.focus()
+      setTimeout(() => {
+        printWindow.print()
+        printWindow.close()
+      }, 250)
+    }
+  }
+
+  // Format date to Thai format
+  const formatThaiDate = (dateStr) => {
+    if (!dateStr) return { day: '...', month: '...............', year: '......' }
+    const date = new Date(dateStr)
+    const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+    return {
+      day: date.getDate(),
+      month: thaiMonths[date.getMonth()],
+      year: date.getFullYear() + 543
+    }
+  }
+
   const filtered = withdrawals.filter(w => {
     const searchLower = search.toLowerCase()
     const withdrawalNumber = (w.withdrawal_number || '').toLowerCase()
@@ -1345,7 +1417,7 @@ export default function WithdrawalsPage11() {
                         {w.status === 'pending' && (
                           <button onClick={() => openEditModal(w)} className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg" title="แก้ไข"><Edit size={16} /></button>
                         )}
-                        <button onClick={() => exportPDF(w)} className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg" title="พิมพ์"><Printer size={16} /></button>
+                        <button onClick={() => openPrintPreview(w)} className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg" title="พิมพ์"><Printer size={16} /></button>
                         {w.status === 'pending' && (
                           <button onClick={() => handleApprove(w)} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg" title="อนุมัติ"><CheckCircle size={16} /></button>
                         )}
@@ -1478,7 +1550,7 @@ export default function WithdrawalsPage11() {
 
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50">ปิด</button>
-              <button onClick={() => exportPDF(selectedWithdrawal)} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
+              <button onClick={() => openPrintPreview(selectedWithdrawal)} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
                 <Printer size={16} className="inline mr-2" /> พิมพ์ใบเบิก
               </button>
             </div>
@@ -1972,6 +2044,178 @@ export default function WithdrawalsPage11() {
               >
                 ปิด
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Preview Modal */}
+      {showPrintPreviewModal && printPreviewWithdrawal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800">ตัวอย่างใบเบิกพัสดุ</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePrint}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <Printer size={16} /> พิมพ์
+                </button>
+                <button
+                  onClick={() => exportPDF(printPreviewWithdrawal)}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 flex items-center gap-2"
+                >
+                  <FileText size={16} /> บันทึก PDF
+                </button>
+                <button
+                  onClick={() => setShowPrintPreviewModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100"
+                >
+                  ปิด
+                </button>
+              </div>
+            </div>
+
+            {/* Preview Content */}
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+              <div
+                ref={printRef}
+                className="bg-white mx-auto shadow-lg"
+                style={{
+                  width: '210mm',
+                  minHeight: '297mm',
+                  padding: '20mm',
+                  fontFamily: 'Sarabun, sans-serif'
+                }}
+              >
+                <div className="print-container">
+                  {/* Header */}
+                  <div className="text-center mb-6">
+                    <h1 className="text-2xl font-bold mb-4">ใบเบิกพัสดุ</h1>
+                  </div>
+
+                  {/* Document Info */}
+                  <div className="text-right text-sm mb-2">
+                    <span>เล่มที่.................</span>
+                  </div>
+
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>โรงเรียนบ้านค้อดอนแคน สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน</span>
+                    <span>เลขที่ ...{printPreviewWithdrawal.withdrawal_number}</span>
+                  </div>
+
+                  <div className="text-right text-sm mb-4">
+                    <span>
+                      วันที่...{formatThaiDate(printPreviewWithdrawal.withdrawal_date).day}...
+                      เดือน.....{formatThaiDate(printPreviewWithdrawal.withdrawal_date).month}...........
+                      พ.ศ......{formatThaiDate(printPreviewWithdrawal.withdrawal_date).year}
+                    </span>
+                  </div>
+
+                  {/* Purpose */}
+                  <div className="text-sm mb-4">
+                    <span>
+                      ข้าพเจ้าของเบิกพัสดุตามรายการต่อไปนี้ เพื่อใช้ในงานการเรียนการสอนในชั้น
+                      {gradeLabel[printPreviewWithdrawal.grade] || printPreviewWithdrawal.orders?.classroom || '.....................'}
+                    </span>
+                  </div>
+
+                  {/* Table */}
+                  <table className="w-full border-collapse text-sm mb-8">
+                    <thead>
+                      <tr>
+                        <th className="border border-gray-400 p-2 bg-gray-50 w-16" rowSpan="2">เลขที่</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50" rowSpan="2">รายการ</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50" colSpan="2">จำนวน/หน่วย</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50 w-24" rowSpan="2">หมายเหตุ</th>
+                      </tr>
+                      <tr>
+                        <th className="border border-gray-400 p-2 bg-gray-50 w-20">ขอเบิก</th>
+                        <th className="border border-gray-400 p-2 bg-gray-50 w-20">เบิกได้</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {printPreviewWithdrawal.withdrawal_items?.map((item, idx) => (
+                        <tr key={item.id || idx}>
+                          <td className="border border-gray-400 p-2 text-center">{idx + 1}</td>
+                          <td className="border border-gray-400 p-2 text-left">{item.books?.title || '-'}</td>
+                          <td className="border border-gray-400 p-2 text-center">{item.requested_qty}</td>
+                          <td className="border border-gray-400 p-2 text-center">{item.approved_qty}</td>
+                          <td className="border border-gray-400 p-2 text-center">{item.notes || ''}</td>
+                        </tr>
+                      ))}
+                      {/* Empty rows to fill the table */}
+                      {Array.from({ length: Math.max(0, 10 - (printPreviewWithdrawal.withdrawal_items?.length || 0)) }).map((_, idx) => (
+                        <tr key={`empty-${idx}`}>
+                          <td className="border border-gray-400 p-2 h-8">&nbsp;</td>
+                          <td className="border border-gray-400 p-2">&nbsp;</td>
+                          <td className="border border-gray-400 p-2">&nbsp;</td>
+                          <td className="border border-gray-400 p-2">&nbsp;</td>
+                          <td className="border border-gray-400 p-2">&nbsp;</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* Signature Section */}
+                  <div className="flex justify-between text-sm mt-16">
+                    {/* Left Column - Requester */}
+                    <div className="w-5/12">
+                      <div className="mb-2">
+                        <span>(ลงชื่อ).........................................................ผู้เบิก</span>
+                      </div>
+                      <div className="mb-2 pl-6">
+                        <span>(...{printPreviewWithdrawal.requested_by_user?.full_name || printPreviewWithdrawal.orders?.users?.full_name || '..................................'}...)</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>ตำแหน่ง.....ครู........................</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>ได้มอบให้............................................................</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>เป็นผู้รับของแทน</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>(ลงชื่อ).........................................................ผู้มอบ</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>(ลงชื่อ).........................................................ผู้รับมอบ</span>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Approver */}
+                    <div className="w-5/12">
+                      <div className="mb-2 font-medium">
+                        <span>อนุญาตให้เบิกได้</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>(ลงชื่อ).........................................................ผู้เบิก</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>ได้ตรวจหักจำนวนแล้ว</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>(ลงชื่อ).........................................................เจ้าหน้าที่พัสดุ</span>
+                      </div>
+                      <div className="mb-2 pl-6">
+                        <span>(...{printPreviewWithdrawal.issued_by_user?.full_name || '..................................'}...)</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>ได้ตรวจรับของไปถูกต้องแล้ว</span>
+                      </div>
+                      <div className="mb-2">
+                        <span>(ลงชื่อ).........................................................ผู้เบิก</span>
+                      </div>
+                      <div className="mb-2 pl-6">
+                        <span>(..........................................................)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
