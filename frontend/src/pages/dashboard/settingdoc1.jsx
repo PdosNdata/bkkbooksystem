@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, FileText, Calendar, Save, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Wallet, FileText, Calendar, Save, RefreshCw, AlertCircle, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 // Inline UI Components
@@ -288,18 +288,76 @@ const SettingDoc1 = () => {
 
   const handleUpdateDocumentType = async (id, updates) => {
     try {
+      setSaving(true);
       const { error } = await supabase
         .from('document_types')
-        .update(updates)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id);
 
       if (error) throw error;
-      
-      showMessage('success', 'อัพเดทข้อมูลสำเร็จ');
+
+      showMessage('success', 'บันทึกข้อมูลประเภทเอกสารสำเร็จ');
       loadDocumentTypes();
     } catch (error) {
       console.error('Error updating document type:', error);
-      showMessage('error', 'ไม่สามารถอัพเดทข้อมูลได้');
+      showMessage('error', `ไม่สามารถบันทึกข้อมูลได้: ${error.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddDocumentType = async () => {
+    try {
+      setSaving(true);
+
+      // สร้างรหัสเอกสารใหม่
+      const newCode = `DOC${documentTypes.length + 1}`;
+
+      const { error } = await supabase
+        .from('document_types')
+        .insert({
+          code: newCode,
+          name_th: 'ประเภทเอกสารใหม่',
+          name_en: 'New Document Type',
+          prefix: '',
+          description: '',
+          is_active: true
+        });
+
+      if (error) throw error;
+
+      showMessage('success', 'เพิ่มประเภทเอกสารใหม่สำเร็จ');
+      loadDocumentTypes();
+    } catch (error) {
+      console.error('Error adding document type:', error);
+      showMessage('error', `ไม่สามารถเพิ่มประเภทเอกสารได้: ${error.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteDocumentType = async (id, code) => {
+    if (!confirm(`คุณต้องการลบประเภทเอกสาร "${code}" ใช่หรือไม่?`)) return;
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('document_types')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      showMessage('success', 'ลบประเภทเอกสารสำเร็จ');
+      loadDocumentTypes();
+    } catch (error) {
+      console.error('Error deleting document type:', error);
+      showMessage('error', `ไม่สามารถลบประเภทเอกสารได้: ${error.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -371,7 +429,7 @@ const SettingDoc1 = () => {
   const handleSaveFiscalYear = async () => {
     try {
       setSaving(true);
-      
+
       const settings = {
         start_date: fiscalYearStartDate,
         end_date: fiscalYearEndDate,
@@ -379,25 +437,46 @@ const SettingDoc1 = () => {
         total_budget: totalBudget
       };
 
-      // บันทึกลง system_settings table
-      const { error } = await supabase
+      // ตรวจสอบว่ามีข้อมูลอยู่แล้วหรือไม่
+      const { data: existing } = await supabase
         .from('system_settings')
-        .upsert({
-          key: 'fiscal_year',
-          value: JSON.stringify(settings),
-          description: 'การตั้งค่าปีงบประมาณและงบประมาณ',
-          updated_at: new Date().toISOString()
-        });
+        .select('key')
+        .eq('key', 'fiscal_year')
+        .single();
+
+      let error;
+      if (existing) {
+        // อัพเดทข้อมูลที่มีอยู่
+        const result = await supabase
+          .from('system_settings')
+          .update({
+            value: JSON.stringify(settings),
+            description: 'การตั้งค่าปีงบประมาณและงบประมาณ',
+            updated_at: new Date().toISOString()
+          })
+          .eq('key', 'fiscal_year');
+        error = result.error;
+      } else {
+        // สร้างข้อมูลใหม่
+        const result = await supabase
+          .from('system_settings')
+          .insert({
+            key: 'fiscal_year',
+            value: JSON.stringify(settings),
+            description: 'การตั้งค่าปีงบประมาณและงบประมาณ'
+          });
+        error = result.error;
+      }
 
       if (error) throw error;
 
       showMessage('success', 'บันทึกการตั้งค่าปีงบประมาณสำเร็จ');
-      
+
       // Reload sequences for new fiscal year
       await loadSequences();
     } catch (error) {
       console.error('Error saving fiscal year:', error);
-      showMessage('error', 'ไม่สามารถบันทึกการตั้งค่าได้');
+      showMessage('error', `ไม่สามารถบันทึกการตั้งค่าได้: ${error.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -475,16 +554,34 @@ const SettingDoc1 = () => {
         <TabsContent value="documents" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>จัดการประเภทเอกสาร</CardTitle>
-              <CardDescription>
-                กำหนดประเภทเอกสารและ prefix สำหรับสร้างเลขที่เอกสาร
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>จัดการประเภทเอกสาร</CardTitle>
+                  <CardDescription>
+                    กำหนดประเภทเอกสารและ prefix สำหรับสร้างเลขที่เอกสาร
+                  </CardDescription>
+                </div>
+                <Button onClick={handleAddDocumentType} disabled={saving}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  เพิ่มประเภทเอกสาร
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {loading ? (
                 <div className="text-center py-12">
                   <RefreshCw className="h-10 w-10 animate-spin mx-auto text-blue-600" />
                   <p className="mt-3 text-gray-600 font-medium">กำลังโหลดข้อมูล...</p>
+                </div>
+              ) : documentTypes.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600 font-medium mb-2">ยังไม่มีประเภทเอกสาร</p>
+                  <p className="text-sm text-gray-500 mb-4">กรุณาเพิ่มประเภทเอกสารใหม่ หรือรัน migration script ในฐานข้อมูล</p>
+                  <Button onClick={handleAddDocumentType} disabled={saving}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    เพิ่มประเภทเอกสาร
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -562,8 +659,31 @@ const SettingDoc1 = () => {
                               />
                               <Label>เปิดใช้งาน</Label>
                             </div>
-                            <div className="text-sm text-gray-600">
-                              ตัวอย่าง: <span className="font-mono font-bold text-blue-700 text-base">{generatePreview(docType, 1)}</span>
+                            <div className="flex items-center gap-4">
+                              <div className="text-sm text-gray-600">
+                                ตัวอย่าง: <span className="font-mono font-bold text-blue-700 text-base">{generatePreview(docType, 1)}</span>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => handleUpdateDocumentType(docType.id, {
+                                  prefix: docType.prefix,
+                                  name_th: docType.name_th,
+                                  name_en: docType.name_en,
+                                  description: docType.description
+                                })}
+                                disabled={saving}
+                              >
+                                <Save className="h-4 w-4 mr-1" />
+                                บันทึก
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteDocumentType(docType.id, docType.code)}
+                                disabled={saving}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         </div>

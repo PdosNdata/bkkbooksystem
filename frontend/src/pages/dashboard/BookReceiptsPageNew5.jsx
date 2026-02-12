@@ -35,6 +35,7 @@ export default function BookReceiptsPageNew5() {
   const [saving, setSaving] = useState(false)
   const [notes, setNotes] = useState('')
   const [loadingBooks, setLoadingBooks] = useState(false)
+  const [noDataReason, setNoDataReason] = useState('') // สาเหตุที่ไม่พบข้อมูล
   const inputRefs = useRef({})
   
   // Detail modal
@@ -729,20 +730,27 @@ const generateReceiptNumber = async () => {
 
   const fetchFilteredBooks = async () => {
     setLoadingBooks(true)
+    setNoDataReason('')
 
     try {
-      const { data: ordersData } = await supabase
+      console.log('🔍 fetchFilteredBooks - selectedGrade:', selectedGrade)
+
+      const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
-        .select('id, status')
+        .select('id, status, grade')
         .eq('grade', selectedGrade)
 
-      if (ordersData) {
+      console.log('📦 Orders query result:', { ordersData, ordersError, count: ordersData?.length })
+
+      if (ordersData && ordersData.length > 0) {
         const validOrders = ordersData.filter(o => o.status && o.status !== 'draft')
+        console.log('✅ Valid orders (status != draft):', validOrders)
 
         if (validOrders.length > 0) {
           const orderIds = validOrders.map(o => o.id)
+          console.log('📋 Order IDs to fetch items:', orderIds)
 
-          const { data: orderItemsData } = await supabase
+          const { data: orderItemsData, error: itemsError } = await supabase
             .from('order_items')
             .select(`
               id,
@@ -758,6 +766,8 @@ const generateReceiptNumber = async () => {
               )
             `)
             .in('order_id', orderIds)
+
+          console.log('📚 Order items result:', { orderItemsData, itemsError, count: orderItemsData?.length })
 
           if (orderItemsData && orderItemsData.length > 0) {
             const typeofbookIds = [...new Set(orderItemsData.map(item => item.books?.typeofbook_id).filter(Boolean))]
@@ -819,16 +829,23 @@ const generateReceiptNumber = async () => {
             const gradeReceipts = receipts.filter(r => r.grade === selectedGrade)
             setDeliveryNumber(gradeReceipts.length + 1)
           } else {
+            console.log('⚠️ No order items found for these orders')
+            setNoDataReason(`คำสั่งซื้อสำหรับชั้น ${gradeLabel[selectedGrade]} ยังไม่มีรายการหนังสือ`)
             setFilteredBooks([])
           }
         } else {
+          console.log('⚠️ No valid orders found (all orders may be drafts or none exist)')
+          setNoDataReason(`ยังไม่มีคำสั่งซื้อที่อนุมัติแล้วสำหรับชั้น ${gradeLabel[selectedGrade]}\n(ต้องสร้างคำสั่งซื้อและอนุมัติก่อนจึงจะรับหนังสือได้)`)
           setFilteredBooks([])
         }
       } else {
+        console.log('⚠️ No orders found for grade:', selectedGrade)
+        setNoDataReason(`ยังไม่มีคำสั่งซื้อสำหรับชั้น ${gradeLabel[selectedGrade]}\n(ต้องสร้างคำสั่งซื้อก่อนจึงจะรับหนังสือได้)`)
         setFilteredBooks([])
       }
     } catch (err) {
       console.error('💥 Error:', err)
+      setNoDataReason('เกิดข้อผิดพลาดในการดึงข้อมูล')
       setFilteredBooks([])
     }
 
@@ -843,6 +860,7 @@ const generateReceiptNumber = async () => {
     setFilteredBooks([])
     setReceiveItems({})
     setNotes('')
+    setNoDataReason('')
     setShowReceiveModal(true)
   }
 
@@ -1318,9 +1336,12 @@ const generateReceiptNumber = async () => {
             )}
 
             {!loadingBooks && selectedGrade && filteredBooks.length === 0 && (
-              <div className="bg-gray-50 rounded-lg p-8 text-center mb-4">
-                <BookOpen size={40} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">ไม่พบรายการหนังสือสำหรับชั้นและกลุ่มสาระที่เลือก</p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center mb-4">
+                <BookOpen size={40} className="text-yellow-400 mx-auto mb-3" />
+                <p className="text-yellow-700 whitespace-pre-line">{noDataReason || 'ไม่พบรายการหนังสือสำหรับชั้นและกลุ่มสาระที่เลือก'}</p>
+                <p className="text-sm text-gray-500 mt-3">
+                  กรุณาตรวจสอบว่ามีคำสั่งซื้อสำหรับชั้นนี้แล้วหรือยังในหน้า "จัดการคำสั่งซื้อ"
+                </p>
               </div>
             )}
 
