@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Printer, Download, FileText, Loader2, Calendar } from 'lucide-react'
+import { Printer, Download, FileText, Loader2, Calendar, BookX, Filter } from 'lucide-react'
 import { Bar, Doughnut } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend } from 'chart.js'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend)
 
 const gradeLabel = { kg2: 'อนุบาล 2', kg3: 'อนุบาล 3', p1: 'ป.1', p2: 'ป.2', p3: 'ป.3', p4: 'ป.4', p5: 'ป.5', p6: 'ป.6', m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' }
+const gradeOptions = ['kg2', 'kg3', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'm1', 'm2', 'm3']
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
@@ -15,7 +16,27 @@ export default function ReportsPage() {
   const [orders, setOrders] = useState([])
   const reportRef = useRef(null)
 
+  // สำหรับรายงานหนังสือค้างส่ง
+  const [pendingBooksYear, setPendingBooksYear] = useState((new Date().getFullYear() + 543).toString())
+  const [pendingBooksGrade, setPendingBooksGrade] = useState('')
+  const [pendingBooksSubject, setPendingBooksSubject] = useState('')
+  const [subjectGroups, setSubjectGroups] = useState([])
+  const [pendingBooks, setPendingBooks] = useState([])
+  const [loadingPendingBooks, setLoadingPendingBooks] = useState(false)
+
+  // Generate year options for pending books (Buddhist Era)
+  const currentBuddhistYear = new Date().getFullYear() + 543
+  const yearOptions = Array.from({ length: 5 }, (_, i) => (currentBuddhistYear - 2 + i).toString())
+
   useEffect(() => { fetchData() }, [selectedYear])
+
+  useEffect(() => { fetchSubjectGroups() }, [])
+
+  useEffect(() => {
+    if (pendingBooksYear) {
+      fetchPendingBooks()
+    }
+  }, [pendingBooksYear, pendingBooksGrade, pendingBooksSubject])
 
   const fetchData = async () => {
     setLoading(true)
@@ -26,6 +47,87 @@ export default function ReportsPage() {
     setBudgets(budgetRes.data || [])
     setOrders(orderRes.data || [])
     setLoading(false)
+  }
+
+  // ดึงข้อมูลกลุ่มสาระการเรียนรู้
+  const fetchSubjectGroups = async () => {
+    const { data, error } = await supabase
+      .from('typeofbooks')
+      .select('id, name')
+      .order('display_order', { ascending: true, nullsFirst: false })
+      .order('name', { ascending: true })
+
+    if (!error && data) {
+      setSubjectGroups(data)
+    }
+  }
+
+  // ดึงข้อมูลหนังสือค้างส่ง
+  const fetchPendingBooks = async () => {
+    setLoadingPendingBooks(true)
+    try {
+      let query = supabase
+        .from('book_stock')
+        .select(`
+          id,
+          book_id,
+          grade,
+          academic_year,
+          quantity,
+          available_quantity,
+          distributed_quantity,
+          books(id, title, price, subject, typeofbook_id, typeofbooks:typeofbook_id(id, name))
+        `)
+        .eq('academic_year', pendingBooksYear)
+        .gt('available_quantity', 0)
+
+      if (pendingBooksGrade) {
+        query = query.eq('grade', pendingBooksGrade)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        console.error('Error fetching pending books:', error)
+        setPendingBooks([])
+      } else {
+        // กรองตามกลุ่มสาระถ้าเลือก
+        let filteredData = data || []
+        if (pendingBooksSubject) {
+          filteredData = filteredData.filter(item =>
+            item.books?.typeofbooks?.id === pendingBooksSubject
+          )
+        }
+
+        // แปลงข้อมูลเป็นรูปแบบที่ใช้แสดงผล
+        const booksData = filteredData
+          .filter(stock => stock.books)
+          .map(stock => ({
+            id: stock.id,
+            book_id: stock.book_id,
+            title: stock.books.title,
+            subject: stock.books.subject,
+            subjectGroup: stock.books.typeofbooks?.name || '-',
+            grade: stock.grade,
+            price: stock.books.price,
+            quantity: stock.quantity,
+            available_quantity: stock.available_quantity,
+            distributed_quantity: stock.distributed_quantity,
+          }))
+          .sort((a, b) => {
+            // เรียงตามชั้น แล้วตามชื่อหนังสือ
+            const gradeOrder = gradeOptions.indexOf(a.grade) - gradeOptions.indexOf(b.grade)
+            if (gradeOrder !== 0) return gradeOrder
+            return a.title.localeCompare(b.title, 'th')
+          })
+
+        setPendingBooks(booksData)
+      }
+    } catch (err) {
+      console.error('Fetch pending books error:', err)
+      setPendingBooks([])
+    }
+    setLoadingPendingBooks(false)
   }
 
   const totalBudget = budgets.reduce((s, b) => s + Number(b.amount || 0), 0)
@@ -175,6 +277,146 @@ export default function ReportsPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* รายงานหนังสือค้างส่ง */}
+      <div className="bg-white rounded-xl border p-6 print:break-before-page">
+        <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <BookX size={20} className="text-orange-600" />
+          รายงานหนังสือค้างส่ง
+        </h3>
+
+        {/* ตัวกรอง */}
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter size={16} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">ตัวกรอง</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* ปีการศึกษา */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">ปีการศึกษา</label>
+              <select
+                value={pendingBooksYear}
+                onChange={(e) => setPendingBooksYear(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+              >
+                {yearOptions.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* ชั้นเรียน */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">ชั้นเรียน</label>
+              <select
+                value={pendingBooksGrade}
+                onChange={(e) => setPendingBooksGrade(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">-- ทุกชั้น --</option>
+                {gradeOptions.map(grade => (
+                  <option key={grade} value={grade}>{gradeLabel[grade]}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* กลุ่มสาระ */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">กลุ่มสาระการเรียนรู้</label>
+              <select
+                value={pendingBooksSubject}
+                onChange={(e) => setPendingBooksSubject(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">-- ทุกกลุ่มสาระ --</option>
+                {subjectGroups.map(sg => (
+                  <option key={sg.id} value={sg.id}>{sg.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* สรุปยอด */}
+        {!loadingPendingBooks && pendingBooks.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-orange-50 rounded-lg p-4 border border-orange-100">
+              <p className="text-xs text-orange-600 font-medium">จำนวนรายการ</p>
+              <p className="text-2xl font-bold text-orange-700">{pendingBooks.length}</p>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+              <p className="text-xs text-blue-600 font-medium">จำนวนค้างส่งรวม</p>
+              <p className="text-2xl font-bold text-blue-700">{pendingBooks.reduce((s, b) => s + b.available_quantity, 0).toLocaleString()} เล่ม</p>
+            </div>
+            <div className="bg-green-50 rounded-lg p-4 border border-green-100">
+              <p className="text-xs text-green-600 font-medium">แจกไปแล้ว</p>
+              <p className="text-2xl font-bold text-green-700">{pendingBooks.reduce((s, b) => s + b.distributed_quantity, 0).toLocaleString()} เล่ม</p>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
+              <p className="text-xs text-purple-600 font-medium">มูลค่าค้างส่ง</p>
+              <p className="text-2xl font-bold text-purple-700">{pendingBooks.reduce((s, b) => s + (b.available_quantity * Number(b.price || 0)), 0).toLocaleString()} บาท</p>
+            </div>
+          </div>
+        )}
+
+        {/* ตารางหนังสือค้างส่ง */}
+        {loadingPendingBooks ? (
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="animate-spin text-orange-600" size={24} />
+            <span className="ml-3 text-gray-500">กำลังโหลดข้อมูล...</span>
+          </div>
+        ) : pendingBooks.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-orange-50">
+                  <th className="text-center px-3 py-3 font-medium w-12">#</th>
+                  <th className="text-left px-3 py-3 font-medium">ชื่อหนังสือ</th>
+                  <th className="text-center px-3 py-3 font-medium w-24">ชั้น</th>
+                  <th className="text-left px-3 py-3 font-medium">กลุ่มสาระ</th>
+                  <th className="text-right px-3 py-3 font-medium w-20">ราคา</th>
+                  <th className="text-center px-3 py-3 font-medium w-20">รับเข้า</th>
+                  <th className="text-center px-3 py-3 font-medium w-20">แจกแล้ว</th>
+                  <th className="text-center px-3 py-3 font-medium w-24">ค้างส่ง</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {pendingBooks.map((book, idx) => (
+                  <tr key={book.id} className="hover:bg-gray-50">
+                    <td className="px-3 py-2 text-center text-gray-400">{idx + 1}</td>
+                    <td className="px-3 py-2">{book.title}</td>
+                    <td className="px-3 py-2 text-center">{gradeLabel[book.grade]}</td>
+                    <td className="px-3 py-2 text-gray-600">{book.subjectGroup}</td>
+                    <td className="px-3 py-2 text-right">{Number(book.price || 0).toLocaleString()}</td>
+                    <td className="px-3 py-2 text-center">{book.quantity}</td>
+                    <td className="px-3 py-2 text-center text-green-600">{book.distributed_quantity}</td>
+                    <td className="px-3 py-2 text-center">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                        {book.available_quantity} เล่ม
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-gray-50 font-semibold">
+                  <td colSpan={5} className="px-3 py-3 text-right">รวมทั้งหมด</td>
+                  <td className="px-3 py-3 text-center">{pendingBooks.reduce((s, b) => s + b.quantity, 0).toLocaleString()}</td>
+                  <td className="px-3 py-3 text-center text-green-600">{pendingBooks.reduce((s, b) => s + b.distributed_quantity, 0).toLocaleString()}</td>
+                  <td className="px-3 py-3 text-center text-orange-600">{pendingBooks.reduce((s, b) => s + b.available_quantity, 0).toLocaleString()} เล่ม</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-32 text-gray-400">
+            <BookX size={40} className="mb-2 text-gray-300" />
+            <p>ไม่พบข้อมูลหนังสือค้างส่ง</p>
+            <p className="text-xs mt-1">เลือกตัวกรองเพื่อแสดงข้อมูล หรืออาจไม่มีหนังสือค้างส่งในปีการศึกษานี้</p>
+          </div>
+        )}
       </div>
     </div>
   )
