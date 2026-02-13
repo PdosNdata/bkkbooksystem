@@ -13,6 +13,7 @@ import ProfilePage from './pages/dashboard/ProfilePage'
 import StudentsPage from './pages/dashboard/StudentsPage'
 
 import WithdrawalsPage11 from './pages/dashboard/WithdrawalsPage11'
+import DistributionsPage from './pages/dashboard/DistributionsPage'
 import UserManagementPage from './pages/dashboard/UserManagementPage'
 import BudgetSettingsPage from './pages/dashboard/BudgetSettingsPage'
 import ReportsPage from './pages/dashboard/ReportsPage'
@@ -80,6 +81,7 @@ export default function App() {
         <Route path="/class-books" element={<ClassBooksPage />} />
         <Route path="/my-orders" element={<MyOrdersPage />} />
         <Route path="/withdrawals" element={<WithdrawalsPage11 />} />
+        <Route path="/distributions" element={<DistributionsPage />} />
         <Route path="/settingdoc" element={<SettingDoc />} />
         <Route path="/book-receipts" element={<BookReceiptsPageNew5 />} />
       </Route>

@@ -4,14 +4,14 @@ import { useAuth } from '../context/AuthContext'
 import { menuConfig } from '../config/menuConfig'
 import {
   LayoutDashboard, ShoppingCart, Package, Users,
-  Wallet, FileText, BookOpen, LogOut, Settings, GraduationCap, 
-  ClipboardList, FileOutput, Truck, UserCog, ChevronDown, ChevronRight
+  Wallet, FileText, BookOpen, LogOut, Settings, GraduationCap,
+  ClipboardList, FileOutput, Truck, UserCog, UserCheck, ChevronDown, ChevronRight
 } from 'lucide-react'
 
 const iconMap = {
   LayoutDashboard, ShoppingCart, Package, Users,
-  Wallet, FileText, BookOpen, Settings, GraduationCap, 
-  ClipboardList, FileOutput, Truck, UserCog
+  Wallet, FileText, BookOpen, Settings, GraduationCap,
+  ClipboardList, FileOutput, Truck, UserCog, UserCheck
 }
 
 export default function Sidebar({ mobile = false, onClose }) {

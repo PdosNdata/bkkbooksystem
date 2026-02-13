@@ -3,18 +3,19 @@ export const menuConfig = {
     { label: 'แดชบอร์ด', path: '/dashboard', icon: 'LayoutDashboard' },
     { label: 'คำสั่งซื้อ', path: '/orders', icon: 'ShoppingCart', badge: '12' },
     { label: 'นักเรียน', path: '/students', icon: 'GraduationCap' },
-    { 
-      label: 'จัดการหนังสือเรียน', 
+    {
+      label: 'จัดการหนังสือเรียน',
       icon: 'Package',
       submenu: [
         { label: 'คลังหนังสือ', path: '/inventory', icon: 'Package' },
         { label: 'รับหนังสือจากสำนักพิมพ์', path: '/book-receipts', icon: 'Truck' },
         { label: 'เบิกหนังสือ', path: '/withdrawals', icon: 'FileOutput' },
+        { label: 'แจกให้นักเรียน', path: '/distributions', icon: 'UserCheck' },
         { label: 'รายงาน', path: '/reports', icon: 'FileText' },
       ]
     },
-    { 
-      label: 'การตั้งค่า', 
+    {
+      label: 'การตั้งค่า',
       icon: 'Settings',
       submenu: [
         { label: 'การจัดการผู้ใช้', path: '/users', icon: 'Users' },
@@ -33,13 +34,14 @@ export const menuConfig = {
   staff: [
     { label: 'แดชบอร์ด', path: '/dashboard', icon: 'LayoutDashboard' },
     { label: 'คำสั่งซื้อ', path: '/orders', icon: 'ShoppingCart', badge: '12' },
-    { 
-      label: 'จัดการหนังสือเรียน', 
+    {
+      label: 'จัดการหนังสือเรียน',
       icon: 'Package',
       submenu: [
         { label: 'คลังหนังสือ', path: '/inventory', icon: 'Package' },
         { label: 'รับหนังสือจากสำนักพิมพ์', path: '/book-receipts', icon: 'Truck' },
         { label: 'เบิกหนังสือ', path: '/withdrawals', icon: 'FileOutput' },
+        { label: 'แจกให้นักเรียน', path: '/distributions', icon: 'UserCheck' },
         { label: 'รายงาน', path: '/reports', icon: 'FileText' },
       ]
     },
@@ -55,12 +57,13 @@ export const menuConfig = {
   ],
   warehouse: [
     { label: 'แดชบอร์ด', path: '/dashboard', icon: 'LayoutDashboard' },
-    { 
-      label: 'จัดการหนังสือเรียน', 
+    {
+      label: 'จัดการหนังสือเรียน',
       icon: 'Package',
       submenu: [
         { label: 'คลังหนังสือ', path: '/inventory', icon: 'Package' },
         { label: 'รับหนังสือจากสำนักพิมพ์', path: '/book-receipts', icon: 'Truck' },
+        { label: 'แจกให้นักเรียน', path: '/distributions', icon: 'UserCheck' },
         { label: 'รายงาน', path: '/reports', icon: 'FileText' },
       ]
     },
