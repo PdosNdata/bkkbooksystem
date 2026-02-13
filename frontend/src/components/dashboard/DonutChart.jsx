@@ -34,16 +34,16 @@ export default function DonutChart({ title, used, total }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow p-4">
-      <h3 className="font-semibold text-center mb-2">{title}</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+      <h3 className="font-semibold text-center mb-2 dark:text-white">{title}</h3>
 
       <Doughnut data={data} options={options} />
 
-      <div className="mt-3 text-center text-sm">
+      <div className="mt-3 text-center text-sm dark:text-gray-200">
         <p>
           ใช้ไป <b>{used.toLocaleString()}</b> / {total.toLocaleString()} บาท
         </p>
-        <p className={over ? 'text-red-600 font-bold' : 'text-gray-600'}>
+        <p className={over ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-600 dark:text-gray-400'}>
           {percent}% {over && '🚨 เกินงบ'}
         </p>
       </div>

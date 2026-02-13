@@ -131,18 +131,18 @@ export default function BudgetSettingsPage() {
   const usedPct = totalBudget > 0 ? Math.round((totalUsed / totalBudget) * 100) : 0
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
+    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">การตั้งค่างบประมาณ</h1>
-          <p className="text-gray-500 text-sm mt-1">กำหนดงบประมาณรายชั้นเรียน (กรอกงบรายหัวหรืองบรวมได้)</p>
+          <h1 className="text-2xl font-bold dark:text-white">การตั้งค่างบประมาณ</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">กำหนดงบประมาณรายชั้นเรียน (กรอกงบรายหัวหรืองบรวมได้)</p>
         </div>
         <div className="flex gap-3">
-          <select className="border rounded-xl px-4 py-2.5 text-sm" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+          <select className="border dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-gray-800 dark:text-gray-200" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
             {[0, -1, -2, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={y} value={y}>{y}</option> })}
           </select>
           <button onClick={handleSaveAll} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 disabled:opacity-50">
@@ -153,30 +153,30 @@ export default function BudgetSettingsPage() {
 
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border p-5">
-          <p className="text-sm text-gray-500">งบประมาณทั้งหมด</p>
-          <p className="text-2xl font-bold mt-1">{totalBudget.toLocaleString()} บาท</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
+          <p className="text-sm text-gray-500 dark:text-gray-400">งบประมาณทั้งหมด</p>
+          <p className="text-2xl font-bold mt-1 dark:text-white">{totalBudget.toLocaleString()} บาท</p>
         </div>
-        <div className="bg-white rounded-xl border p-5">
-          <p className="text-sm text-gray-500">ใช้ไปแล้ว</p>
-          <p className="text-2xl font-bold mt-1 text-blue-600">{totalUsed.toLocaleString()} บาท</p>
-          <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
+          <p className="text-sm text-gray-500 dark:text-gray-400">ใช้ไปแล้ว</p>
+          <p className="text-2xl font-bold mt-1 text-blue-600 dark:text-blue-400">{totalUsed.toLocaleString()} บาท</p>
+          <div className="mt-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
             <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${usedPct}%` }} />
           </div>
-          <p className="text-xs text-gray-400 mt-1">{usedPct}% ของงบประมาณ</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{usedPct}% ของงบประมาณ</p>
         </div>
-        <div className="bg-white rounded-xl border p-5">
-          <p className="text-sm text-gray-500">คงเหลือ</p>
-          <p className="text-2xl font-bold mt-1 text-green-600">{(totalBudget - totalUsed).toLocaleString()} บาท</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
+          <p className="text-sm text-gray-500 dark:text-gray-400">คงเหลือ</p>
+          <p className="text-2xl font-bold mt-1 text-green-600 dark:text-green-400">{(totalBudget - totalUsed).toLocaleString()} บาท</p>
         </div>
-        <div className="bg-white rounded-xl border p-5">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
           <div className="flex items-center gap-2">
-            <Users size={16} className="text-purple-600" />
-            <p className="text-sm text-gray-500">นักเรียนทั้งหมด</p>
+            <Users size={16} className="text-purple-600 dark:text-purple-400" />
+            <p className="text-sm text-gray-500 dark:text-gray-400">นักเรียนทั้งหมด</p>
           </div>
-          <p className="text-2xl font-bold mt-1 text-purple-600">{totalStudents.toLocaleString()} คน</p>
+          <p className="text-2xl font-bold mt-1 text-purple-600 dark:text-purple-400">{totalStudents.toLocaleString()} คน</p>
           {totalStudents > 0 && totalBudget > 0 && (
-            <p className="text-xs text-gray-400 mt-1">เฉลี่ย {Math.round(totalBudget / totalStudents).toLocaleString()} บาท/คน</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">เฉลี่ย {Math.round(totalBudget / totalStudents).toLocaleString()} บาท/คน</p>
           )}
         </div>
       </div>
@@ -188,13 +188,13 @@ export default function BudgetSettingsPage() {
         const levelUsed = grades.reduce((sum, g) => sum + Number(budgets[g]?.used_amount || 0), 0)
 
         return (
-          <div key={level} className="bg-white rounded-xl border p-5">
+          <div key={level} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <Wallet size={20} className="text-blue-600" />
+              <h3 className="font-semibold text-lg flex items-center gap-2 dark:text-white">
+                <Wallet size={20} className="text-blue-600 dark:text-blue-400" />
                 {levelLabel[level]}
               </h3>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1"><Users size={14} /> {levelStudents} คน</span>
                 <span>รวม {levelBudget.toLocaleString()} บาท</span>
               </div>
@@ -203,19 +203,19 @@ export default function BudgetSettingsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="text-left px-4 py-3 font-medium w-28">ระดับชั้น</th>
-                    <th className="text-center px-4 py-3 font-medium w-24">นักเรียน</th>
-                    <th className="text-center px-4 py-3 font-medium w-40">
+                  <tr className="bg-gray-50 dark:bg-gray-700">
+                    <th className="text-left px-4 py-3 font-medium w-28 dark:text-gray-200">ระดับชั้น</th>
+                    <th className="text-center px-4 py-3 font-medium w-24 dark:text-gray-200">นักเรียน</th>
+                    <th className="text-center px-4 py-3 font-medium w-40 dark:text-gray-200">
                       <span className="flex items-center justify-center gap-1"><Calculator size={13} /> งบ/คน (บาท)</span>
                     </th>
-                    <th className="text-center px-4 py-3 font-medium w-44">งบประมาณรวม (บาท)</th>
-                    <th className="text-right px-4 py-3 font-medium w-28">ใช้ไปแล้ว</th>
-                    <th className="text-right px-4 py-3 font-medium w-28">คงเหลือ</th>
-                    <th className="text-center px-4 py-3 font-medium w-20">บันทึก</th>
+                    <th className="text-center px-4 py-3 font-medium w-44 dark:text-gray-200">งบประมาณรวม (บาท)</th>
+                    <th className="text-right px-4 py-3 font-medium w-28 dark:text-gray-200">ใช้ไปแล้ว</th>
+                    <th className="text-right px-4 py-3 font-medium w-28 dark:text-gray-200">คงเหลือ</th>
+                    <th className="text-center px-4 py-3 font-medium w-20 dark:text-gray-200">บันทึก</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {grades.map(grade => {
                     const count = studentCounts[grade] || 0
                     const amount = amounts[grade] || 0
@@ -223,17 +223,17 @@ export default function BudgetSettingsPage() {
                     const remaining = amount - used
 
                     return (
-                      <tr key={grade} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium">{gradeLabel[grade]}</td>
+                      <tr key={grade} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-4 py-3 font-medium dark:text-gray-200">{gradeLabel[grade]}</td>
                         <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center gap-1 text-purple-600 font-medium">
+                          <span className="inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium">
                             <Users size={13} /> {count}
                           </span>
                         </td>
                         <td className="px-4 py-2">
                           <input
                             type="number"
-                            className="w-full text-center border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full text-center border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-200"
                             placeholder="0"
                             value={perHeads[grade] || ''}
                             onChange={e => handlePerHeadChange(grade, e.target.value)}
@@ -242,20 +242,20 @@ export default function BudgetSettingsPage() {
                         <td className="px-4 py-2">
                           <input
                             type="number"
-                            className="w-full text-center border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full text-center border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-200"
                             placeholder="0"
                             value={amount || ''}
                             onChange={e => handleAmountChange(grade, e.target.value)}
                           />
                         </td>
-                        <td className="px-4 py-3 text-right text-blue-600">{used.toLocaleString()} บาท</td>
-                        <td className={`px-4 py-3 text-right font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <td className="px-4 py-3 text-right text-blue-600 dark:text-blue-400">{used.toLocaleString()} บาท</td>
+                        <td className={`px-4 py-3 text-right font-medium ${remaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {remaining.toLocaleString()} บาท
                         </td>
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleSaveGrade(grade)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"
                             title="บันทึก"
                           >
                             <Save size={15} />
@@ -265,15 +265,15 @@ export default function BudgetSettingsPage() {
                     )
                   })}
                   {/* แถวรวม */}
-                  <tr className="bg-blue-50 font-medium">
+                  <tr className="bg-blue-50 dark:bg-blue-900/30 font-medium dark:text-gray-200">
                     <td className="px-4 py-3">รวม {levelLabel[level]}</td>
-                    <td className="px-4 py-3 text-center text-purple-600">{levelStudents} คน</td>
-                    <td className="px-4 py-3 text-center text-orange-600">
+                    <td className="px-4 py-3 text-center text-purple-600 dark:text-purple-400">{levelStudents} คน</td>
+                    <td className="px-4 py-3 text-center text-orange-600 dark:text-orange-400">
                       {levelStudents > 0 ? `${Math.round(levelBudget / levelStudents).toLocaleString()} บาท` : '-'}
                     </td>
                     <td className="px-4 py-3 text-center">{levelBudget.toLocaleString()} บาท</td>
-                    <td className="px-4 py-3 text-right text-blue-600">{levelUsed.toLocaleString()} บาท</td>
-                    <td className={`px-4 py-3 text-right ${(levelBudget - levelUsed) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className="px-4 py-3 text-right text-blue-600 dark:text-blue-400">{levelUsed.toLocaleString()} บาท</td>
+                    <td className={`px-4 py-3 text-right ${(levelBudget - levelUsed) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {(levelBudget - levelUsed).toLocaleString()} บาท
                     </td>
                     <td className="px-4 py-3"></td>

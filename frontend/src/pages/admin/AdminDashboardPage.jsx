@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard งบประมาณรายปี</h1>
+      <h1 className="text-2xl font-bold dark:text-white">Dashboard งบประมาณรายปี</h1>
 
       <SummaryCard
         title="งบประมาณรวมทั้งหมด"

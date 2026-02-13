@@ -177,7 +177,7 @@ export default function StudentsPage() {
   students.forEach(s => { gradeStats[s.grade] = (gradeStats[s.grade] || 0) + 1 })
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
+    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
   return (
@@ -185,15 +185,15 @@ export default function StudentsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">ข้อมูลนักเรียน</h1>
-          <p className="text-gray-500 text-sm mt-1">จัดการข้อมูลนักเรียนทั้งหมด ({students.length} คน)</p>
+          <h1 className="text-2xl font-bold dark:text-white">ข้อมูลนักเรียน</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">จัดการข้อมูลนักเรียนทั้งหมด ({students.length} คน)</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <input type="file" accept=".csv" ref={fileInputRef} onChange={handleCsvUpload} className="hidden" />
           <button onClick={() => fileInputRef.current?.click()} disabled={csvUploading} className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm hover:bg-green-700 disabled:opacity-50">
             {csvUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} นำเข้า CSV
           </button>
-          <button onClick={exportCsv} className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-xl text-sm hover:bg-gray-50">
+          <button onClick={exportCsv} className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200">
             <Download size={16} /> ส่งออก CSV
           </button>
           <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
@@ -204,39 +204,39 @@ export default function StudentsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-blue-50"><Users size={24} className="text-blue-600" /></div>
-          <div><p className="text-sm text-gray-500">นักเรียนทั้งหมด</p><p className="text-2xl font-bold">{students.length}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30"><Users size={24} className="text-blue-600 dark:text-blue-400" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">นักเรียนทั้งหมด</p><p className="text-2xl font-bold dark:text-white">{students.length}</p></div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-purple-50"><GraduationCap size={24} className="text-purple-600" /></div>
-          <div><p className="text-sm text-gray-500">อนุบาล</p><p className="text-2xl font-bold">{(gradeStats.kg2 || 0) + (gradeStats.kg3 || 0)}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/30"><GraduationCap size={24} className="text-purple-600 dark:text-purple-400" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">อนุบาล</p><p className="text-2xl font-bold dark:text-white">{(gradeStats.kg2 || 0) + (gradeStats.kg3 || 0)}</p></div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-green-50"><GraduationCap size={24} className="text-green-600" /></div>
-          <div><p className="text-sm text-gray-500">ประถม</p><p className="text-2xl font-bold">{['p1','p2','p3','p4','p5','p6'].reduce((sum, g) => sum + (gradeStats[g] || 0), 0)}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/30"><GraduationCap size={24} className="text-green-600 dark:text-green-400" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">ประถม</p><p className="text-2xl font-bold dark:text-white">{['p1','p2','p3','p4','p5','p6'].reduce((sum, g) => sum + (gradeStats[g] || 0), 0)}</p></div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-orange-50"><GraduationCap size={24} className="text-orange-600" /></div>
-          <div><p className="text-sm text-gray-500">มัธยม</p><p className="text-2xl font-bold">{['m1','m2','m3'].reduce((sum, g) => sum + (gradeStats[g] || 0), 0)}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-orange-50 dark:bg-orange-900/30"><GraduationCap size={24} className="text-orange-600 dark:text-orange-400" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">มัธยม</p><p className="text-2xl font-bold dark:text-white">{['m1','m2','m3'].reduce((sum, g) => sum + (gradeStats[g] || 0), 0)}</p></div>
         </div>
       </div>
 
       {/* CSV Format hint */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-3">
-        <p className="text-sm text-blue-700">
+      <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-xl px-5 py-3">
+        <p className="text-sm text-blue-700 dark:text-blue-300">
           <span className="font-medium">รูปแบบ CSV:</span> student_id, prefix, first_name, last_name, gender, grade, classroom (prefix: เด็กชาย/เด็กหญิง/นาย/นางสาว | grade: p1, m1, kg2 | gender: male/female)
         </p>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
         <div className="flex flex-col sm:flex-row gap-3 mb-5">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="text" placeholder="ค้นหารหัส, ชื่อ, นามสกุล..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+            <input type="text" placeholder="ค้นหารหัส, ชื่อ, นามสกุล..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
           </div>
-          <select className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={filterGrade} onChange={e => { setFilterGrade(e.target.value); setCurrentPage(1) }}>
+          <select className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-200" value={filterGrade} onChange={e => { setFilterGrade(e.target.value); setCurrentPage(1) }}>
             <option value="">ทุกชั้นเรียน</option>
             {gradeOptions.map(g => <option key={g} value={g}>{gradeLabel[g]}</option>)}
           </select>
@@ -245,7 +245,7 @@ export default function StudentsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-600">
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200">
                 <th className="text-left px-4 py-3 font-medium w-12">#</th>
                 <th className="text-left px-4 py-3 font-medium">รหัสนักเรียน</th>
                 <th className="text-left px-4 py-3 font-medium">คำนำหน้า</th>
@@ -257,47 +257,47 @@ export default function StudentsPage() {
                 <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {paginated.map((s, idx) => (
-                <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400">{(currentPage - 1) * PAGE_SIZE + idx + 1}</td>
-                  <td className="px-4 py-3 font-mono text-blue-700 font-medium">{s.student_id}</td>
-                  <td className="px-4 py-3">{s.prefix || '-'}</td>
-                  <td className="px-4 py-3">{s.first_name}</td>
-                  <td className="px-4 py-3">{s.last_name}</td>
+                <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-4 py-3 text-gray-400 dark:text-gray-500">{(currentPage - 1) * PAGE_SIZE + idx + 1}</td>
+                  <td className="px-4 py-3 font-mono text-blue-700 dark:text-blue-400 font-medium">{s.student_id}</td>
+                  <td className="px-4 py-3 dark:text-gray-200">{s.prefix || '-'}</td>
+                  <td className="px-4 py-3 dark:text-gray-200">{s.first_name}</td>
+                  <td className="px-4 py-3 dark:text-gray-200">{s.last_name}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${s.gender === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-sky-100 text-sky-700'}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${s.gender === 'female' ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300' : 'bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300'}`}>
                       {genderLabel[s.gender] || s.gender || 'ชาย'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
                       {gradeLabel[s.grade] || s.grade}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-center">{s.classroom || '-'}</td>
+                  <td className="px-4 py-3 text-center dark:text-gray-200">{s.classroom || '-'}</td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => openEdit(s)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit3 size={15} /></button>
-                      <button onClick={() => handleDelete(s.id, `${s.first_name} ${s.last_name}`)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={15} /></button>
+                      <button onClick={() => openEdit(s)} className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"><Edit3 size={15} /></button>
+                      <button onClick={() => handleDelete(s.id, `${s.first_name} ${s.last_name}`)} className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"><Trash2 size={15} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {paginated.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-400">ไม่พบรายการ</td></tr>}
+              {paginated.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">ไม่พบรายการ</td></tr>}
             </tbody>
           </table>
         </div>
 
         {filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
             <div className="flex gap-1">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ก่อนหน้า</button>
+              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-200">ก่อนหน้า</button>
               {Array.from({length: totalPages}, (_, i) => i+1).slice(Math.max(0, currentPage-3), currentPage+2).map(p => (
-                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}>{p}</button>
+                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200'}`}>{p}</button>
               ))}
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ถัดไป</button>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-200">ถัดไป</button>
             </div>
           </div>
         )}
@@ -306,16 +306,16 @@ export default function StudentsPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 mx-4">
-            <h3 className="text-lg font-bold mb-4">{editItem ? 'แก้ไขข้อมูลนักเรียน' : 'เพิ่มนักเรียนใหม่'}</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 mx-4">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">{editItem ? 'แก้ไขข้อมูลนักเรียน' : 'เพิ่มนักเรียนใหม่'}</h3>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium">รหัสประจำตัวนักเรียน *</label>
+                  <label className="text-sm font-medium dark:text-gray-200">รหัสประจำตัวนักเรียน *</label>
                   <input type="text" className="input-field mt-1" placeholder="เช่น 12345" value={form.student_id} onChange={e => setForm(p => ({...p, student_id: e.target.value}))} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">คำนำหน้า *</label>
+                  <label className="text-sm font-medium dark:text-gray-200">คำนำหน้า *</label>
                   <select className="input-field mt-1" value={form.prefix} onChange={e => setForm(p => ({...p, prefix: e.target.value}))}>
                     {prefixOptions.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
@@ -323,30 +323,30 @@ export default function StudentsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium">ชื่อ *</label>
+                  <label className="text-sm font-medium dark:text-gray-200">ชื่อ *</label>
                   <input type="text" className="input-field mt-1" value={form.first_name} onChange={e => setForm(p => ({...p, first_name: e.target.value}))} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">นามสกุล *</label>
+                  <label className="text-sm font-medium dark:text-gray-200">นามสกุล *</label>
                   <input type="text" className="input-field mt-1" value={form.last_name} onChange={e => setForm(p => ({...p, last_name: e.target.value}))} />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-sm font-medium">เพศ *</label>
+                  <label className="text-sm font-medium dark:text-gray-200">เพศ *</label>
                   <select className="input-field mt-1" value={form.gender} onChange={e => setForm(p => ({...p, gender: e.target.value}))}>
                     <option value="male">ชาย</option>
                     <option value="female">หญิง</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">ชั้นเรียน *</label>
+                  <label className="text-sm font-medium dark:text-gray-200">ชั้นเรียน *</label>
                   <select className="input-field mt-1" value={form.grade} onChange={e => setForm(p => ({...p, grade: e.target.value}))}>
                     {gradeOptions.map(g => <option key={g} value={g}>{gradeLabel[g]}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">ห้อง *</label>
+                  <label className="text-sm font-medium dark:text-gray-200">ห้อง *</label>
                   <select className="input-field mt-1" value={form.classroom} onChange={e => setForm(p => ({...p, classroom: e.target.value}))}>
                     {['1','2','3','4','5','6'].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -354,7 +354,7 @@ export default function StudentsPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50">ยกเลิก</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200">ยกเลิก</button>
               <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">บันทึก</button>
             </div>
           </div>

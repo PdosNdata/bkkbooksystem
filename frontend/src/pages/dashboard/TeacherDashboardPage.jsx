@@ -83,7 +83,7 @@ export default function TeacherDashboardPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="animate-spin text-blue-600" size={32} />
-        <span className="ml-3 text-gray-500">กำลังโหลดข้อมูล...</span>
+        <span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</span>
       </div>
     )
   }
@@ -92,8 +92,8 @@ export default function TeacherDashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">สถานะคำสั่งซื้อของฉัน</h1>
-        <p className="text-gray-500 text-sm mt-1">ติดตามคำสั่งซื้อหนังสือเรียนประจำชั้นของคุณ</p>
+        <h1 className="text-2xl font-bold dark:text-white">สถานะคำสั่งซื้อของฉัน</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">ติดตามคำสั่งซื้อหนังสือเรียนประจำชั้นของคุณ</p>
       </div>
 
       {/* Stat Cards */}
@@ -101,14 +101,14 @@ export default function TeacherDashboardPage() {
         {stats.map((stat, i) => {
           const Icon = stat.icon
           return (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5">
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${stat.iconBg}`}>
+                <div className={`p-3 rounded-xl ${stat.iconBg} dark:bg-opacity-20`}>
                   <Icon size={24} className={stat.iconColor} />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+                  <p className="text-2xl font-bold dark:text-white">{stat.value}</p>
                 </div>
               </div>
             </div>
@@ -117,20 +117,20 @@ export default function TeacherDashboardPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-100 p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5">
         <div className="flex flex-col md:flex-row gap-3 mb-5">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder="ค้นหารหัสคำสั่งซื้อ หรือ ชั้นเรียน..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
               value={searchText}
               onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1) }}
             />
           </div>
           <select
-            className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-200"
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1) }}
           >
@@ -147,7 +147,7 @@ export default function TeacherDashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-600">
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200">
                 <th className="text-left px-4 py-3 font-medium rounded-tl-lg">รหัสคำสั่งซื้อ</th>
                 <th className="text-left px-4 py-3 font-medium">วันที่สั่งซื้อ</th>
                 <th className="text-left px-4 py-3 font-medium">ชั้นเรียน</th>
@@ -156,22 +156,22 @@ export default function TeacherDashboardPage() {
                 <th className="text-center px-4 py-3 font-medium rounded-tr-lg">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {paginated.map((order) => {
                 const displayStatus = statusMap[order.status] || order.status
                 return (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-blue-600">{order.order_number}</td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(order.created_at)}</td>
-                    <td className="px-4 py-3 text-gray-600">{order.classroom || '-'}</td>
-                    <td className="px-4 py-3 text-center">{order.total_quantity}</td>
+                  <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{order.order_number}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(order.created_at)}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{order.classroom || '-'}</td>
+                    <td className="px-4 py-3 text-center dark:text-gray-200">{order.total_quantity}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${statusStyles[displayStatus] || 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${statusStyles[displayStatus] || 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-200'}`}>
                         {displayStatus}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm">
+                      <button className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">
                         <Eye size={15} /> ดูรายละเอียด
                       </button>
                     </td>
@@ -180,7 +180,7 @@ export default function TeacherDashboardPage() {
               })}
               {paginated.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                     {orders.length === 0 ? 'ยังไม่มีคำสั่งซื้อ' : 'ไม่พบรายการที่ค้นหา'}
                   </td>
                 </tr>
@@ -192,7 +192,7 @@ export default function TeacherDashboardPage() {
         {/* Pagination */}
         {filtered.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-3">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               แสดง {(currentPage - 1) * PAGE_SIZE + 1} ถึง{' '}
               {Math.min(currentPage * PAGE_SIZE, filtered.length)} จาก {filtered.length} รายการ
             </p>
@@ -200,7 +200,7 @@ export default function TeacherDashboardPage() {
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-40"
+                className="px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 dark:text-gray-200"
               >
                 ก่อนหน้า
               </button>
@@ -208,7 +208,7 @@ export default function TeacherDashboardPage() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1.5 rounded-lg text-sm ${page === currentPage ? 'bg-blue-600 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm ${page === currentPage ? 'bg-blue-600 text-white' : 'border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200'}`}
                 >
                   {page}
                 </button>
@@ -216,7 +216,7 @@ export default function TeacherDashboardPage() {
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-40"
+                className="px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 dark:text-gray-200"
               >
                 ถัดไป
               </button>

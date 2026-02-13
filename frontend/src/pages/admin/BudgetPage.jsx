@@ -6,8 +6,8 @@ export default function BudgetPage() {
   return (
     <div className="p-6">
       {/* Title */}
-      <h1 className="text-2xl font-bold mb-2">การตั้งค่างบประมาณ</h1>
-      <p className="text-gray-500 mb-6">
+      <h1 className="text-2xl font-bold mb-2 dark:text-white">การตั้งค่างบประมาณ</h1>
+      <p className="text-gray-500 dark:text-gray-400 mb-6">
         จัดการงบประมาณหนังสือเรียนประจำปีการศึกษา
       </p>
 
@@ -19,20 +19,20 @@ export default function BudgetPage() {
       </div>
 
       {/* Progress */}
-      <div className="bg-white rounded-xl p-6 shadow">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
         <div className="flex justify-between mb-2">
-          <span className="font-medium">การใช้งบประมาณ</span>
-          <span className="text-blue-600 font-semibold">{percent}%</span>
+          <span className="font-medium dark:text-white">การใช้งบประมาณ</span>
+          <span className="text-blue-600 dark:text-blue-400 font-semibold">{percent}%</span>
         </div>
 
-        <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-600 transition-all"
             style={{ width: `${percent}%` }}
           />
         </div>
 
-        <div className="mt-4 text-sm text-gray-500">
+        <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
           ใช้ไป {usedBudget.toLocaleString()} จาก {totalBudget.toLocaleString()} บาท
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function BudgetPage() {
         <button className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           แก้ไขงบประมาณ
         </button>
-        <button className="px-5 py-2 border rounded-lg hover:bg-gray-100">
+        <button className="px-5 py-2 border dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">
           ประวัติการใช้งบ
         </button>
       </div>
@@ -52,9 +52,9 @@ export default function BudgetPage() {
 
 function Card({ title, value }) {
   return (
-    <div className="bg-white rounded-xl p-6 shadow">
-      <p className="text-gray-500 text-sm mb-1">{title}</p>
-      <p className="text-xl font-bold">{value}</p>
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">{title}</p>
+      <p className="text-xl font-bold dark:text-white">{value}</p>
     </div>
   )
 }
