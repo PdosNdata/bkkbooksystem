@@ -75,7 +75,7 @@ export default function DistributionsPage() {
         .eq('grade', selectedGrade)
         .gte('withdrawn_date', startDate)
         .lte('withdrawn_date', endDate)
-        .in('status', ['pending', 'approved', 'completed'])
+        .in('status', ['approved', 'completed'])
         .order('created_at', { ascending: false })
 
       if (withdrawalsError) {
