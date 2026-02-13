@@ -55,6 +55,13 @@ export default function DistributionsPage() {
   const [loadingStudentDistributions, setLoadingStudentDistributions] = useState(false)
   const studentPrintRef = useRef(null)
 
+  // สำหรับพิมพ์หลายคนในครั้งเดียว (Batch Print)
+  const [showBatchPrintModal, setShowBatchPrintModal] = useState(false)
+  const [selectedStudentsForPrint, setSelectedStudentsForPrint] = useState([])
+  const [batchPrintData, setBatchPrintData] = useState([]) // เก็บข้อมูลหนังสือของแต่ละนักเรียน
+  const [loadingBatchPrint, setLoadingBatchPrint] = useState(false)
+  const batchPrintRef = useRef(null)
+
   // Generate year options (current year +/- 2 years in Buddhist Era)
   const currentBuddhistYear = new Date().getFullYear() + 543
   const yearOptions = Array.from({ length: 5 }, (_, i) => (currentBuddhistYear - 2 + i).toString())
@@ -273,6 +280,198 @@ export default function DistributionsPage() {
     setSelectedStudentForPrint(student)
     setShowStudentPrintPreview(true)
     await fetchStudentDistributions(student.id)
+  }
+
+  // ดึง unique students จาก distributionHistory
+  const getUniqueStudentsWithDistributions = () => {
+    const uniqueStudents = new Map()
+    distributionHistory.forEach(item => {
+      if (item.students?.id && !uniqueStudents.has(item.students.id)) {
+        uniqueStudents.set(item.students.id, {
+          ...item.students,
+          bookCount: distributionHistory.filter(d => d.students?.id === item.students.id).length
+        })
+      }
+    })
+    return Array.from(uniqueStudents.values())
+  }
+
+  // เปิด Modal พิมพ์หลายคน
+  const openBatchPrintModal = () => {
+    const uniqueStudents = getUniqueStudentsWithDistributions()
+    if (uniqueStudents.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'ไม่พบข้อมูล',
+        text: 'ยังไม่มีนักเรียนที่ได้รับหนังสือในชั้นนี้',
+        confirmButtonColor: '#2563eb'
+      })
+      return
+    }
+    setSelectedStudentsForPrint([]) // เริ่มต้นไม่เลือก
+    setBatchPrintData([])
+    setShowBatchPrintModal(true)
+  }
+
+  // เลือก/ยกเลิกนักเรียนทั้งหมดสำหรับพิมพ์
+  const toggleSelectAllForPrint = () => {
+    const uniqueStudents = getUniqueStudentsWithDistributions()
+    if (selectedStudentsForPrint.length === uniqueStudents.length) {
+      setSelectedStudentsForPrint([])
+    } else {
+      setSelectedStudentsForPrint(uniqueStudents.map(s => s.id))
+    }
+  }
+
+  // เลือก/ยกเลิกนักเรียนคนเดียวสำหรับพิมพ์
+  const toggleStudentForPrint = (studentId) => {
+    setSelectedStudentsForPrint(prev =>
+      prev.includes(studentId)
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    )
+  }
+
+  // ดึงข้อมูลหนังสือของนักเรียนหลายคนพร้อมกัน
+  const fetchBatchPrintData = async (studentIds) => {
+    setLoadingBatchPrint(true)
+    try {
+      const { data, error } = await supabase
+        .from('student_book_distributions')
+        .select(`
+          id,
+          student_id,
+          distribution_date,
+          semester,
+          notes,
+          students(id, student_id, prefix, first_name, last_name, gender),
+          books(id, title, subject)
+        `)
+        .in('student_id', studentIds)
+        .eq('grade', selectedGrade)
+        .eq('academic_year', selectedYear)
+        .order('student_id')
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching batch print data:', error)
+        return []
+      }
+
+      // จัดกลุ่มตามนักเรียน
+      const groupedData = {}
+      ;(data || []).forEach(item => {
+        if (!groupedData[item.student_id]) {
+          groupedData[item.student_id] = {
+            student: item.students,
+            distributions: []
+          }
+        }
+        groupedData[item.student_id].distributions.push(item)
+      })
+
+      return Object.values(groupedData)
+    } catch (err) {
+      console.error('Fetch batch print data error:', err)
+      return []
+    } finally {
+      setLoadingBatchPrint(false)
+    }
+  }
+
+  // เตรียมข้อมูลสำหรับ Preview พิมพ์หลายคน
+  const prepareBatchPrint = async () => {
+    if (selectedStudentsForPrint.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกนักเรียน',
+        text: 'กรุณาเลือกนักเรียนอย่างน้อย 1 คน',
+        confirmButtonColor: '#2563eb'
+      })
+      return
+    }
+    const data = await fetchBatchPrintData(selectedStudentsForPrint)
+    setBatchPrintData(data)
+  }
+
+  // พิมพ์หลายคนในครั้งเดียว
+  const handleBatchPrint = () => {
+    if (batchPrintRef.current) {
+      const printContent = batchPrintRef.current.innerHTML
+      const printWindow = window.open('', '_blank')
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>บัญชีแจกหนังสือเรียน ชั้น${gradeLabel[selectedGrade] || ''} (${batchPrintData.length} คน)</title>
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Sarabun', sans-serif; }
+            .page-break { page-break-after: always; }
+            .page-break:last-child { page-break-after: auto; }
+            @media print {
+              @page { size: A4; margin: 15mm; }
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+              .page-break { page-break-after: always; }
+              .page-break:last-child { page-break-after: auto; }
+            }
+          </style>
+        </head>
+        <body>${printContent}</body>
+        </html>
+      `)
+      printWindow.document.close()
+      setTimeout(() => {
+        printWindow.print()
+      }, 500)
+    }
+  }
+
+  // Export PDF หลายคนในครั้งเดียว
+  const exportBatchPDF = async () => {
+    if (!batchPrintRef.current || batchPrintData.length === 0) return
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pages = batchPrintRef.current.querySelectorAll('.student-page')
+
+      for (let i = 0; i < pages.length; i++) {
+        if (i > 0) {
+          pdf.addPage()
+        }
+
+        const canvas = await html2canvas(pages[i], {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        })
+
+        const imgData = canvas.toDataURL('image/png')
+        const pdfWidth = pdf.internal.pageSize.getWidth()
+        const pdfHeight = pdf.internal.pageSize.getHeight()
+
+        const imgWidth = canvas.width
+        const imgHeight = canvas.height
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+
+        const imgX = (pdfWidth - imgWidth * ratio) / 2
+        const imgY = 0
+
+        pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
+      }
+
+      pdf.save(`บัญชีแจกหนังสือเรียน_${gradeShortLabel[selectedGrade] || ''}_${selectedYear}_${batchPrintData.length}คน.pdf`)
+    } catch (err) {
+      console.error('PDF export error:', err)
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'ไม่สามารถสร้างไฟล์ PDF ได้',
+        confirmButtonColor: '#2563eb'
+      })
+    }
   }
 
   const formatThaiDate = (dateString) => {
@@ -752,6 +951,14 @@ export default function DistributionsPage() {
           >
             <Eye size={18} />
             ดูตัวอย่างก่อนพิมพ์
+          </button>
+          <button
+            onClick={openBatchPrintModal}
+            disabled={!selectedGrade || distributionHistory.length === 0}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Printer size={18} />
+            พิมพ์บัญชีรายบุคคล
           </button>
         </div>
       </div>
@@ -1415,6 +1622,235 @@ export default function DistributionsPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Batch Print Modal - พิมพ์หลายคนในครั้งเดียว */}
+      {showBatchPrintModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-purple-700 text-white">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <Printer size={24} />
+                พิมพ์บัญชีแจกหนังสือรายบุคคล - ชั้น{gradeLabel[selectedGrade]}
+              </h3>
+              <p className="text-purple-100 text-sm mt-1">เลือกพิมพ์ทั้งชั้นหรือเลือกพิมพ์เฉพาะบางคน</p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-hidden flex">
+              {/* Left Panel - Student Selection */}
+              <div className={`${batchPrintData.length > 0 ? 'w-1/3' : 'w-full'} border-r flex flex-col`}>
+                <div className="p-4 bg-gray-50 border-b">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Users size={18} className="text-purple-600" />
+                      นักเรียนที่ได้รับหนังสือ ({getUniqueStudentsWithDistributions().length} คน)
+                    </h4>
+                    <button
+                      onClick={toggleSelectAllForPrint}
+                      className="text-sm text-purple-600 hover:text-purple-800"
+                    >
+                      {selectedStudentsForPrint.length === getUniqueStudentsWithDistributions().length ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งชั้น'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="space-y-2">
+                    {getUniqueStudentsWithDistributions().map((student) => {
+                      const isSelected = selectedStudentsForPrint.includes(student.id)
+                      return (
+                        <label
+                          key={student.id}
+                          className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-purple-50 border border-purple-200'
+                              : 'bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleStudentForPrint(student.id)}
+                            className="w-4 h-4 text-purple-600 rounded"
+                          />
+                          <div className="flex-1">
+                            <div className={`text-sm font-medium ${student.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}`}>
+                              {student.prefix}{student.first_name} {student.last_name}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              รหัส: {student.student_id} | ได้รับ {student.bookCount} เล่ม
+                            </div>
+                          </div>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-gray-50 border-t space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle2 size={16} className="text-purple-600" />
+                    เลือกแล้ว: <span className="font-semibold text-purple-600">{selectedStudentsForPrint.length}</span> คน
+                  </div>
+                  <button
+                    onClick={prepareBatchPrint}
+                    disabled={selectedStudentsForPrint.length === 0 || loadingBatchPrint}
+                    className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-xl text-sm hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {loadingBatchPrint ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        กำลังโหลด...
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={16} />
+                        ดูตัวอย่างก่อนพิมพ์
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Panel - Print Preview */}
+              {batchPrintData.length > 0 && (
+                <div className="w-2/3 flex flex-col">
+                  <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <FileText size={18} className="text-green-600" />
+                      ตัวอย่างก่อนพิมพ์ ({batchPrintData.length} คน)
+                    </h4>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleBatchPrint}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2"
+                      >
+                        <Printer size={16} /> พิมพ์ทั้งหมด
+                      </button>
+                      <button
+                        onClick={exportBatchPDF}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 flex items-center gap-2"
+                      >
+                        <FileText size={16} /> บันทึก PDF
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+                    <div ref={batchPrintRef}>
+                      {batchPrintData.map((data, pageIdx) => (
+                        <div
+                          key={data.student.id}
+                          className="student-page bg-white mx-auto shadow-lg mb-6 page-break"
+                          style={{
+                            width: '210mm',
+                            minHeight: '297mm',
+                            padding: '15mm',
+                            fontFamily: 'Sarabun, sans-serif',
+                            wordWrap: 'break-word',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word'
+                          }}
+                        >
+                          <div className="print-container">
+                            {/* Header */}
+                            <div className="text-center mb-6">
+                              <h1 className="text-xl font-bold mb-1">บัญชีแจกหนังสือเรียน ภาคเรียนที่ {selectedSemester} ปีการศึกษา {selectedYear}</h1>
+                              <p className="text-base mb-1">โรงเรียนบ้านค้อดอนแคน อำเภอกู่แก้ว จังหวัดอุดรธานี</p>
+                              <p className="text-base">ชั้น{gradeLabel[selectedGrade] || ''}</p>
+                            </div>
+
+                            {/* Table */}
+                            <table className="w-full border-collapse text-sm mb-8" style={{ tableLayout: 'fixed' }}>
+                              <thead>
+                                <tr>
+                                  <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '45px' }}>เลขที่</th>
+                                  <th className="border border-gray-600 p-2 bg-white text-center">รายชื่อหนังสือ</th>
+                                  <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '70px' }}>จำนวน(เล่ม)</th>
+                                  <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '110px' }}>วัน/เดือน/ปีที่แจก</th>
+                                  <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '70px' }}>หมายเหตุ</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {data.distributions.map((item, idx) => (
+                                  <tr key={item.id}>
+                                    <td className="border border-gray-600 p-2 text-center">{idx + 1}</td>
+                                    <td className="border border-gray-600 p-2 text-left" style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{item.books?.title || '-'}</td>
+                                    <td className="border border-gray-600 p-2 text-center">1</td>
+                                    <td className="border border-gray-600 p-2 text-center">{formatShortThaiDate(item.distribution_date)}</td>
+                                    <td className="border border-gray-600 p-2 text-center">{item.notes || ''}</td>
+                                  </tr>
+                                ))}
+                                {/* Empty rows to fill minimum 10 rows */}
+                                {Array.from({ length: Math.max(0, 10 - data.distributions.length) }).map((_, idx) => (
+                                  <tr key={`empty-${idx}`}>
+                                    <td className="border border-gray-600 p-2 h-8">&nbsp;</td>
+                                    <td className="border border-gray-600 p-2">&nbsp;</td>
+                                    <td className="border border-gray-600 p-2">&nbsp;</td>
+                                    <td className="border border-gray-600 p-2">&nbsp;</td>
+                                    <td className="border border-gray-600 p-2">&nbsp;</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+
+                            {/* Signature Section */}
+                            <div className="mt-12">
+                              <div className="flex justify-between mb-12">
+                                <div className="w-5/12 text-center">
+                                  <div className="mb-2">
+                                    <span className="text-sm">(ลงชื่อ)........................................................ผู้รับหนังสือ</span>
+                                  </div>
+                                  <div className="mb-2">
+                                    <span className="text-sm">(...{data.student.prefix}{data.student.first_name} {data.student.last_name}...)</span>
+                                  </div>
+                                </div>
+                                <div className="w-5/12 text-center">
+                                  <div className="mb-2">
+                                    <span className="text-sm">(ลงชื่อ)........................................................ครูประจำชั้น</span>
+                                  </div>
+                                  <div className="mb-2">
+                                    <span className="text-sm">(..................................................)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex justify-center">
+                                <div className="text-center">
+                                  <div className="mb-2">
+                                    <span className="text-sm">(ลงชื่อ)........................................................ผู้อำนวยการโรงเรียน</span>
+                                  </div>
+                                  <div className="mb-2">
+                                    <span className="text-sm">(..................................................)</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowBatchPrintModal(false)
+                  setSelectedStudentsForPrint([])
+                  setBatchPrintData([])
+                }}
+                className="px-5 py-2.5 border border-gray-300 rounded-xl text-sm hover:bg-gray-100"
+              >
+                ปิด
+              </button>
             </div>
           </div>
         </div>
