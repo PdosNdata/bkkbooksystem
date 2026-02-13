@@ -51,6 +51,8 @@ export default function DistributionsPage() {
       const startDate = `${gregorianYear}-05-01` // เริ่มภาคเรียนที่ 1
       const endDate = `${gregorianYear + 1}-03-31` // จบภาคเรียนที่ 2
 
+      console.log('Fetching withdrawals for:', { selectedGrade, startDate, endDate })
+
       // ดึงข้อมูลหนังสือจากใบเบิกของครู (withdrawals + withdrawal_items) สำหรับชั้นเรียนที่เลือก
       const { data: withdrawalsData, error: withdrawalsError } = await supabase
         .from('withdrawals')
@@ -73,7 +75,7 @@ export default function DistributionsPage() {
         .eq('grade', selectedGrade)
         .gte('withdrawn_date', startDate)
         .lte('withdrawn_date', endDate)
-        .in('status', ['created', 'approved', 'completed'])
+        .in('status', ['pending', 'approved', 'completed'])
         .order('created_at', { ascending: false })
 
       if (withdrawalsError) {
@@ -82,6 +84,8 @@ export default function DistributionsPage() {
         setLoading(false)
         return
       }
+
+      console.log('Withdrawals found:', withdrawalsData?.length || 0, withdrawalsData)
 
       // รวมจำนวนหนังสือตามที่ครูเบิกไป (approved_qty) โดยกลุ่มตาม book_id
       const bookMap = new Map()
