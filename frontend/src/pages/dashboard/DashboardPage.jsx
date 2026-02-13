@@ -192,7 +192,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="animate-spin text-blue-600" size={32} />
-        <span className="ml-3 text-gray-500">กำลังโหลดข้อมูล...</span>
+        <span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</span>
       </div>
     )
   }
@@ -202,17 +202,17 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">ยินดีต้อนรับกลับ, {user?.name || 'ผู้ดูแลระบบ'}</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold dark:text-white">ยินดีต้อนรับกลับ, {user?.name || 'ผู้ดูแลระบบ'}</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
             นี่คือภาพรวมคำสั่งซื้อหนังสือเรียนประจำปีการศึกษา {currentYear}.
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
+          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 transition-colors">
             <Printer size={16} />
             พิมพ์รายงาน
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 transition-colors">
             <Plus size={16} />
             คำสั่งซื้อใหม่
           </button>
@@ -221,19 +221,19 @@ export default function DashboardPage() {
 
       {/* Alert */}
       {showAlert && notifCount > 0 && (
-        <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-xl px-5 py-3">
+        <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-xl px-5 py-3">
           <div className="flex items-center gap-3">
-            <AlertCircle size={20} className="text-blue-600" />
-            <p className="text-sm">
+            <AlertCircle size={20} className="text-blue-600 dark:text-blue-400" />
+            <p className="text-sm dark:text-gray-200">
               <span className="font-medium">ต้องการความสนใจ:</span>{' '}
               คุณมี {notifCount} การแจ้งเตือนที่ยังไม่ได้อ่านเกี่ยวกับคำสั่งซื้อหนังสือเรียนใหม่
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="text-blue-600 text-sm font-medium flex items-center gap-1 hover:underline">
+            <button className="text-blue-600 dark:text-blue-400 text-sm font-medium flex items-center gap-1 hover:underline">
               ตรวจสอบตอนนี้ <ArrowRight size={14} />
             </button>
-            <button onClick={() => setShowAlert(false)} className="text-gray-400 hover:text-gray-600">
+            <button onClick={() => setShowAlert(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
               <X size={18} />
             </button>
           </div>
@@ -245,9 +245,9 @@ export default function DashboardPage() {
         {stats.map((stat, i) => {
           const Icon = stat.icon
           return (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 transition-colors">
               <div className="flex items-start justify-between mb-3">
-                <div className={`p-2.5 rounded-xl ${stat.iconBg}`}>
+                <div className={`p-2.5 rounded-xl ${stat.iconBg} dark:bg-opacity-20`}>
                   <Icon size={20} className={stat.iconColor} />
                 </div>
                 {stat.change && (
@@ -256,13 +256,13 @@ export default function DashboardPage() {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mb-1">{stat.label}</p>
-              <p className="text-2xl font-bold">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{stat.label}</p>
+              <p className="text-2xl font-bold dark:text-white">
                 {stat.value}
-                <span className="text-sm font-normal text-gray-400 ml-1">{stat.unit}</span>
+                <span className="text-sm font-normal text-gray-400 dark:text-gray-500 ml-1">{stat.unit}</span>
               </p>
               {stat.progress !== undefined && (
-                <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
+                <div className="mt-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
                   <div
                     className="bg-blue-600 h-1.5 rounded-full"
                     style={{ width: `${stat.progress}%` }}
@@ -277,14 +277,14 @@ export default function DashboardPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Line Chart */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-6">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 transition-colors">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-semibold">แนวโน้มคำสั่งซื้อ</h3>
-              <p className="text-sm text-gray-400">ปริมาณคำสั่งซื้อรายเดือนใน {trendMonths} เดือนที่ผ่านมา</p>
+              <h3 className="font-semibold dark:text-white">แนวโน้มคำสั่งซื้อ</h3>
+              <p className="text-sm text-gray-400 dark:text-gray-500">ปริมาณคำสั่งซื้อรายเดือนใน {trendMonths} เดือนที่ผ่านมา</p>
             </div>
             <select
-              className="text-sm border border-gray-200 rounded-lg px-3 py-1.5"
+              className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={trendMonths}
               onChange={(e) => setTrendMonths(Number(e.target.value))}
             >
@@ -298,13 +298,13 @@ export default function DashboardPage() {
         </div>
 
         {/* Doughnut Chart */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h3 className="font-semibold mb-4">การกระจายสถานะคำสั่งซื้อ</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 transition-colors">
+          <h3 className="font-semibold mb-4 dark:text-white">การกระจายสถานะคำสั่งซื้อ</h3>
           <div className="h-48">
             {totalOrders > 0 ? (
               <Doughnut data={doughnutData} options={doughnutOptions} plugins={[doughnutPlugin]} />
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+              <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500 text-sm">
                 ยังไม่มีข้อมูลคำสั่งซื้อ
               </div>
             )}
@@ -313,8 +313,8 @@ export default function DashboardPage() {
             {statusLabels.map((item, i) => (
               <div key={item.label} className="flex items-center gap-2 text-xs">
                 <span className={`w-2.5 h-2.5 rounded-full ${item.color}`}></span>
-                <span className="text-gray-600">{item.label}</span>
-                <span className="text-gray-400">({statusDist.percentages[i]}%)</span>
+                <span className="text-gray-600 dark:text-gray-300">{item.label}</span>
+                <span className="text-gray-400 dark:text-gray-500">({statusDist.percentages[i]}%)</span>
               </div>
             ))}
           </div>

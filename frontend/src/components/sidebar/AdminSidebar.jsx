@@ -10,14 +10,14 @@ import {
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 bg-white border-r px-4 py-6">
+    <aside className="w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 px-4 py-6 transition-colors duration-200">
       <div className="flex items-center gap-2 mb-8">
         <div className="bg-blue-600 text-white p-2 rounded">
           🎓
         </div>
         <div>
-          <p className="font-bold">ระบบบริหารจัดการหนังสือเรียน</p>
-          <p className="text-xs text-gray-500">ผู้ดูแลระบบ</p>
+          <p className="font-bold dark:text-white">ระบบบริหารจัดการหนังสือเรียน</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">ผู้ดูแลระบบ</p>
         </div>
       </div>
 
@@ -30,7 +30,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-6">
-        <button className="flex items-center gap-2 text-red-500">
+        <button className="flex items-center gap-2 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors">
           <LogOut size={18} /> ออกจากระบบ
         </button>
       </div>
@@ -42,7 +42,13 @@ function NavItem({ to, icon, label, badge }) {
   return (
     <NavLink
       to={to}
-      className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700"
+      className={({ isActive }) =>
+        `flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
+          isActive
+            ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-medium'
+            : 'text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
+        }`
+      }
     >
       <div className="flex items-center gap-2">
         {icon}

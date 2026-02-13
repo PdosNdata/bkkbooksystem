@@ -12,6 +12,14 @@
 body {
   font-family: 'Sarabun', sans-serif;
   background-color: #F3F4F6;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Dark mode body */
+.dark body,
+html.dark body {
+  background-color: #111827;
+  color: #f3f4f6;
 }
 
 /* components */
@@ -20,8 +28,8 @@ body {
     @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
   .btn-outline {
-    @apply border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-100 transition;
-  }  
+    @apply border border-gray-300 dark:border-gray-600 px-6 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 transition;
+  }
   .btn-secondary {
     @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
@@ -32,33 +40,33 @@ body {
     @apply bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
   .input-field {
-    @apply w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+    @apply w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-400;
   }
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 dark:text-gray-100;
   }
   .table {
-    @apply w-full border-collapse bg-white rounded-lg overflow-hidden shadow-md;
+    @apply w-full border-collapse bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md;
   }
   .table th {
-    @apply bg-blue-600 text-white px-4 py-3 text-left font-semibold;
+    @apply bg-blue-600 dark:bg-blue-700 text-white px-4 py-3 text-left font-semibold;
   }
   .table td {
-    @apply border-b border-gray-200 px-4 py-3;
+    @apply border-b border-gray-200 dark:border-gray-700 px-4 py-3 dark:text-gray-200;
   }
   .badge {
     @apply px-2 py-1 rounded-full text-xs font-semibold;
   }
   .badge-pending {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
   }
   .badge-approved {
-    @apply bg-green-100 text-green-800;
+    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
   }
   .badge-received {
-    @apply bg-blue-100 text-blue-800;
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
   }
   .badge-distributed {
-    @apply bg-purple-100 text-purple-800;
+    @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
   }
 }

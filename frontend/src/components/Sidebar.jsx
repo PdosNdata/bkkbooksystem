@@ -46,7 +46,7 @@ export default function Sidebar({ mobile = false, onClose }) {
         <div key={`menu-${item.label}-${index}`} className="mb-1">
           <button
             onClick={() => toggleMenu(item.label)}
-            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             <div className="flex items-center gap-3">
               <Icon size={18} />
@@ -58,7 +58,7 @@ export default function Sidebar({ mobile = false, onClose }) {
               <ChevronRight size={16} />
             )}
           </button>
-          
+
           {isOpen && (
             <div className="ml-4 mt-1 space-y-1">
               {item.submenu.map((subItem, subIndex) => {
@@ -71,8 +71,8 @@ export default function Sidebar({ mobile = false, onClose }) {
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-4 py-2 rounded-xl text-sm transition-colors ${
                         isActive
-                          ? 'bg-blue-50 text-blue-600 font-medium'
-                          : 'text-gray-600 hover:bg-gray-50'
+                          ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-medium'
+                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                       }`
                     }
                   >
@@ -96,8 +96,8 @@ export default function Sidebar({ mobile = false, onClose }) {
         className={({ isActive }) =>
           `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors ${
             isActive
-              ? 'bg-blue-50 text-blue-600 font-medium'
-              : 'text-gray-600 hover:bg-gray-50'
+              ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-medium'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`
         }
       >
@@ -113,15 +113,15 @@ export default function Sidebar({ mobile = false, onClose }) {
   }
 
   return (
-    <aside className="w-64 bg-white border-r min-h-screen flex flex-col">
+    <aside className="w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 min-h-screen flex flex-col transition-colors duration-200">
       {/* Logo */}
-      <div className="p-5 flex items-center gap-3 border-b">
+      <div className="p-5 flex items-center gap-3 border-b dark:border-gray-700">
         <div className="bg-blue-600 text-white p-2.5 rounded-xl">
           <Package size={20} />
         </div>
         <div>
-          <p className="font-bold text-sm">ระบบบริหารจัดการหนังสือเรียน</p>
-          <p className="text-xs text-gray-400">{user.role === 'admin' ? 'ผู้ดูแลระบบ' : user.role}</p>
+          <p className="font-bold text-sm dark:text-white">ระบบบริหารจัดการหนังสือเรียน</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{user.role === 'admin' ? 'ผู้ดูแลระบบ' : user.role}</p>
         </div>
       </div>
 
@@ -131,10 +131,10 @@ export default function Sidebar({ mobile = false, onClose }) {
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t dark:border-gray-700">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 text-gray-500 hover:text-red-500 text-sm w-full px-4 py-2"
+          className="flex items-center gap-3 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 text-sm w-full px-4 py-2 transition-colors"
         >
           <LogOut size={18} />
           ออกจากระบบ
