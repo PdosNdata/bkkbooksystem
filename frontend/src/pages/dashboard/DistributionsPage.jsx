@@ -26,8 +26,7 @@ export default function DistributionsPage() {
   const [selectedGrade, setSelectedGrade] = useState('')
   const [selectedYear, setSelectedYear] = useState((new Date().getFullYear() + 543).toString())
   const [selectedSemester, setSelectedSemester] = useState('1')
-  const [distributionDate, setDistributionDate] = useState('2026-05-15') // 15 พ.ค. 2569
-  const [students, setStudents] = useState([])
+  const [distributionDate, setDistributionDate] = useState(new Date().toISOString().slice(0, 10))
   const [showPrintPreview, setShowPrintPreview] = useState(false)
   const printRef = useRef(null)
 
@@ -38,42 +37,10 @@ export default function DistributionsPage() {
   useEffect(() => {
     if (selectedGrade && selectedYear) {
       fetchBooksByGrade()
-      fetchStudentsByGrade()
     } else {
       setBooks([])
-      setStudents([])
     }
   }, [selectedGrade, selectedYear])
-
-  // ดึงข้อมูลนักเรียนตามชั้นเรียน เรียงตามเพศ (ชายก่อน) แล้วรหัสนักเรียน
-  const fetchStudentsByGrade = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .eq('grade', selectedGrade)
-
-      if (error) {
-        console.error('Error fetching students:', error)
-        setStudents([])
-        return
-      }
-
-      // เรียงลำดับ: 1.เพศ (ชายก่อนหญิง) 2.รหัสนักเรียน
-      const sortedStudents = (data || []).sort((a, b) => {
-        // เพศชายก่อน
-        if (a.gender === 'male' && b.gender === 'female') return -1
-        if (a.gender === 'female' && b.gender === 'male') return 1
-        // เรียงตามรหัสนักเรียน
-        return (a.student_id || '').localeCompare(b.student_id || '', 'th', { numeric: true })
-      })
-
-      setStudents(sortedStudents)
-    } catch (err) {
-      console.error('Fetch students error:', err)
-      setStudents([])
-    }
-  }
 
   const fetchBooksByGrade = async () => {
     setLoading(true)
@@ -201,15 +168,15 @@ export default function DistributionsPage() {
       const imgY = 0
 
       pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
-      pdf.save(`บัญชีแจกหนังสือเรียน_นักเรียน_${gradeLabel[selectedGrade] || 'unknown'}_${selectedYear}.pdf`)
+      pdf.save(`บัญชีแจกหนังสือเรียน_${gradeLabel[selectedGrade] || 'unknown'}_${selectedYear}.pdf`)
     } catch (err) {
       console.error('PDF export error:', err)
     }
   }
 
   const openPrintPreview = () => {
-    if (students.length === 0) {
-      alert('ไม่พบข้อมูลนักเรียนในชั้นเรียนนี้')
+    if (books.length === 0) {
+      alert('กรุณาเลือกชั้นเรียนและปีการศึกษาก่อน')
       return
     }
     setShowPrintPreview(true)
@@ -290,7 +257,7 @@ export default function DistributionsPage() {
         <div className="flex gap-3 mt-6">
           <button
             onClick={openPrintPreview}
-            disabled={!selectedGrade || students.length === 0}
+            disabled={!selectedGrade || books.length === 0}
             className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Eye size={18} />
@@ -307,57 +274,50 @@ export default function DistributionsPage() {
         </div>
       )}
 
-      {/* Students Table Preview */}
-      {!loading && selectedGrade && students.length > 0 && (
+      {/* Books Table Preview */}
+      {!loading && selectedGrade && books.length > 0 && (
         <div className="bg-white rounded-xl border p-6">
           <h3 className="text-lg font-semibold mb-4">
-            รายชื่อนักเรียน ชั้น{gradeLabel[selectedGrade]} ปีการศึกษา {selectedYear}
+            รายการหนังสือ ชั้น{gradeLabel[selectedGrade]} ปีการศึกษา {selectedYear}
           </h3>
-          <p className="text-sm text-gray-500 mb-4">
-            เรียงลำดับตาม: 1. เพศ (ชายก่อน) 2. รหัสนักเรียน
-          </p>
           <div className="overflow-x-auto">
             <table className="table w-full">
               <thead>
                 <tr>
                   <th className="w-16">เลขที่</th>
-                  <th className="w-24">รหัส</th>
-                  <th>ชื่อ-นามสกุล</th>
-                  <th className="w-20 text-center">เพศ</th>
-                  <th className="w-32 text-center">วันที่แจก</th>
+                  <th>รายชื่อหนังสือ</th>
+                  <th className="w-24 text-center">จำนวน(เล่ม)</th>
+                  <th className="w-32 text-center">วัน/เดือน/ปีที่แจก</th>
+                  <th className="w-24 text-center">หมายเหตุ</th>
                 </tr>
               </thead>
               <tbody>
-                {students.map((student, idx) => (
-                  <tr key={student.id}>
+                {books.map((book, idx) => (
+                  <tr key={book.id}>
                     <td className="text-center">{idx + 1}</td>
-                    <td className="font-mono text-sm">{student.student_id}</td>
-                    <td>{student.prefix}{student.first_name} {student.last_name}</td>
-                    <td className="text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${student.gender === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-sky-100 text-sky-700'}`}>
-                        {student.gender === 'female' ? 'หญิง' : 'ชาย'}
-                      </span>
-                    </td>
+                    <td>{book.title}</td>
+                    <td className="text-center">1</td>
                     <td className="text-center">{formatShortThaiDate(distributionDate)}</td>
+                    <td className="text-center">-</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <p className="text-sm text-gray-500 mt-4">
-            รวมทั้งหมด {students.length} คน
+            รวมทั้งหมด {books.length} รายการ (แจกคนละ 1 เล่ม/วิชา)
           </p>
         </div>
       )}
 
       {/* Empty State */}
-      {!loading && selectedGrade && students.length === 0 && (
+      {!loading && selectedGrade && books.length === 0 && (
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-center h-32 text-gray-400">
             <div className="text-center">
-              <UserCheck size={48} className="mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium">ไม่พบข้อมูลนักเรียน</p>
-              <p className="text-sm mt-1">ไม่มีนักเรียนในชั้น{gradeLabel[selectedGrade]} กรุณาเพิ่มข้อมูลนักเรียนก่อน</p>
+              <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium">ไม่พบข้อมูลหนังสือ</p>
+              <p className="text-sm mt-1">ไม่มีหนังสือในคลังสำหรับชั้น{gradeLabel[selectedGrade]} ปี {selectedYear}</p>
             </div>
           </div>
         </div>
@@ -428,49 +388,35 @@ export default function DistributionsPage() {
                     <p className="text-base">ชั้น{gradeLabel[selectedGrade] || ''}</p>
                   </div>
 
-                  {/* Table - รายชื่อนักเรียน */}
+                  {/* Table */}
                   <table className="w-full border-collapse text-sm mb-8" style={{ tableLayout: 'fixed' }}>
                     <thead>
                       <tr>
                         <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '45px' }}>เลขที่</th>
-                        <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '80px' }}>รหัสนักเรียน</th>
-                        <th className="border border-gray-600 p-2 bg-white text-center">ชื่อ-นามสกุล</th>
-                        <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '90px' }}>วันที่แจก</th>
-                        <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '160px' }}>ลงชื่อผู้รับหนังสือ</th>
+                        <th className="border border-gray-600 p-2 bg-white text-center">รายชื่อหนังสือ</th>
+                        <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '70px' }}>จำนวน(เล่ม)</th>
+                        <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '110px' }}>วัน/เดือน/ปีที่แจก</th>
+                        <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '70px' }}>หมายเหตุ</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {students.map((student, idx) => (
-                        <tr key={student.id}>
+                      {books.map((book, idx) => (
+                        <tr key={book.id}>
                           <td className="border border-gray-600 p-2 text-center">{idx + 1}</td>
-                          <td className="border border-gray-600 p-2 text-center" style={{ fontSize: '12px' }}>{student.student_id}</td>
-                          <td className="border border-gray-600 p-2 text-left" style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>
-                            {student.prefix}{student.first_name} {student.last_name}
-                          </td>
-                          <td className="border border-gray-600 p-2 text-center" style={{ fontSize: '12px' }}>{formatShortThaiDate(distributionDate)}</td>
-                          <td className="border border-gray-600 p-2 text-center" style={{ verticalAlign: 'bottom', paddingBottom: '4px' }}>
-                            <div style={{ fontSize: '11px', color: '#2563eb' }}>
-                              <div style={{ marginBottom: '2px' }}>(ลงชื่อ)....................................ผู้รับ</div>
-                              <div style={{ marginLeft: '24px' }}>หนังสือ</div>
-                              <div>(............................................)</div>
-                            </div>
-                          </td>
+                          <td className="border border-gray-600 p-2 text-left" style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{book.title}</td>
+                          <td className="border border-gray-600 p-2 text-center">1</td>
+                          <td className="border border-gray-600 p-2 text-center">{formatShortThaiDate(distributionDate)}</td>
+                          <td className="border border-gray-600 p-2 text-center"></td>
                         </tr>
                       ))}
                       {/* Empty rows to fill minimum 10 rows */}
-                      {Array.from({ length: Math.max(0, 10 - students.length) }).map((_, idx) => (
+                      {Array.from({ length: Math.max(0, 10 - books.length) }).map((_, idx) => (
                         <tr key={`empty-${idx}`}>
-                          <td className="border border-gray-600 p-2 h-16">&nbsp;</td>
+                          <td className="border border-gray-600 p-2 h-8">&nbsp;</td>
                           <td className="border border-gray-600 p-2">&nbsp;</td>
                           <td className="border border-gray-600 p-2">&nbsp;</td>
                           <td className="border border-gray-600 p-2">&nbsp;</td>
-                          <td className="border border-gray-600 p-2" style={{ verticalAlign: 'bottom', paddingBottom: '4px' }}>
-                            <div style={{ fontSize: '11px', color: '#2563eb' }}>
-                              <div style={{ marginBottom: '2px' }}>(ลงชื่อ)....................................ผู้รับ</div>
-                              <div style={{ marginLeft: '24px' }}>หนังสือ</div>
-                              <div>(............................................)</div>
-                            </div>
-                          </td>
+                          <td className="border border-gray-600 p-2">&nbsp;</td>
                         </tr>
                       ))}
                     </tbody>
