@@ -164,6 +164,133 @@ export default function ReportsPage() {
 
   const handlePrint = () => window.print()
 
+  // ฟังก์ชันพิมพ์รายงานหนังสือค้างส่ง
+  const handlePrintPendingBooks = () => {
+    if (pendingBooks.length === 0) return
+
+    const totalQuantity = pendingBooks.reduce((s, b) => s + b.quantity, 0)
+    const totalDistributed = pendingBooks.reduce((s, b) => s + b.distributed_quantity, 0)
+    const totalPending = pendingBooks.reduce((s, b) => s + b.available_quantity, 0)
+    const totalValue = pendingBooks.reduce((s, b) => s + (b.available_quantity * Number(b.price || 0)), 0)
+
+    const gradeText = pendingBooksGrade ? gradeLabel[pendingBooksGrade] : 'ทุกชั้นเรียน'
+    const subjectText = pendingBooksSubject
+      ? subjectGroups.find(sg => sg.id === pendingBooksSubject)?.name || '-'
+      : 'ทุกกลุ่มสาระ'
+
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>รายงานหนังสือค้างส่ง - ${pendingBooksYear}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Sarabun', sans-serif; font-size: 12pt; padding: 20mm; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .header h1 { font-size: 18pt; font-weight: 700; margin-bottom: 5px; }
+          .header p { font-size: 11pt; color: #666; }
+          .filters { margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 10pt; }
+          .filters span { margin-right: 20px; }
+          .summary { display: flex; gap: 15px; margin-bottom: 20px; }
+          .summary-item { flex: 1; padding: 10px; background: #f8f9fa; border-radius: 4px; text-align: center; }
+          .summary-item .label { font-size: 9pt; color: #666; }
+          .summary-item .value { font-size: 14pt; font-weight: 700; color: #333; }
+          table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+          th, td { border: 1px solid #ddd; padding: 8px; }
+          th { background: #f97316; color: white; font-weight: 600; text-align: center; }
+          td { vertical-align: middle; }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          .text-green { color: #16a34a; }
+          .text-orange { color: #ea580c; }
+          tfoot td { background: #f8f9fa; font-weight: 600; }
+          .footer { margin-top: 30px; font-size: 10pt; color: #666; text-align: center; }
+          @media print {
+            body { padding: 10mm; }
+            @page { size: A4 portrait; margin: 10mm; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>รายงานหนังสือค้างส่ง</h1>
+          <p>โรงเรียนบ้านค้อดอนแคน — ปีการศึกษา ${pendingBooksYear}</p>
+        </div>
+
+        <div class="filters">
+          <span><strong>ชั้นเรียน:</strong> ${gradeText}</span>
+          <span><strong>กลุ่มสาระ:</strong> ${subjectText}</span>
+        </div>
+
+        <div class="summary">
+          <div class="summary-item">
+            <div class="label">จำนวนรายการ</div>
+            <div class="value">${pendingBooks.length}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">จำนวนค้างส่งรวม</div>
+            <div class="value">${totalPending.toLocaleString()} เล่ม</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">แจกไปแล้ว</div>
+            <div class="value">${totalDistributed.toLocaleString()} เล่ม</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">มูลค่าค้างส่ง</div>
+            <div class="value">${totalValue.toLocaleString()} บาท</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 30px;">#</th>
+              <th style="text-align: left;">ชื่อหนังสือ</th>
+              <th style="width: 60px;">ชั้น</th>
+              <th style="text-align: left;">กลุ่มสาระ</th>
+              <th style="width: 70px;">ราคา</th>
+              <th style="width: 60px;">รับเข้า</th>
+              <th style="width: 60px;">แจกแล้ว</th>
+              <th style="width: 70px;">ค้างส่ง</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pendingBooks.map((book, idx) => `
+              <tr>
+                <td class="text-center">${idx + 1}</td>
+                <td>${book.title}</td>
+                <td class="text-center">${gradeLabel[book.grade]}</td>
+                <td>${book.subjectGroup}</td>
+                <td class="text-right">${Number(book.price || 0).toLocaleString()}</td>
+                <td class="text-center">${book.quantity}</td>
+                <td class="text-center text-green">${book.distributed_quantity}</td>
+                <td class="text-center text-orange">${book.available_quantity}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5" class="text-right">รวมทั้งหมด</td>
+              <td class="text-center">${totalQuantity.toLocaleString()}</td>
+              <td class="text-center text-green">${totalDistributed.toLocaleString()}</td>
+              <td class="text-center text-orange">${totalPending.toLocaleString()}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="footer">
+          พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </div>
+      </body>
+      </html>
+    `)
+    printWindow.document.close()
+    setTimeout(() => printWindow.print(), 500)
+  }
+
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
   }
@@ -281,10 +408,21 @@ export default function ReportsPage() {
 
       {/* รายงานหนังสือค้างส่ง */}
       <div className="bg-white rounded-xl border p-6 print:break-before-page">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <BookX size={20} className="text-orange-600" />
-          รายงานหนังสือค้างส่ง
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold flex items-center gap-2">
+            <BookX size={20} className="text-orange-600" />
+            รายงานหนังสือค้างส่ง
+          </h3>
+          {pendingBooks.length > 0 && (
+            <button
+              onClick={handlePrintPendingBooks}
+              className="flex items-center gap-2 px-4 py-2 text-sm border rounded-lg hover:bg-gray-50 print:hidden"
+            >
+              <Printer size={16} />
+              พิมพ์รายงานค้างส่ง
+            </button>
+          )}
+        </div>
 
         {/* ตัวกรอง */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
