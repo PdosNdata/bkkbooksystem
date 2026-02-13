@@ -45,42 +45,79 @@ export default function DistributionsPage() {
   const fetchBooksByGrade = async () => {
     setLoading(true)
     try {
-      // ดึงข้อมูลหนังสือจาก book_stock ที่ถูกเบิกแล้ว (distributed) สำหรับชั้นเรียนที่เลือก
-      const { data: stockData, error: stockError } = await supabase
-        .from('book_stock')
+      // คำนวณช่วงวันที่ของปีการศึกษา (เริ่ม พ.ค. ปี พ.ศ. ที่เลือก ถึง มี.ค. ปี พ.ศ. ถัดไป)
+      const buddhistYear = parseInt(selectedYear)
+      const gregorianYear = buddhistYear - 543
+      const startDate = `${gregorianYear}-05-01` // เริ่มภาคเรียนที่ 1
+      const endDate = `${gregorianYear + 1}-03-31` // จบภาคเรียนที่ 2
+
+      // ดึงข้อมูลหนังสือจากใบเบิกของครู (withdrawals + withdrawal_items) สำหรับชั้นเรียนที่เลือก
+      const { data: withdrawalsData, error: withdrawalsError } = await supabase
+        .from('withdrawals')
         .select(`
           id,
-          book_id,
-          available_quantity,
-          distributed_quantity,
-          quantity,
-          books(id, title, price, subject)
+          withdrawal_number,
+          grade,
+          withdrawn_date,
+          status,
+          withdrawal_items(
+            id,
+            book_id,
+            requested_qty,
+            approved_qty,
+            notes,
+            books(id, title, price, subject)
+          ),
+          requested_by_user:users!withdrawals_requested_by_fkey(full_name)
         `)
         .eq('grade', selectedGrade)
-        .eq('academic_year', selectedYear)
-        .gt('quantity', 0)
-        .order('book_id')
+        .gte('withdrawn_date', startDate)
+        .lte('withdrawn_date', endDate)
+        .in('status', ['created', 'approved', 'completed'])
+        .order('created_at', { ascending: false })
 
-      if (stockError) {
-        console.error('Error fetching book stock:', stockError)
+      if (withdrawalsError) {
+        console.error('Error fetching withdrawals:', withdrawalsError)
         setBooks([])
         setLoading(false)
         return
       }
 
-      // Filter books that have been distributed or have stock
-      const booksData = (stockData || [])
-        .filter(stock => stock.books)
-        .map(stock => ({
-          id: stock.id,
-          book_id: stock.book_id,
-          title: stock.books.title,
-          subject: stock.books.subject,
-          quantity: 1, // แจกคนละเล่ม
-          distributed_quantity: stock.distributed_quantity || 0,
-          available_quantity: stock.available_quantity || 0,
-          total_quantity: stock.quantity || 0
-        }))
+      // รวมจำนวนหนังสือตามที่ครูเบิกไป (approved_qty) โดยกลุ่มตาม book_id
+      const bookMap = new Map()
+
+      ;(withdrawalsData || []).forEach(withdrawal => {
+        const withdrawnDate = withdrawal.withdrawn_date
+        const teacherName = withdrawal.requested_by_user?.full_name || '-'
+
+        ;(withdrawal.withdrawal_items || []).forEach(item => {
+          if (!item.books) return
+
+          const bookId = item.book_id
+          const approvedQty = item.approved_qty || 0
+
+          if (approvedQty <= 0) return
+
+          if (bookMap.has(bookId)) {
+            // รวมจำนวนหนังสือที่เบิกจากหลายใบเบิก
+            const existing = bookMap.get(bookId)
+            existing.quantity += approvedQty
+          } else {
+            bookMap.set(bookId, {
+              id: item.id,
+              book_id: bookId,
+              title: item.books.title,
+              subject: item.books.subject,
+              quantity: approvedQty, // จำนวนที่ครูเบิกไป
+              withdrawn_date: withdrawnDate,
+              teacher_name: teacherName
+            })
+          }
+        })
+      })
+
+      // แปลง Map เป็น Array
+      const booksData = Array.from(bookMap.values())
 
       setBooks(booksData)
     } catch (err) {
@@ -296,7 +333,7 @@ export default function DistributionsPage() {
                   <tr key={book.id}>
                     <td className="text-center">{idx + 1}</td>
                     <td>{book.title}</td>
-                    <td className="text-center">1</td>
+                    <td className="text-center">{book.quantity}</td>
                     <td className="text-center">{formatShortThaiDate(distributionDate)}</td>
                     <td className="text-center">-</td>
                   </tr>
@@ -305,7 +342,7 @@ export default function DistributionsPage() {
             </table>
           </div>
           <p className="text-sm text-gray-500 mt-4">
-            รวมทั้งหมด {books.length} รายการ (แจกคนละ 1 เล่ม/วิชา)
+            รวมทั้งหมด {books.length} รายการ (รวม {books.reduce((sum, b) => sum + b.quantity, 0)} เล่ม ตามจำนวนที่ครูเบิก)
           </p>
         </div>
       )}
@@ -317,7 +354,7 @@ export default function DistributionsPage() {
             <div className="text-center">
               <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium">ไม่พบข้อมูลหนังสือ</p>
-              <p className="text-sm mt-1">ไม่มีหนังสือในคลังสำหรับชั้น{gradeLabel[selectedGrade]} ปี {selectedYear}</p>
+              <p className="text-sm mt-1">ไม่พบใบเบิกหนังสือสำหรับชั้น{gradeLabel[selectedGrade]} ปี {selectedYear}</p>
             </div>
           </div>
         </div>
@@ -404,7 +441,7 @@ export default function DistributionsPage() {
                         <tr key={book.id}>
                           <td className="border border-gray-600 p-2 text-center">{idx + 1}</td>
                           <td className="border border-gray-600 p-2 text-left" style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{book.title}</td>
-                          <td className="border border-gray-600 p-2 text-center">1</td>
+                          <td className="border border-gray-600 p-2 text-center">{book.quantity}</td>
                           <td className="border border-gray-600 p-2 text-center">{formatShortThaiDate(distributionDate)}</td>
                           <td className="border border-gray-600 p-2 text-center"></td>
                         </tr>
