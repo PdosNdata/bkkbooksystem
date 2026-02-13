@@ -48,6 +48,13 @@ export default function DistributionsPage() {
   const [activeTab, setActiveTab] = useState('distribute') // 'distribute' or 'history'
   const [searchStudent, setSearchStudent] = useState('')
 
+  // สำหรับพิมพ์บัญชีแจกหนังสือรายบุคคล
+  const [showStudentPrintPreview, setShowStudentPrintPreview] = useState(false)
+  const [selectedStudentForPrint, setSelectedStudentForPrint] = useState(null)
+  const [studentDistributions, setStudentDistributions] = useState([])
+  const [loadingStudentDistributions, setLoadingStudentDistributions] = useState(false)
+  const studentPrintRef = useRef(null)
+
   // Generate year options (current year +/- 2 years in Buddhist Era)
   const currentBuddhistYear = new Date().getFullYear() + 543
   const yearOptions = Array.from({ length: 5 }, (_, i) => (currentBuddhistYear - 2 + i).toString())
@@ -230,6 +237,44 @@ export default function DistributionsPage() {
     }
   }
 
+  // ดึงรายการหนังสือที่นักเรียนคนหนึ่งได้รับ
+  const fetchStudentDistributions = async (studentId) => {
+    setLoadingStudentDistributions(true)
+    try {
+      const { data, error } = await supabase
+        .from('student_book_distributions')
+        .select(`
+          id,
+          distribution_date,
+          semester,
+          notes,
+          books(id, title, subject)
+        `)
+        .eq('student_id', studentId)
+        .eq('grade', selectedGrade)
+        .eq('academic_year', selectedYear)
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching student distributions:', error)
+        setStudentDistributions([])
+      } else {
+        setStudentDistributions(data || [])
+      }
+    } catch (err) {
+      console.error('Fetch student distributions error:', err)
+      setStudentDistributions([])
+    }
+    setLoadingStudentDistributions(false)
+  }
+
+  // เปิด Modal พิมพ์บัญชีแจกหนังสือรายบุคคล
+  const openStudentPrintPreview = async (student) => {
+    setSelectedStudentForPrint(student)
+    setShowStudentPrintPreview(true)
+    await fetchStudentDistributions(student.id)
+  }
+
   const formatThaiDate = (dateString) => {
     if (!dateString) return { day: '...', month: '...', year: '...' }
     const date = new Date(dateString)
@@ -280,6 +325,72 @@ export default function DistributionsPage() {
       setTimeout(() => {
         printWindow.print()
       }, 500)
+    }
+  }
+
+  // พิมพ์บัญชีแจกหนังสือรายบุคคล
+  const handleStudentPrint = () => {
+    if (studentPrintRef.current) {
+      const printContent = studentPrintRef.current.innerHTML
+      const studentName = selectedStudentForPrint
+        ? `${selectedStudentForPrint.prefix}${selectedStudentForPrint.first_name} ${selectedStudentForPrint.last_name}`
+        : ''
+      const printWindow = window.open('', '_blank')
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>บัญชีแจกหนังสือเรียน ${studentName}</title>
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Sarabun', sans-serif; }
+            @media print {
+              @page { size: A4; margin: 15mm; }
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>${printContent}</body>
+        </html>
+      `)
+      printWindow.document.close()
+      setTimeout(() => {
+        printWindow.print()
+      }, 500)
+    }
+  }
+
+  // Export PDF บัญชีแจกหนังสือรายบุคคล
+  const exportStudentPDF = async () => {
+    if (!studentPrintRef.current || !selectedStudentForPrint) return
+
+    try {
+      const element = studentPrintRef.current
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
+
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = pdf.internal.pageSize.getHeight()
+
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+
+      const imgX = (pdfWidth - imgWidth * ratio) / 2
+      const imgY = 0
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
+      const studentName = `${selectedStudentForPrint.first_name}_${selectedStudentForPrint.last_name}`
+      pdf.save(`บัญชีแจกหนังสือ_${studentName}_${gradeShortLabel[selectedGrade] || ''}_${selectedYear}.pdf`)
+    } catch (err) {
+      console.error('PDF export error:', err)
     }
   }
 
@@ -689,6 +800,53 @@ export default function DistributionsPage() {
         </div>
       )}
 
+      {/* Student Distribution Summary - รายชื่อนักเรียนที่ได้รับหนังสือ พร้อมปุ่มพิมพ์ */}
+      {!loading && selectedGrade && distributionHistory.length > 0 && (
+        <div className="bg-white rounded-xl border p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Users size={20} className="text-green-600" />
+            รายชื่อนักเรียนที่ได้รับหนังสือ - พิมพ์บัญชีรายบุคคล
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* สร้าง unique students จาก distributionHistory */}
+            {(() => {
+              const uniqueStudents = new Map()
+              distributionHistory.forEach(item => {
+                if (item.students?.id && !uniqueStudents.has(item.students.id)) {
+                  uniqueStudents.set(item.students.id, {
+                    ...item.students,
+                    bookCount: distributionHistory.filter(d => d.students?.id === item.students.id).length
+                  })
+                }
+              })
+              return Array.from(uniqueStudents.values()).map(student => (
+                <div
+                  key={student.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border hover:border-blue-200 hover:bg-blue-50 transition-all"
+                >
+                  <div className="flex-1">
+                    <div className={`font-medium ${student.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}`}>
+                      {student.prefix}{student.first_name} {student.last_name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      รหัส: {student.student_id} | ได้รับ {student.bookCount} เล่ม
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => openStudentPrintPreview(student)}
+                    className="ml-3 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 flex items-center gap-1"
+                    title="พิมพ์บัญชีแจกหนังสือ"
+                  >
+                    <Printer size={14} />
+                    พิมพ์
+                  </button>
+                </div>
+              ))
+            })()}
+          </div>
+        </div>
+      )}
+
       {/* Distribution History */}
       {!loading && selectedGrade && distributionHistory.length > 0 && (
         <div className="bg-white rounded-xl border p-6">
@@ -721,17 +879,26 @@ export default function DistributionsPage() {
                     <td>{item.books?.title || '-'}</td>
                     <td className="text-center">{formatShortThaiDate(item.distribution_date)}</td>
                     <td className="text-center">
-                      <button
-                        onClick={() => handleDeleteDistribution(
-                          item.id,
-                          `${item.students?.first_name} ${item.students?.last_name}`,
-                          item.books?.title
-                        )}
-                        className="text-red-600 hover:bg-red-50 p-1 rounded"
-                        title="ลบรายการ"
-                      >
-                        <XCircle size={16} />
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => openStudentPrintPreview(item.students)}
+                          className="text-blue-600 hover:bg-blue-50 p-1 rounded"
+                          title="พิมพ์บัญชีแจกหนังสือ"
+                        >
+                          <Printer size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDistribution(
+                            item.id,
+                            `${item.students?.first_name} ${item.students?.last_name}`,
+                            item.books?.title
+                          )}
+                          className="text-red-600 hover:bg-red-50 p-1 rounded"
+                          title="ลบรายการ"
+                        >
+                          <XCircle size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1095,6 +1262,159 @@ export default function DistributionsPage() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Student Print Preview Modal - พิมพ์บัญชีแจกหนังสือรายบุคคล */}
+      {showStudentPrintPreview && selectedStudentForPrint && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800">
+                บัญชีแจกหนังสือเรียน - {selectedStudentForPrint.prefix}{selectedStudentForPrint.first_name} {selectedStudentForPrint.last_name}
+              </h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleStudentPrint}
+                  disabled={loadingStudentDistributions || studentDistributions.length === 0}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Printer size={16} /> พิมพ์
+                </button>
+                <button
+                  onClick={exportStudentPDF}
+                  disabled={loadingStudentDistributions || studentDistributions.length === 0}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FileText size={16} /> บันทึก PDF
+                </button>
+                <button
+                  onClick={() => {
+                    setShowStudentPrintPreview(false)
+                    setSelectedStudentForPrint(null)
+                    setStudentDistributions([])
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100"
+                >
+                  ปิด
+                </button>
+              </div>
+            </div>
+
+            {/* Preview Content */}
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+              {loadingStudentDistributions ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="animate-spin text-blue-600" size={32} />
+                  <span className="ml-3 text-gray-500">กำลังโหลดข้อมูล...</span>
+                </div>
+              ) : studentDistributions.length === 0 ? (
+                <div className="flex items-center justify-center h-64 text-gray-400">
+                  <div className="text-center">
+                    <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium">ไม่พบข้อมูลการแจกหนังสือ</p>
+                    <p className="text-sm mt-1">นักเรียนคนนี้ยังไม่ได้รับหนังสือในปีการศึกษานี้</p>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  ref={studentPrintRef}
+                  className="bg-white mx-auto shadow-lg"
+                  style={{
+                    width: '210mm',
+                    minHeight: '297mm',
+                    padding: '15mm',
+                    fontFamily: 'Sarabun, sans-serif',
+                    wordWrap: 'break-word',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word'
+                  }}
+                >
+                  <div className="print-container">
+                    {/* Header */}
+                    <div className="text-center mb-6">
+                      <h1 className="text-xl font-bold mb-1">บัญชีแจกหนังสือเรียน ภาคเรียนที่ {selectedSemester} ปีการศึกษา {selectedYear}</h1>
+                      <p className="text-base mb-1">โรงเรียนบ้านค้อดอนแคน อำเภอกู่แก้ว จังหวัดอุดรธานี</p>
+                      <p className="text-base">ชั้น{gradeLabel[selectedGrade] || ''}</p>
+                    </div>
+
+                    {/* Table */}
+                    <table className="w-full border-collapse text-sm mb-8" style={{ tableLayout: 'fixed' }}>
+                      <thead>
+                        <tr>
+                          <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '45px' }}>เลขที่</th>
+                          <th className="border border-gray-600 p-2 bg-white text-center">รายชื่อหนังสือ</th>
+                          <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '70px' }}>จำนวน(เล่ม)</th>
+                          <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '110px' }}>วัน/เดือน/ปีที่แจก</th>
+                          <th className="border border-gray-600 p-2 bg-white text-center" style={{ width: '70px' }}>หมายเหตุ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {studentDistributions.map((item, idx) => (
+                          <tr key={item.id}>
+                            <td className="border border-gray-600 p-2 text-center">{idx + 1}</td>
+                            <td className="border border-gray-600 p-2 text-left" style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{item.books?.title || '-'}</td>
+                            <td className="border border-gray-600 p-2 text-center">1</td>
+                            <td className="border border-gray-600 p-2 text-center">{formatShortThaiDate(item.distribution_date)}</td>
+                            <td className="border border-gray-600 p-2 text-center">{item.notes || ''}</td>
+                          </tr>
+                        ))}
+                        {/* Empty rows to fill minimum 10 rows */}
+                        {Array.from({ length: Math.max(0, 10 - studentDistributions.length) }).map((_, idx) => (
+                          <tr key={`empty-${idx}`}>
+                            <td className="border border-gray-600 p-2 h-8">&nbsp;</td>
+                            <td className="border border-gray-600 p-2">&nbsp;</td>
+                            <td className="border border-gray-600 p-2">&nbsp;</td>
+                            <td className="border border-gray-600 p-2">&nbsp;</td>
+                            <td className="border border-gray-600 p-2">&nbsp;</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Signature Section */}
+                    <div className="mt-12">
+                      {/* Row 1: ผู้รับหนังสือ and ครูประจำชั้น */}
+                      <div className="flex justify-between mb-12">
+                        {/* Left - ผู้รับหนังสือ */}
+                        <div className="w-5/12 text-center">
+                          <div className="mb-2">
+                            <span className="text-sm">(ลงชื่อ)........................................................ผู้รับหนังสือ</span>
+                          </div>
+                          <div className="mb-2">
+                            <span className="text-sm">(...{selectedStudentForPrint.prefix}{selectedStudentForPrint.first_name} {selectedStudentForPrint.last_name}...)</span>
+                          </div>
+                        </div>
+
+                        {/* Right - ครูประจำชั้น */}
+                        <div className="w-5/12 text-center">
+                          <div className="mb-2">
+                            <span className="text-sm">(ลงชื่อ)........................................................ครูประจำชั้น</span>
+                          </div>
+                          <div className="mb-2">
+                            <span className="text-sm">(..................................................)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 2: ผู้อำนวยการโรงเรียน (centered) */}
+                      <div className="flex justify-center">
+                        <div className="text-center">
+                          <div className="mb-2">
+                            <span className="text-sm">(ลงชื่อ)........................................................ผู้อำนวยการโรงเรียน</span>
+                          </div>
+                          <div className="mb-2">
+                            <span className="text-sm">(..................................................)</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
