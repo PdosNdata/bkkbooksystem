@@ -45,83 +45,44 @@ export default function DistributionsPage() {
   const fetchBooksByGrade = async () => {
     setLoading(true)
     try {
-      // คำนวณช่วงวันที่ของปีการศึกษา (เริ่ม พ.ค. ปี พ.ศ. ที่เลือก ถึง มี.ค. ปี พ.ศ. ถัดไป)
-      const buddhistYear = parseInt(selectedYear)
-      const gregorianYear = buddhistYear - 543
-      const startDate = `${gregorianYear}-05-01` // เริ่มภาคเรียนที่ 1
-      const endDate = `${gregorianYear + 1}-03-31` // จบภาคเรียนที่ 2
+      console.log('Fetching book_stock for:', { selectedGrade, selectedYear })
 
-      console.log('Fetching withdrawals for:', { selectedGrade, startDate, endDate })
-
-      // ดึงข้อมูลหนังสือจากใบเบิกของครู (withdrawals + withdrawal_items) สำหรับชั้นเรียนที่เลือก
-      const { data: withdrawalsData, error: withdrawalsError } = await supabase
-        .from('withdrawals')
+      // ดึงข้อมูลหนังสือจาก book_stock โดยใช้ distributed_quantity (จำนวนที่แจกไปแล้ว)
+      const { data: stockData, error: stockError } = await supabase
+        .from('book_stock')
         .select(`
           id,
-          withdrawal_number,
+          book_id,
           grade,
-          withdrawn_date,
-          status,
-          withdrawal_items(
-            id,
-            book_id,
-            requested_qty,
-            approved_qty,
-            notes,
-            books(id, title, price, subject)
-          ),
-          requested_by_user:users!withdrawals_requested_by_fkey(full_name)
+          academic_year,
+          quantity,
+          available_quantity,
+          distributed_quantity,
+          books(id, title, price, subject)
         `)
         .eq('grade', selectedGrade)
-        .gte('withdrawn_date', startDate)
-        .lte('withdrawn_date', endDate)
-        .in('status', ['approved', 'completed'])
-        .order('created_at', { ascending: false })
+        .eq('academic_year', selectedYear)
+        .gt('distributed_quantity', 0) // เฉพาะหนังสือที่มีการแจกไปแล้ว
 
-      if (withdrawalsError) {
-        console.error('Error fetching withdrawals:', withdrawalsError)
+      if (stockError) {
+        console.error('Error fetching book_stock:', stockError)
         setBooks([])
         setLoading(false)
         return
       }
 
-      console.log('Withdrawals found:', withdrawalsData?.length || 0, withdrawalsData)
+      console.log('Book stock found:', stockData?.length || 0, stockData)
 
-      // รวมจำนวนหนังสือตามที่ครูเบิกไป (approved_qty) โดยกลุ่มตาม book_id
-      const bookMap = new Map()
-
-      ;(withdrawalsData || []).forEach(withdrawal => {
-        const withdrawnDate = withdrawal.withdrawn_date
-        const teacherName = withdrawal.requested_by_user?.full_name || '-'
-
-        ;(withdrawal.withdrawal_items || []).forEach(item => {
-          if (!item.books) return
-
-          const bookId = item.book_id
-          const approvedQty = item.approved_qty || 0
-
-          if (approvedQty <= 0) return
-
-          if (bookMap.has(bookId)) {
-            // รวมจำนวนหนังสือที่เบิกจากหลายใบเบิก
-            const existing = bookMap.get(bookId)
-            existing.quantity += approvedQty
-          } else {
-            bookMap.set(bookId, {
-              id: item.id,
-              book_id: bookId,
-              title: item.books.title,
-              subject: item.books.subject,
-              quantity: approvedQty, // จำนวนที่ครูเบิกไป
-              withdrawn_date: withdrawnDate,
-              teacher_name: teacherName
-            })
-          }
-        })
-      })
-
-      // แปลง Map เป็น Array
-      const booksData = Array.from(bookMap.values())
+      // แปลงข้อมูลเป็นรูปแบบที่ใช้แสดงผล (แบ่งให้นักเรียนคนละเล่ม)
+      const booksData = (stockData || [])
+        .filter(stock => stock.books) // กรองเฉพาะที่มีข้อมูลหนังสือ
+        .map(stock => ({
+          id: stock.id,
+          book_id: stock.book_id,
+          title: stock.books.title,
+          subject: stock.books.subject,
+          quantity: stock.distributed_quantity, // จำนวนเล่มที่แจกไปแล้ว = จำนวนนักเรียนที่ได้รับ (คนละ 1 เล่ม)
+        }))
 
       setBooks(booksData)
     } catch (err) {
@@ -346,7 +307,7 @@ export default function DistributionsPage() {
             </table>
           </div>
           <p className="text-sm text-gray-500 mt-4">
-            รวมทั้งหมด {books.length} รายการ (รวม {books.reduce((sum, b) => sum + b.quantity, 0)} เล่ม ตามจำนวนที่ครูเบิก)
+            รวมทั้งหมด {books.length} รายการ (รวม {books.reduce((sum, b) => sum + b.quantity, 0)} เล่ม แจกนักเรียนคนละ 1 เล่ม)
           </p>
         </div>
       )}
@@ -358,7 +319,7 @@ export default function DistributionsPage() {
             <div className="text-center">
               <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium">ไม่พบข้อมูลหนังสือ</p>
-              <p className="text-sm mt-1">ไม่พบใบเบิกหนังสือสำหรับชั้น{gradeLabel[selectedGrade]} ปี {selectedYear}</p>
+              <p className="text-sm mt-1">ไม่พบข้อมูลการแจกหนังสือสำหรับชั้น{gradeLabel[selectedGrade]} ปี {selectedYear}</p>
             </div>
           </div>
         </div>
