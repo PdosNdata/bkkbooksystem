@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
-import { UserCheck, Search, Loader2, BookOpen, Printer, FileText, Eye } from 'lucide-react'
+import { UserCheck, Search, Loader2, BookOpen, Printer, FileText, Eye, Users, CheckCircle2, XCircle, History, Gift } from 'lucide-react'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import Swal from 'sweetalert2'
 
 const gradeLabel = {
   kg2: 'อนุบาล 2',
@@ -18,6 +19,12 @@ const gradeLabel = {
   m3: 'มัธยมศึกษาปีที่ 3'
 }
 
+const gradeShortLabel = {
+  kg2: 'อ.2', kg3: 'อ.3',
+  p1: 'ป.1', p2: 'ป.2', p3: 'ป.3', p4: 'ป.4', p5: 'ป.5', p6: 'ป.6',
+  m1: 'ม.1', m2: 'ม.2', m3: 'ม.3'
+}
+
 const gradeOptions = ['kg2', 'kg3', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'm1', 'm2', 'm3']
 
 export default function DistributionsPage() {
@@ -30,6 +37,17 @@ export default function DistributionsPage() {
   const [showPrintPreview, setShowPrintPreview] = useState(false)
   const printRef = useRef(null)
 
+  // สำหรับ Modal แจกนักเรียน
+  const [showDistributeModal, setShowDistributeModal] = useState(false)
+  const [students, setStudents] = useState([])
+  const [selectedStudents, setSelectedStudents] = useState([])
+  const [selectedBooks, setSelectedBooks] = useState([])
+  const [distributionHistory, setDistributionHistory] = useState([])
+  const [loadingStudents, setLoadingStudents] = useState(false)
+  const [distributing, setDistributing] = useState(false)
+  const [activeTab, setActiveTab] = useState('distribute') // 'distribute' or 'history'
+  const [searchStudent, setSearchStudent] = useState('')
+
   // Generate year options (current year +/- 2 years in Buddhist Era)
   const currentBuddhistYear = new Date().getFullYear() + 543
   const yearOptions = Array.from({ length: 5 }, (_, i) => (currentBuddhistYear - 2 + i).toString())
@@ -37,8 +55,10 @@ export default function DistributionsPage() {
   useEffect(() => {
     if (selectedGrade && selectedYear) {
       fetchBooksByGrade()
+      fetchDistributionHistory()
     } else {
       setBooks([])
+      setDistributionHistory([])
     }
   }, [selectedGrade, selectedYear])
 
@@ -79,9 +99,11 @@ export default function DistributionsPage() {
         .map(stock => ({
           id: stock.id,
           book_id: stock.book_id,
+          book_stock_id: stock.id,
           title: stock.books.title,
           subject: stock.books.subject,
           quantity: stock.distributed_quantity, // จำนวนเล่มที่แจกไปแล้ว = จำนวนนักเรียนที่ได้รับ (คนละ 1 เล่ม)
+          available_quantity: stock.available_quantity,
         }))
 
       setBooks(booksData)
@@ -90,6 +112,122 @@ export default function DistributionsPage() {
       setBooks([])
     }
     setLoading(false)
+  }
+
+  // ดึงข้อมูลหนังสือที่มีในคลัง (ยังไม่จำเป็นต้องมี distributed_quantity > 0)
+  const fetchAvailableBooks = async () => {
+    try {
+      const { data: stockData, error: stockError } = await supabase
+        .from('book_stock')
+        .select(`
+          id,
+          book_id,
+          grade,
+          academic_year,
+          quantity,
+          available_quantity,
+          distributed_quantity,
+          books(id, title, price, subject)
+        `)
+        .eq('grade', selectedGrade)
+        .eq('academic_year', selectedYear)
+        .gt('quantity', 0)
+
+      if (stockError) {
+        console.error('Error fetching available books:', stockError)
+        return []
+      }
+
+      return (stockData || [])
+        .filter(stock => stock.books)
+        .map(stock => ({
+          id: stock.id,
+          book_id: stock.book_id,
+          book_stock_id: stock.id,
+          title: stock.books.title,
+          subject: stock.books.subject,
+          available_quantity: stock.available_quantity,
+          distributed_quantity: stock.distributed_quantity,
+        }))
+    } catch (err) {
+      console.error('Fetch available books error:', err)
+      return []
+    }
+  }
+
+  // ดึงข้อมูลนักเรียนตามชั้นเรียน
+  const fetchStudentsByGrade = async () => {
+    setLoadingStudents(true)
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .eq('grade', selectedGrade)
+        .order('gender', { ascending: false }) // ชาย (male) ก่อน หญิง (female)
+        .order('student_id')
+
+      if (error) {
+        console.error('Error fetching students:', error)
+        setStudents([])
+      } else {
+        // ดึงข้อมูลว่านักเรียนคนไหนได้รับหนังสือเล่มไหนไปแล้ว
+        const { data: distributions } = await supabase
+          .from('student_book_distributions')
+          .select('student_id, book_id')
+          .eq('grade', selectedGrade)
+          .eq('academic_year', selectedYear)
+
+        const distributedMap = {}
+        ;(distributions || []).forEach(d => {
+          if (!distributedMap[d.student_id]) {
+            distributedMap[d.student_id] = new Set()
+          }
+          distributedMap[d.student_id].add(d.book_id)
+        })
+
+        const studentsWithStatus = (data || []).map(s => ({
+          ...s,
+          distributed_books: distributedMap[s.id] || new Set()
+        }))
+
+        setStudents(studentsWithStatus)
+      }
+    } catch (err) {
+      console.error('Fetch students error:', err)
+      setStudents([])
+    }
+    setLoadingStudents(false)
+  }
+
+  // ดึงประวัติการแจกหนังสือ
+  const fetchDistributionHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('student_book_distributions')
+        .select(`
+          id,
+          distribution_date,
+          semester,
+          notes,
+          created_at,
+          students(id, student_id, prefix, first_name, last_name, gender),
+          books(id, title, subject)
+        `)
+        .eq('grade', selectedGrade)
+        .eq('academic_year', selectedYear)
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (error) {
+        console.error('Error fetching distribution history:', error)
+        setDistributionHistory([])
+      } else {
+        setDistributionHistory(data || [])
+      }
+    } catch (err) {
+      console.error('Fetch history error:', err)
+      setDistributionHistory([])
+    }
   }
 
   const formatThaiDate = (dateString) => {
@@ -184,6 +322,237 @@ export default function DistributionsPage() {
     setShowPrintPreview(true)
   }
 
+  // เปิด Modal แจกนักเรียน
+  const openDistributeModal = async () => {
+    if (!selectedGrade) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกชั้นเรียน',
+        text: 'กรุณาเลือกชั้นเรียนก่อนแจกหนังสือ',
+        confirmButtonColor: '#2563eb'
+      })
+      return
+    }
+
+    setShowDistributeModal(true)
+    setSelectedStudents([])
+    setSelectedBooks([])
+    setActiveTab('distribute')
+    setSearchStudent('')
+
+    // ดึงข้อมูลนักเรียนและหนังสือ
+    await fetchStudentsByGrade()
+    const availableBooks = await fetchAvailableBooks()
+    setSelectedBooks(availableBooks.map(b => ({ ...b, selected: false })))
+  }
+
+  // เลือก/ยกเลิกนักเรียนทั้งหมด
+  const toggleSelectAllStudents = () => {
+    const filteredStudents = students.filter(s =>
+      `${s.student_id} ${s.first_name} ${s.last_name}`.toLowerCase().includes(searchStudent.toLowerCase())
+    )
+    if (selectedStudents.length === filteredStudents.length) {
+      setSelectedStudents([])
+    } else {
+      setSelectedStudents(filteredStudents.map(s => s.id))
+    }
+  }
+
+  // เลือก/ยกเลิกนักเรียน
+  const toggleStudent = (studentId) => {
+    setSelectedStudents(prev =>
+      prev.includes(studentId)
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    )
+  }
+
+  // เลือก/ยกเลิกหนังสือทั้งหมด
+  const toggleSelectAllBooks = () => {
+    const allSelected = selectedBooks.every(b => b.selected)
+    setSelectedBooks(selectedBooks.map(b => ({ ...b, selected: !allSelected })))
+  }
+
+  // เลือก/ยกเลิกหนังสือ
+  const toggleBook = (bookStockId) => {
+    setSelectedBooks(selectedBooks.map(b =>
+      b.book_stock_id === bookStockId ? { ...b, selected: !b.selected } : b
+    ))
+  }
+
+  // บันทึกการแจกหนังสือ
+  const handleDistribute = async () => {
+    const selectedBooksList = selectedBooks.filter(b => b.selected)
+
+    if (selectedStudents.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกนักเรียน',
+        text: 'กรุณาเลือกนักเรียนอย่างน้อย 1 คน',
+        confirmButtonColor: '#2563eb'
+      })
+      return
+    }
+
+    if (selectedBooksList.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกหนังสือ',
+        text: 'กรุณาเลือกหนังสืออย่างน้อย 1 เล่ม',
+        confirmButtonColor: '#2563eb'
+      })
+      return
+    }
+
+    // สร้างรายการแจก (กรองเฉพาะที่ยังไม่ได้รับ)
+    const distributionRecords = []
+    const skippedCount = { students: 0, books: 0 }
+
+    for (const studentId of selectedStudents) {
+      const student = students.find(s => s.id === studentId)
+      if (!student) continue
+
+      for (const book of selectedBooksList) {
+        // ตรวจสอบว่านักเรียนได้รับหนังสือเล่มนี้ไปแล้วหรือยัง
+        if (student.distributed_books && student.distributed_books.has(book.book_id)) {
+          skippedCount.books++
+          continue
+        }
+
+        distributionRecords.push({
+          student_id: studentId,
+          book_id: book.book_id,
+          book_stock_id: book.book_stock_id,
+          academic_year: selectedYear,
+          grade: selectedGrade,
+          distribution_date: distributionDate,
+          semester: selectedSemester,
+        })
+      }
+    }
+
+    if (distributionRecords.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'นักเรียนได้รับหนังสือแล้ว',
+        text: 'นักเรียนที่เลือกได้รับหนังสือที่เลือกทั้งหมดไปแล้ว',
+        confirmButtonColor: '#2563eb'
+      })
+      return
+    }
+
+    // ยืนยันการแจก
+    const confirmResult = await Swal.fire({
+      title: 'ยืนยันการแจกหนังสือ',
+      html: `
+        <div class="text-left">
+          <p>นักเรียนที่เลือก: <strong>${selectedStudents.length}</strong> คน</p>
+          <p>หนังสือที่เลือก: <strong>${selectedBooksList.length}</strong> เล่ม</p>
+          <p>จำนวนรายการแจก: <strong>${distributionRecords.length}</strong> รายการ</p>
+          ${skippedCount.books > 0 ? `<p class="text-orange-600 text-sm mt-2">* ข้ามรายการที่เคยแจกแล้ว ${skippedCount.books} รายการ</p>` : ''}
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'ยืนยันแจก',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#16a34a',
+      cancelButtonColor: '#6b7280'
+    })
+
+    if (!confirmResult.isConfirmed) return
+
+    setDistributing(true)
+
+    try {
+      // บันทึกลงฐานข้อมูล
+      const { error } = await supabase
+        .from('student_book_distributions')
+        .insert(distributionRecords)
+
+      if (error) {
+        console.error('Error saving distributions:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message,
+          confirmButtonColor: '#2563eb'
+        })
+      } else {
+        Swal.fire({
+          icon: 'success',
+          title: 'แจกหนังสือสำเร็จ',
+          text: `แจกหนังสือให้นักเรียน ${distributionRecords.length} รายการ`,
+          timer: 2000,
+          showConfirmButton: false
+        })
+
+        // รีเฟรชข้อมูล
+        await fetchStudentsByGrade()
+        await fetchDistributionHistory()
+        await fetchBooksByGrade()
+
+        // Reset selections
+        setSelectedStudents([])
+        setSelectedBooks(prev => prev.map(b => ({ ...b, selected: false })))
+      }
+    } catch (err) {
+      console.error('Distribute error:', err)
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'ไม่สามารถบันทึกการแจกหนังสือได้',
+        confirmButtonColor: '#2563eb'
+      })
+    }
+
+    setDistributing(false)
+  }
+
+  // ลบรายการแจก
+  const handleDeleteDistribution = async (id, studentName, bookTitle) => {
+    const result = await Swal.fire({
+      title: 'ยืนยันลบรายการแจก',
+      html: `ต้องการลบรายการแจก<br/>"${bookTitle}"<br/>ให้ "${studentName}" หรือไม่?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ลบ',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280'
+    })
+
+    if (!result.isConfirmed) return
+
+    const { error } = await supabase
+      .from('student_book_distributions')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'ลบไม่สำเร็จ',
+        text: error.message
+      })
+    } else {
+      Swal.fire({
+        icon: 'success',
+        title: 'ลบสำเร็จ',
+        timer: 1200,
+        showConfirmButton: false
+      })
+      await fetchDistributionHistory()
+      await fetchStudentsByGrade()
+      await fetchBooksByGrade()
+    }
+  }
+
+  // กรองนักเรียนตามการค้นหา
+  const filteredStudents = students.filter(s =>
+    `${s.student_id} ${s.first_name} ${s.last_name}`.toLowerCase().includes(searchStudent.toLowerCase())
+  )
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -199,7 +568,7 @@ export default function DistributionsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border p-6">
-        <h2 className="text-lg font-semibold mb-4">เลือกข้อมูลสำหรับพิมพ์บัญชีแจก</h2>
+        <h2 className="text-lg font-semibold mb-4">เลือกข้อมูลสำหรับแจกหนังสือ</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Grade Selection */}
           <div>
@@ -256,11 +625,19 @@ export default function DistributionsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mt-6">
+        <div className="flex flex-wrap gap-3 mt-6">
+          <button
+            onClick={openDistributeModal}
+            disabled={!selectedGrade}
+            className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Gift size={18} />
+            แจกนักเรียน
+          </button>
           <button
             onClick={openPrintPreview}
             disabled={!selectedGrade || books.length === 0}
-            className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Eye size={18} />
             ดูตัวอย่างก่อนพิมพ์
@@ -280,7 +657,7 @@ export default function DistributionsPage() {
       {!loading && selectedGrade && books.length > 0 && (
         <div className="bg-white rounded-xl border p-6">
           <h3 className="text-lg font-semibold mb-4">
-            รายการหนังสือ ชั้น{gradeLabel[selectedGrade]} ปีการศึกษา {selectedYear}
+            รายการหนังสือที่แจกแล้ว ชั้น{gradeLabel[selectedGrade]} ปีการศึกษา {selectedYear}
           </h3>
           <div className="overflow-x-auto">
             <table className="table w-full">
@@ -312,14 +689,71 @@ export default function DistributionsPage() {
         </div>
       )}
 
+      {/* Distribution History */}
+      {!loading && selectedGrade && distributionHistory.length > 0 && (
+        <div className="bg-white rounded-xl border p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <History size={20} className="text-blue-600" />
+            ประวัติการแจกหนังสือ (ล่าสุด 100 รายการ)
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="table w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="w-12">#</th>
+                  <th>รหัสนักเรียน</th>
+                  <th>ชื่อ-นามสกุล</th>
+                  <th>หนังสือ</th>
+                  <th className="text-center">วันที่แจก</th>
+                  <th className="text-center">ดำเนินการ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {distributionHistory.slice(0, 20).map((item, idx) => (
+                  <tr key={item.id}>
+                    <td className="text-center text-gray-400">{idx + 1}</td>
+                    <td className="font-mono text-blue-700">{item.students?.student_id || '-'}</td>
+                    <td>
+                      <span className={item.students?.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}>
+                        {item.students?.prefix} {item.students?.first_name} {item.students?.last_name}
+                      </span>
+                    </td>
+                    <td>{item.books?.title || '-'}</td>
+                    <td className="text-center">{formatShortThaiDate(item.distribution_date)}</td>
+                    <td className="text-center">
+                      <button
+                        onClick={() => handleDeleteDistribution(
+                          item.id,
+                          `${item.students?.first_name} ${item.students?.last_name}`,
+                          item.books?.title
+                        )}
+                        className="text-red-600 hover:bg-red-50 p-1 rounded"
+                        title="ลบรายการ"
+                      >
+                        <XCircle size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {distributionHistory.length > 20 && (
+            <p className="text-sm text-gray-400 mt-2 text-center">
+              แสดง 20 รายการแรก จากทั้งหมด {distributionHistory.length} รายการ
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Empty State */}
-      {!loading && selectedGrade && books.length === 0 && (
+      {!loading && selectedGrade && books.length === 0 && distributionHistory.length === 0 && (
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-center h-32 text-gray-400">
             <div className="text-center">
               <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium">ไม่พบข้อมูลหนังสือ</p>
-              <p className="text-sm mt-1">ไม่พบข้อมูลการแจกหนังสือสำหรับชั้น{gradeLabel[selectedGrade]} ปี {selectedYear}</p>
+              <p className="text-lg font-medium">ไม่พบข้อมูลการแจกหนังสือ</p>
+              <p className="text-sm mt-1">คลิกปุ่ม "แจกนักเรียน" เพื่อเริ่มบันทึกการแจก</p>
             </div>
           </div>
         </div>
@@ -462,6 +896,204 @@ export default function DistributionsPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Distribute Modal */}
+      {showDistributeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <Gift size={24} />
+                แจกหนังสือให้นักเรียน - ชั้น{gradeLabel[selectedGrade]}
+              </h3>
+              <p className="text-blue-100 text-sm mt-1">ปีการศึกษา {selectedYear} ภาคเรียนที่ {selectedSemester}</p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-hidden flex">
+              {/* Left Panel - Students */}
+              <div className="w-1/2 border-r flex flex-col">
+                <div className="p-4 bg-gray-50 border-b">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Users size={18} className="text-blue-600" />
+                      รายชื่อนักเรียน ({filteredStudents.length} คน)
+                    </h4>
+                    <button
+                      onClick={toggleSelectAllStudents}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      {selectedStudents.length === filteredStudents.length ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งหมด'}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="ค้นหานักเรียน..."
+                      className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm"
+                      value={searchStudent}
+                      onChange={(e) => setSearchStudent(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4">
+                  {loadingStudents ? (
+                    <div className="flex items-center justify-center h-32">
+                      <Loader2 className="animate-spin text-blue-600" size={24} />
+                      <span className="ml-2 text-gray-500">กำลังโหลด...</span>
+                    </div>
+                  ) : filteredStudents.length === 0 ? (
+                    <div className="text-center text-gray-400 py-8">
+                      ไม่พบนักเรียนในชั้นนี้
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredStudents.map((student) => {
+                        const isSelected = selectedStudents.includes(student.id)
+                        const hasDistributed = student.distributed_books && student.distributed_books.size > 0
+
+                        return (
+                          <label
+                            key={student.id}
+                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                              isSelected
+                                ? 'bg-blue-50 border border-blue-200'
+                                : 'bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleStudent(student.id)}
+                              className="w-4 h-4 text-blue-600 rounded"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-sm font-medium ${student.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}`}>
+                                  {student.prefix} {student.first_name} {student.last_name}
+                                </span>
+                                {hasDistributed && (
+                                  <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                                    ได้รับแล้ว {student.distributed_books.size} เล่ม
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs text-gray-400 mt-0.5">
+                                รหัส: {student.student_id}
+                              </div>
+                            </div>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-4 bg-gray-50 border-t">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle2 size={16} className="text-green-600" />
+                    เลือกแล้ว: <span className="font-semibold text-blue-600">{selectedStudents.length}</span> คน
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Panel - Books */}
+              <div className="w-1/2 flex flex-col">
+                <div className="p-4 bg-gray-50 border-b">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <BookOpen size={18} className="text-green-600" />
+                      รายการหนังสือ ({selectedBooks.length} เล่ม)
+                    </h4>
+                    <button
+                      onClick={toggleSelectAllBooks}
+                      className="text-sm text-green-600 hover:text-green-800"
+                    >
+                      {selectedBooks.every(b => b.selected) ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งหมด'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4">
+                  {selectedBooks.length === 0 ? (
+                    <div className="text-center text-gray-400 py-8">
+                      ไม่พบหนังสือในคลัง
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {selectedBooks.map((book) => (
+                        <label
+                          key={book.book_stock_id}
+                          className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                            book.selected
+                              ? 'bg-green-50 border border-green-200'
+                              : 'bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={book.selected}
+                            onChange={() => toggleBook(book.book_stock_id)}
+                            className="w-4 h-4 text-green-600 rounded"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{book.title}</div>
+                            <div className="text-xs text-gray-400 mt-0.5">
+                              {book.subject || 'ไม่ระบุวิชา'}
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-4 bg-gray-50 border-t">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <BookOpen size={16} className="text-green-600" />
+                    เลือกแล้ว: <span className="font-semibold text-green-600">{selectedBooks.filter(b => b.selected).length}</span> เล่ม
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t bg-gray-50 flex justify-between items-center">
+              <div className="text-sm text-gray-600">
+                วันที่แจก: <span className="font-medium">{formatShortThaiDate(distributionDate)}</span>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDistributeModal(false)}
+                  className="px-5 py-2.5 border border-gray-300 rounded-xl text-sm hover:bg-gray-100"
+                >
+                  ปิด
+                </button>
+                <button
+                  onClick={handleDistribute}
+                  disabled={distributing || selectedStudents.length === 0 || selectedBooks.filter(b => b.selected).length === 0}
+                  className="px-5 py-2.5 bg-green-600 text-white rounded-xl text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {distributing ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      กำลังบันทึก...
+                    </>
+                  ) : (
+                    <>
+                      <Gift size={16} />
+                      แจกหนังสือ ({selectedStudents.length} คน x {selectedBooks.filter(b => b.selected).length} เล่ม)
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
