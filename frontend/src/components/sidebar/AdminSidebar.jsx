@@ -5,7 +5,14 @@ import {
   Users,
   Wallet,
   FileText,
-  LogOut
+  LogOut,
+  BookOpen,
+  PackageCheck,
+  ClipboardCheck,
+  PackageOpen,
+  ClipboardList,
+  Gift,
+  Settings
 } from 'lucide-react'
 
 export default function Sidebar() {
@@ -16,7 +23,7 @@ export default function Sidebar() {
           🎓
         </div>
         <div>
-          <p className="font-bold">ผู้ดูแลระบบหนังสือเรียน</p>
+          <p className="font-bold text-black">ผู้ดูแลระบบหนังสือเรียน</p>
           <p className="text-xs text-gray-500">ผู้ดูแลระบบ</p>
         </div>
       </div>
@@ -24,8 +31,14 @@ export default function Sidebar() {
       <nav className="space-y-2">
         <NavItem to="/admin/dashboard" icon={<LayoutDashboard />} label="แดชบอร์ด" />
         <NavItem to="/admin/orders" icon={<ShoppingCart />} label="คำสั่งซื้อ" badge="12" />
-        <NavItem to="/admin/budgets" icon={<Wallet />} label="การตั้งค่างบประมาณ" />
+        <NavItem to="/admin/inventory" icon={<BookOpen />} label="คลังหนังสือ" />
+        <NavItem to="/admin/book-receives" icon={<PackageCheck />} label="รับหนังสือ" />
+        <NavItem to="/admin/book-receipts" icon={<ClipboardCheck />} label="ใบรับ" />
+        <NavItem to="/admin/book-withdrawals" icon={<PackageOpen />} label="เบิกหนังสือ" />
+        <NavItem to="/admin/withdrawal-slips" icon={<ClipboardList />} label="ใบเบิก" />
+        <NavItem to="/admin/distribute" icon={<Gift />} label="แจกให้นักเรียน" />
         <NavItem to="/admin/users" icon={<Users />} label="การจัดการผู้ใช้" />
+        <NavItem to="/admin/settings" icon={<Settings />} label="การตั้งค่าเอกสารและปีงบประมาณ" />
         <NavItem to="/admin/reports" icon={<FileText />} label="รายงาน" />
       </nav>
 
@@ -42,7 +55,7 @@ function NavItem({ to, icon, label, badge }) {
   return (
     <NavLink
       to={to}
-      className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700"
+      className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-blue-50 text-black"
     >
       <div className="flex items-center gap-2">
         {icon}
