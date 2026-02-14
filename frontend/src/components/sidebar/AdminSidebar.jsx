@@ -55,11 +55,12 @@ function NavItem({ to, icon, label, badge }) {
   return (
     <NavLink
       to={to}
-      className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-blue-50 text-black"
+      className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-blue-50"
+      style={{ color: '#000000' }}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" style={{ color: '#000000' }}>
         {icon}
-        {label}
+        <span style={{ color: '#000000' }}>{label}</span>
       </div>
       {badge && (
         <span className="bg-red-500 text-white text-xs px-2 rounded-full">
