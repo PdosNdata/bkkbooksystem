@@ -175,15 +175,15 @@ export default function UserManagementPage() {
   const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
+    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">การจัดการผู้ใช้</h1>
-          <p className="text-gray-500 text-sm mt-1">จัดการบัญชีผู้ใช้ทั้งหมดในระบบ ({users.length} คน)</p>
+          <h1 className="text-2xl font-bold dark:text-white">การจัดการผู้ใช้</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">จัดการบัญชีผู้ใช้ทั้งหมดในระบบ ({users.length} คน)</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
           <UserPlus size={16} /> เพิ่มผู้ใช้
@@ -193,12 +193,12 @@ export default function UserManagementPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(roleLabels).map(([role, label]) => (
-          <div key={role} className="bg-white rounded-xl border p-4 flex items-center gap-3">
+          <div key={role} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4 flex items-center gap-3">
             <div className={`p-2.5 rounded-xl ${
-              role === 'admin' ? 'bg-purple-50' : 
-              role === 'staff' ? 'bg-orange-50' : 
-              role === 'warehouse' ? 'bg-green-50' : 
-              'bg-blue-50'
+              role === 'admin' ? 'bg-purple-50 dark:bg-purple-900/30' :
+              role === 'staff' ? 'bg-orange-50 dark:bg-orange-900/30' :
+              role === 'warehouse' ? 'bg-green-50 dark:bg-green-900/30' :
+              'bg-blue-50 dark:bg-blue-900/30'
             }`}>
               <User size={20} className={
                 role === 'admin' ? 'text-purple-600' : 
@@ -208,21 +208,21 @@ export default function UserManagementPage() {
               } />
             </div>
             <div>
-              <p className="text-xs text-gray-500">{label}</p>
-              <p className="text-xl font-bold">{users.filter(u => u.role === role).length}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+              <p className="text-xl font-bold dark:text-white">{users.filter(u => u.role === role).length}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-3 mb-5">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="text" placeholder="ค้นหาชื่อหรืออีเมล..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
+            <input type="text" placeholder="ค้นหาชื่อหรืออีเมล..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
           </div>
-          <select className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm" value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setCurrentPage(1) }}>
+          <select className="border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200" value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setCurrentPage(1) }}>
             <option value="all">ทุกตำแหน่ง</option>
             {Object.entries(roleLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
@@ -232,7 +232,7 @@ export default function UserManagementPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-600">
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <th className="text-left px-4 py-3 font-medium">ผู้ใช้</th>
                 <th className="text-left px-4 py-3 font-medium">อีเมล</th>
                 <th className="text-center px-4 py-3 font-medium">ตำแหน่ง</th>

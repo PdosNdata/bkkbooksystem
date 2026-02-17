@@ -4,25 +4,25 @@ import { supabase } from '../../lib/supabase';
 
 // Inline UI Components
 const Card = ({ children, className = '' }) => (
-  <div className={`rounded-lg border-2 border-gray-200 bg-white shadow-lg ${className}`}>
+  <div className={`rounded-lg border-2 border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 ${className}`}>
     {children}
   </div>
 );
 
 const CardHeader = ({ children, className = '' }) => (
-  <div className={`flex flex-col space-y-1.5 p-6 border-b border-gray-100 bg-gray-50 ${className}`}>
+  <div className={`flex flex-col space-y-1.5 p-6 border-b border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-700 ${className}`}>
     {children}
   </div>
 );
 
 const CardTitle = ({ children, className = '' }) => (
-  <h3 className={`text-2xl font-bold leading-none tracking-tight text-gray-800 ${className}`}>
+  <h3 className={`text-2xl font-bold leading-none tracking-tight text-gray-800 dark:text-white ${className}`}>
     {children}
   </h3>
 );
 
 const CardDescription = ({ children, className = '' }) => (
-  <p className={`text-sm text-gray-600 ${className}`}>
+  <p className={`text-sm text-gray-600 dark:text-gray-300 ${className}`}>
     {children}
   </p>
 );
@@ -36,11 +36,11 @@ const CardContent = ({ children, className = '' }) => (
 const Button = ({ children, onClick, disabled, variant = 'default', size = 'default', className = '' }) => {
   const variants = {
     default: 'bg-blue-600 text-white hover:bg-blue-700 shadow-md',
-    outline: 'border-2 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 text-gray-700',
-    ghost: 'hover:bg-gray-100 hover:text-gray-900 text-gray-700',
+    outline: 'border-2 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:border-gray-500',
+    ghost: 'hover:bg-gray-100 hover:text-gray-900 text-gray-700 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white',
     destructive: 'bg-red-600 text-white hover:bg-red-700 shadow-md',
   };
-  
+
   const sizes = {
     default: 'h-10 px-4 py-2',
     sm: 'h-9 px-3 text-sm',
@@ -51,7 +51,7 @@ const Button = ({ children, onClick, disabled, variant = 'default', size = 'defa
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-md font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-300 ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-md font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-300 dark:disabled:bg-gray-600 ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {children}
     </button>
@@ -67,7 +67,7 @@ const Input = ({ value, onChange, onBlur, disabled, type = 'text', min, max, cla
     disabled={disabled}
     min={min}
     max={max}
-    className={`flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 ${className}`}
+    className={`flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:disabled:bg-gray-600 ${className}`}
     {...props}
   />
 );
@@ -75,7 +75,7 @@ const Input = ({ value, onChange, onBlur, disabled, type = 'text', min, max, cla
 const Label = ({ children, htmlFor, className = '' }) => (
   <label
     htmlFor={htmlFor}
-    className={`text-sm font-semibold leading-none text-gray-700 mb-1.5 block ${className}`}
+    className={`text-sm font-semibold leading-none text-gray-700 mb-1.5 block dark:text-gray-200 ${className}`}
   >
     {children}
   </label>
@@ -106,7 +106,7 @@ const Tabs = ({ children, defaultValue, className = '' }) => {
 };
 
 const TabsList = ({ children, activeTab, setActiveTab, className = '' }) => (
-  <div className={`inline-flex h-12 items-center justify-center rounded-lg bg-gray-100 p-1.5 shadow-inner ${className}`}>
+  <div className={`inline-flex h-12 items-center justify-center rounded-lg bg-gray-100 p-1.5 shadow-inner dark:bg-gray-700 ${className}`}>
     {React.Children.map(children, child =>
       React.cloneElement(child, { activeTab, setActiveTab })
     )}
@@ -118,8 +118,8 @@ const TabsTrigger = ({ children, value, activeTab, setActiveTab }) => (
     onClick={() => setActiveTab(value)}
     className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
       activeTab === value
-        ? 'bg-white text-blue-700 shadow-md'
-        : 'text-gray-600 hover:bg-white/50 hover:text-gray-900'
+        ? 'bg-white text-blue-700 shadow-md dark:bg-gray-600 dark:text-blue-400'
+        : 'text-gray-600 hover:bg-white/50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-600/50 dark:hover:text-white'
     }`}
   >
     {children}
@@ -144,7 +144,7 @@ const Switch = ({ checked, onCheckedChange, disabled }) => (
     onClick={() => !disabled && onCheckedChange(!checked)}
     disabled={disabled}
     className={`peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-      checked ? 'bg-blue-600 border-blue-600' : 'bg-gray-300 border-gray-300'
+      checked ? 'bg-blue-600 border-blue-600' : 'bg-gray-300 border-gray-300 dark:bg-gray-600 dark:border-gray-600'
     }`}
   >
     <span
@@ -513,21 +513,21 @@ const SettingDoc = () => {
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Wallet className="h-8 w-8 text-blue-700" />
+          <div className="p-2 bg-blue-100 rounded-lg dark:bg-blue-900">
+            <Wallet className="h-8 w-8 text-blue-700 dark:text-blue-300" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">การตั้งค่าเอกสารและปีงบประมาณ</h1>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">การตั้งค่าเอกสารและปีงบประมาณ</h1>
         </div>
-        <p className="text-gray-600 text-base">
+        <p className="text-gray-600 text-base dark:text-gray-300">
           จัดการเลขที่เอกสาร ประเภทเอกสาร และตั้งค่าปีงบประมาณ
         </p>
       </div>
 
       {message.text && (
         <Alert className={`mb-6 ${
-          message.type === 'success' ? 'bg-green-50 border-green-500' : 
-          message.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
-          'bg-red-50 border-red-500'
+          message.type === 'success' ? 'bg-green-50 border-green-500 dark:bg-green-900/30 dark:border-green-600' :
+          message.type === 'warning' ? 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/30 dark:border-yellow-600' :
+          'bg-red-50 border-red-500 dark:bg-red-900/30 dark:border-red-600'
         }`}>
           <div className="flex items-center gap-2">
             {message.type === 'success' ? (
@@ -538,9 +538,9 @@ const SettingDoc = () => {
               <AlertCircle className="h-5 w-5 text-red-600" />
             )}
             <AlertDescription className={
-              message.type === 'success' ? 'text-green-800' : 
-              message.type === 'warning' ? 'text-yellow-800' :
-              'text-red-800'
+              message.type === 'success' ? 'text-green-800 dark:text-green-200' :
+              message.type === 'warning' ? 'text-yellow-800 dark:text-yellow-200' :
+              'text-red-800 dark:text-red-200'
             }>
               {message.text}
             </AlertDescription>
@@ -576,8 +576,8 @@ const SettingDoc = () => {
             <CardContent>
               {loading ? (
                 <div className="text-center py-12">
-                  <RefreshCw className="h-10 w-10 animate-spin mx-auto text-blue-600" />
-                  <p className="mt-3 text-gray-600 font-medium">กำลังโหลดข้อมูล...</p>
+                  <RefreshCw className="h-10 w-10 animate-spin mx-auto text-blue-600 dark:text-blue-400" />
+                  <p className="mt-3 text-gray-600 dark:text-gray-300 font-medium">กำลังโหลดข้อมูล...</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -655,8 +655,8 @@ const SettingDoc = () => {
                               />
                               <Label>เปิดใช้งาน</Label>
                             </div>
-                            <div className="text-sm text-gray-600">
-                              ตัวอย่าง: <span className="font-mono font-bold text-blue-700 text-base">{generatePreview(docType, 1)}</span>
+                            <div className="text-sm text-gray-600 dark:text-gray-300">
+                              ตัวอย่าง: <span className="font-mono font-bold text-blue-700 dark:text-blue-400 text-base">{generatePreview(docType, 1)}</span>
                             </div>
                           </div>
                         </div>
@@ -679,15 +679,15 @@ const SettingDoc = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mb-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+              <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-blue-900">ปีงบประมาณปัจจุบัน</Label>
-                    <p className="text-3xl font-bold text-blue-700">พ.ศ. {currentFiscalYear}</p>
+                    <Label className="text-blue-900 dark:text-blue-200">ปีงบประมาณปัจจุบัน</Label>
+                    <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">พ.ศ. {currentFiscalYear}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">เลขที่เอกสารจะใช้ปีงบประมาณนี้</p>
-                    <p className="text-xs text-gray-500 mt-1">สามารถเปลี่ยนได้ที่แท็บ "ปีงบประมาณ"</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">เลขที่เอกสารจะใช้ปีงบประมาณนี้</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">สามารถเปลี่ยนได้ที่แท็บ "ปีงบประมาณ"</p>
                   </div>
                 </div>
               </div>
@@ -703,12 +703,12 @@ const SettingDoc = () => {
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="font-semibold text-lg">{docType.name_th}</h3>
-                              <p className="text-sm text-muted-foreground">{docType.name_en}</p>
+                              <h3 className="font-semibold text-lg dark:text-white">{docType.name_th}</h3>
+                              <p className="text-sm text-muted-foreground dark:text-gray-400">{docType.name_en}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm text-gray-600 font-medium">เลขที่ถัดไป</p>
-                              <p className="font-mono text-3xl font-bold text-blue-700 mt-1">
+                              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">เลขที่ถัดไป</p>
+                              <p className="font-mono text-3xl font-bold text-blue-700 dark:text-blue-400 mt-1">
                                 {generatePreview(docType, nextNumber)}
                               </p>
                             </div>
@@ -753,9 +753,9 @@ const SettingDoc = () => {
                             </div>
                           </div>
 
-                          <div className="text-xs bg-blue-50 border-2 border-blue-200 p-4 rounded-lg">
-                            <strong className="text-blue-900">💡 หมายเหตุ:</strong> 
-                            <span className="text-blue-800"> เลขที่เอกสารจะถูกสร้างอัตโนมัติเมื่อสร้างเอกสารใหม่ 
+                          <div className="text-xs bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700 p-4 rounded-lg">
+                            <strong className="text-blue-900 dark:text-blue-200">💡 หมายเหตุ:</strong>
+                            <span className="text-blue-800 dark:text-blue-300"> เลขที่เอกสารจะถูกสร้างอัตโนมัติเมื่อสร้างเอกสารใหม่
                             โดยจะเพิ่มขึ้นทีละ 1 จากเลขที่ปัจจุบัน และใช้ปีงบประมาณ {currentFiscalYear}</span>
                           </div>
                         </div>
@@ -779,9 +779,9 @@ const SettingDoc = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* งบประมาณ */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-200 dark:border-green-700 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-bold text-green-900 text-lg flex items-center gap-2">
+                  <h4 className="font-bold text-green-900 dark:text-green-200 text-lg flex items-center gap-2">
                     <Wallet className="h-5 w-5" />
                     งบประมาณรวม
                   </h4>
@@ -797,18 +797,18 @@ const SettingDoc = () => {
                 </div>
                 
                 {/* แสดงยอดรวมจากตาราง budgets */}
-                <div className="mb-4 bg-white border-2 border-green-300 rounded-lg p-4">
+                <div className="mb-4 bg-white dark:bg-gray-800 border-2 border-green-300 dark:border-green-600 rounded-lg p-4">
                   {loading ? (
                     <div className="text-center py-4">
-                      <RefreshCw className="h-6 w-6 animate-spin mx-auto text-green-600" />
-                      <p className="mt-2 text-sm text-gray-600">กำลังโหลดข้อมูลงบประมาณ...</p>
+                      <RefreshCw className="h-6 w-6 animate-spin mx-auto text-green-600 dark:text-green-400" />
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">กำลังโหลดข้อมูลงบประมาณ...</p>
                     </div>
                   ) : (
                     <>
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <p className="text-sm text-gray-600">งบประมาณรวมจากตาราง Budgets</p>
-                          <p className="text-2xl font-bold text-green-700">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">งบประมาณรวมจากตาราง Budgets</p>
+                          <p className="text-2xl font-bold text-green-700 dark:text-green-400">
                             ฿{approvedOrdersTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </p>
                         </div>
@@ -816,13 +816,13 @@ const SettingDoc = () => {
                           variant="outline"
                           size="sm"
                           onClick={handleUseBudgetFromOrders}
-                          className="border-green-500 text-green-700 hover:bg-green-50"
+                          className="border-green-500 text-green-700 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/30"
                         >
                           <RefreshCw className="h-4 w-4 mr-2" />
                           นำเข้างบประมาณ
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         รวมจากฟิลด์ amount ทุกแถวในตาราง budgets
                       </p>
                     </>
@@ -843,9 +843,9 @@ const SettingDoc = () => {
                     />
                   </div>
                   <div className="flex items-end">
-                    <div className="bg-white border-2 border-green-300 rounded-lg p-4 w-full">
-                      <p className="text-sm text-gray-600 mb-1">งบประมาณที่ตั้งไว้</p>
-                      <p className="text-2xl font-bold text-green-700">
+                    <div className="bg-white dark:bg-gray-800 border-2 border-green-300 dark:border-green-600 rounded-lg p-4 w-full">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">งบประมาณที่ตั้งไว้</p>
+                      <p className="text-2xl font-bold text-green-700 dark:text-green-400">
                         ฿{parseFloat(totalBudget || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -854,8 +854,8 @@ const SettingDoc = () => {
               </div>
 
               {/* ช่วงเวลาปีงบประมาณ */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
-                <h4 className="font-bold text-blue-900 mb-4 text-lg flex items-center gap-2">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-6">
+                <h4 className="font-bold text-blue-900 dark:text-blue-200 mb-4 text-lg flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
                   ช่วงเวลาปีงบประมาณ
                 </h4>
@@ -863,8 +863,8 @@ const SettingDoc = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* วันที่เริ่มต้น */}
                   <div className="space-y-3">
-                    <div className="bg-white border-2 border-blue-300 rounded-lg p-4">
-                      <p className="text-sm font-semibold text-blue-700 mb-3">📅 วันที่เริ่มต้นปีงบประมาณ</p>
+                    <div className="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                      <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3">📅 วันที่เริ่มต้นปีงบประมาณ</p>
                       
                       <div>
                         <Label>วันที่</Label>
@@ -875,8 +875,8 @@ const SettingDoc = () => {
                           className="font-medium"
                         />
                         {fiscalYearStartDate && (
-                          <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p className="text-sm text-blue-900 font-semibold">
+                          <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                            <p className="text-sm text-blue-900 dark:text-blue-200 font-semibold">
                               {formatThaiDate(fiscalYearStartDate)}
                             </p>
                           </div>
@@ -887,8 +887,8 @@ const SettingDoc = () => {
 
                   {/* วันที่สิ้นสุด */}
                   <div className="space-y-3">
-                    <div className="bg-white border-2 border-blue-300 rounded-lg p-4">
-                      <p className="text-sm font-semibold text-blue-700 mb-3">📅 วันที่สิ้นสุดปีงบประมาณ</p>
+                    <div className="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                      <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3">📅 วันที่สิ้นสุดปีงบประมาณ</p>
                       
                       <div>
                         <Label>วันที่</Label>
@@ -899,8 +899,8 @@ const SettingDoc = () => {
                           className="font-medium"
                         />
                         {fiscalYearEndDate && (
-                          <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p className="text-sm text-blue-900 font-semibold">
+                          <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                            <p className="text-sm text-blue-900 dark:text-blue-200 font-semibold">
                               {formatThaiDate(fiscalYearEndDate)}
                             </p>
                           </div>
@@ -912,8 +912,8 @@ const SettingDoc = () => {
               </div>
 
               {/* ปีงบประมาณปัจจุบัน */}
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-6">
-                <h4 className="font-bold text-purple-900 mb-4 text-lg">ปีงบประมาณปัจจุบัน</h4>
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-2 border-purple-200 dark:border-purple-700 rounded-lg p-6">
+                <h4 className="font-bold text-purple-900 dark:text-purple-200 mb-4 text-lg">ปีงบประมาณปัจจุบัน</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>ปีงบประมาณที่ใช้งาน (พ.ศ.)</Label>
@@ -927,49 +927,49 @@ const SettingDoc = () => {
                     />
                   </div>
                   <div className="flex items-end">
-                    <div className="bg-white border-2 border-purple-300 rounded-lg p-4 w-full">
-                      <p className="text-sm text-gray-600 mb-1">ปีงบประมาณ</p>
-                      <p className="text-3xl font-bold text-purple-700">
+                    <div className="bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-lg p-4 w-full">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">ปีงบประมาณ</p>
+                      <p className="text-3xl font-bold text-purple-700 dark:text-purple-400">
                         พ.ศ. {currentFiscalYear}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="mt-3 text-sm bg-purple-100 border border-purple-300 rounded-lg p-3">
-                  <strong className="text-purple-900">⚠️ สำคัญ:</strong>
-                  <span className="text-purple-800"> เมื่อเปลี่ยนปีงบประมาณ เลขที่เอกสารจะใช้ปีงบประมาณใหม่ในการสร้างเลขที่</span>
+                <div className="mt-3 text-sm bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 rounded-lg p-3">
+                  <strong className="text-purple-900 dark:text-purple-200">⚠️ สำคัญ:</strong>
+                  <span className="text-purple-800 dark:text-purple-300"> เมื่อเปลี่ยนปีงบประมาณ เลขที่เอกสารจะใช้ปีงบประมาณใหม่ในการสร้างเลขที่</span>
                 </div>
               </div>
 
               {/* สรุปข้อมูล */}
-              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-6">
-                <h4 className="font-bold text-amber-900 mb-3 text-lg">📊 สรุปข้อมูลปีงบประมาณ</h4>
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 border-2 border-amber-300 dark:border-amber-700 rounded-lg p-6">
+                <h4 className="font-bold text-amber-900 dark:text-amber-200 mb-3 text-lg">📊 สรุปข้อมูลปีงบประมาณ</h4>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between items-center py-2 border-b border-amber-200">
-                    <span className="font-semibold text-gray-700">ปีงบประมาณปัจจุบัน:</span>
-                    <span className="font-bold text-amber-900 text-lg">พ.ศ. {currentFiscalYear}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-amber-200 dark:border-amber-700">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">ปีงบประมาณปัจจุบัน:</span>
+                    <span className="font-bold text-amber-900 dark:text-amber-200 text-lg">พ.ศ. {currentFiscalYear}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-amber-200">
-                    <span className="font-semibold text-gray-700">วันที่เริ่มต้น:</span>
-                    <span className="font-medium text-amber-900">
+                  <div className="flex justify-between items-center py-2 border-b border-amber-200 dark:border-amber-700">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">วันที่เริ่มต้น:</span>
+                    <span className="font-medium text-amber-900 dark:text-amber-200">
                       {fiscalYearStartDate ? formatThaiDate(fiscalYearStartDate) : '-'}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-amber-200">
-                    <span className="font-semibold text-gray-700">วันที่สิ้นสุด:</span>
-                    <span className="font-medium text-amber-900">
+                  <div className="flex justify-between items-center py-2 border-b border-amber-200 dark:border-amber-700">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">วันที่สิ้นสุด:</span>
+                    <span className="font-medium text-amber-900 dark:text-amber-200">
                       {fiscalYearEndDate ? formatThaiDate(fiscalYearEndDate) : '-'}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-amber-200">
-                    <span className="font-semibold text-gray-700">งบประมาณที่ตั้งไว้:</span>
-                    <span className="font-bold text-green-700 text-lg">
+                  <div className="flex justify-between items-center py-2 border-b border-amber-200 dark:border-amber-700">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">งบประมาณที่ตั้งไว้:</span>
+                    <span className="font-bold text-green-700 dark:text-green-400 text-lg">
                       ฿{parseFloat(totalBudget || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="font-semibold text-gray-700">งบประมาณจากตาราง Budgets:</span>
-                    <span className="font-bold text-blue-700 text-lg">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">งบประมาณจากตาราง Budgets:</span>
+                    <span className="font-bold text-blue-700 dark:text-blue-400 text-lg">
                       ฿{approvedOrdersTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </span>
                   </div>

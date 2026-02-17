@@ -4,25 +4,25 @@ import { supabase } from '../../lib/supabase';
 
 // Inline UI Components
 const Card = ({ children, className = '' }) => (
-  <div className={`rounded-lg border-2 border-gray-200 bg-white shadow-lg ${className}`}>
+  <div className={`rounded-lg border-2 border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 ${className}`}>
     {children}
   </div>
 );
 
 const CardHeader = ({ children, className = '' }) => (
-  <div className={`flex flex-col space-y-1.5 p-6 border-b border-gray-100 bg-gray-50 ${className}`}>
+  <div className={`flex flex-col space-y-1.5 p-6 border-b border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-700 ${className}`}>
     {children}
   </div>
 );
 
 const CardTitle = ({ children, className = '' }) => (
-  <h3 className={`text-2xl font-bold leading-none tracking-tight text-gray-800 ${className}`}>
+  <h3 className={`text-2xl font-bold leading-none tracking-tight text-gray-800 dark:text-white ${className}`}>
     {children}
   </h3>
 );
 
 const CardDescription = ({ children, className = '' }) => (
-  <p className={`text-sm text-gray-600 ${className}`}>
+  <p className={`text-sm text-gray-600 dark:text-gray-300 ${className}`}>
     {children}
   </p>
 );
@@ -36,11 +36,11 @@ const CardContent = ({ children, className = '' }) => (
 const Button = ({ children, onClick, disabled, variant = 'default', size = 'default', className = '' }) => {
   const variants = {
     default: 'bg-blue-600 text-white hover:bg-blue-700 shadow-md',
-    outline: 'border-2 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 text-gray-700',
-    ghost: 'hover:bg-gray-100 hover:text-gray-900 text-gray-700',
+    outline: 'border-2 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:border-gray-500',
+    ghost: 'hover:bg-gray-100 hover:text-gray-900 text-gray-700 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white',
     destructive: 'bg-red-600 text-white hover:bg-red-700 shadow-md',
   };
-  
+
   const sizes = {
     default: 'h-10 px-4 py-2',
     sm: 'h-9 px-3 text-sm',
@@ -51,7 +51,7 @@ const Button = ({ children, onClick, disabled, variant = 'default', size = 'defa
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-md font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-300 ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-md font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-300 dark:disabled:bg-gray-600 ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {children}
     </button>
@@ -67,7 +67,7 @@ const Input = ({ value, onChange, onBlur, disabled, type = 'text', min, max, cla
     disabled={disabled}
     min={min}
     max={max}
-    className={`flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 ${className}`}
+    className={`flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:disabled:bg-gray-600 ${className}`}
     {...props}
   />
 );
@@ -75,7 +75,7 @@ const Input = ({ value, onChange, onBlur, disabled, type = 'text', min, max, cla
 const Label = ({ children, htmlFor, className = '' }) => (
   <label
     htmlFor={htmlFor}
-    className={`text-sm font-semibold leading-none text-gray-700 mb-1.5 block ${className}`}
+    className={`text-sm font-semibold leading-none text-gray-700 mb-1.5 block dark:text-gray-200 ${className}`}
   >
     {children}
   </label>
@@ -106,7 +106,7 @@ const Tabs = ({ children, defaultValue, className = '' }) => {
 };
 
 const TabsList = ({ children, activeTab, setActiveTab, className = '' }) => (
-  <div className={`inline-flex h-12 items-center justify-center rounded-lg bg-gray-100 p-1.5 shadow-inner ${className}`}>
+  <div className={`inline-flex h-12 items-center justify-center rounded-lg bg-gray-100 p-1.5 shadow-inner dark:bg-gray-700 ${className}`}>
     {React.Children.map(children, child =>
       React.cloneElement(child, { activeTab, setActiveTab })
     )}
@@ -118,8 +118,8 @@ const TabsTrigger = ({ children, value, activeTab, setActiveTab }) => (
     onClick={() => setActiveTab(value)}
     className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
       activeTab === value
-        ? 'bg-white text-blue-700 shadow-md'
-        : 'text-gray-600 hover:bg-white/50 hover:text-gray-900'
+        ? 'bg-white text-blue-700 shadow-md dark:bg-gray-600 dark:text-blue-400'
+        : 'text-gray-600 hover:bg-white/50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-600/50 dark:hover:text-white'
     }`}
   >
     {children}
@@ -144,7 +144,7 @@ const Switch = ({ checked, onCheckedChange, disabled }) => (
     onClick={() => !disabled && onCheckedChange(!checked)}
     disabled={disabled}
     className={`peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-      checked ? 'bg-blue-600 border-blue-600' : 'bg-gray-300 border-gray-300'
+      checked ? 'bg-blue-600 border-blue-600' : 'bg-gray-300 border-gray-300 dark:bg-gray-600 dark:border-gray-600'
     }`}
   >
     <span
@@ -509,12 +509,12 @@ const SettingDoc1 = () => {
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Wallet className="h-8 w-8 text-blue-700" />
+          <div className="p-2 bg-blue-100 rounded-lg dark:bg-blue-900">
+            <Wallet className="h-8 w-8 text-blue-700 dark:text-blue-300" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">การตั้งค่าเอกสารและปีงบประมาณ</h1>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">การตั้งค่าเอกสารและปีงบประมาณ</h1>
         </div>
-        <p className="text-gray-600 text-base">
+        <p className="text-gray-600 text-base dark:text-gray-300">
           จัดการเลขที่เอกสาร ประเภทเอกสาร และตั้งค่าปีงบประมาณ
         </p>
       </div>

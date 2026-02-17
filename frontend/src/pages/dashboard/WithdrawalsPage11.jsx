@@ -1332,24 +1332,24 @@ export default function WithdrawalsPage11() {
 
   const statusBadge = (status) => {
     const styles = {
-      pending: 'bg-yellow-100 text-yellow-700',
-      approved: 'bg-green-100 text-green-700',
-      completed: 'bg-blue-100 text-blue-700',
+      pending: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+      approved: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+      completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
     }
     const labels = { pending: 'รออนุมัติ', approved: 'อนุมัติแล้ว', completed: 'เบิกแล้ว' }
-    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100'}`}>{labels[status] || status}</span>
+    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 dark:bg-gray-700'}`}>{labels[status] || status}</span>
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
+    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">เบิกหนังสือ</h1>
-          <p className="text-gray-500 text-sm mt-1">จัดการใบเบิกหนังสือเรียน</p>
+          <h1 className="text-2xl font-bold dark:text-white">เบิกหนังสือ</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">จัดการใบเบิกหนังสือเรียน</p>
         </div>
         <button
           onClick={() => setShowNewWithdrawalModal(true)}
@@ -1361,28 +1361,28 @@ export default function WithdrawalsPage11() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-blue-50"><FileText size={24} className="text-blue-600" /></div>
-          <div><p className="text-sm text-gray-500">ใบเบิกทั้งหมด</p><p className="text-2xl font-bold">{withdrawals.length}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30"><FileText size={24} className="text-blue-600" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">ใบเบิกทั้งหมด</p><p className="text-2xl font-bold dark:text-white">{withdrawals.length}</p></div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-yellow-50"><Clock size={24} className="text-yellow-600" /></div>
-          <div><p className="text-sm text-gray-500">รออนุมัติ</p><p className="text-2xl font-bold">{withdrawals.filter(w => w.status === 'pending').length}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/30"><Clock size={24} className="text-yellow-600" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">รออนุมัติ</p><p className="text-2xl font-bold dark:text-white">{withdrawals.filter(w => w.status === 'pending').length}</p></div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-green-50"><CheckCircle size={24} className="text-green-600" /></div>
-          <div><p className="text-sm text-gray-500">อนุมัติแล้ว</p><p className="text-2xl font-bold">{withdrawals.filter(w => w.status === 'approved').length}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/30"><CheckCircle size={24} className="text-green-600" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">อนุมัติแล้ว</p><p className="text-2xl font-bold dark:text-white">{withdrawals.filter(w => w.status === 'approved').length}</p></div>
         </div>
       </div>
 
       {/* Orders that can be withdrawn */}
       {orders.length > 0 && (
-        <div className="bg-white rounded-xl border p-5">
-          <h3 className="font-semibold mb-4">คำสั่งซื้อที่พร้อมให้เบิก</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
+          <h3 className="font-semibold mb-4 dark:text-white">คำสั่งซื้อที่พร้อมให้เบิก</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 text-gray-600">
+                <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                   <th className="text-left px-4 py-3 font-medium">เลขที่คำสั่งซื้อ</th>
                   <th className="text-left px-4 py-3 font-medium">ครูผู้สั่ง</th>
                   <th className="text-center px-4 py-3 font-medium">ชั้นเรียน</th>
@@ -1391,14 +1391,14 @@ export default function WithdrawalsPage11() {
                   <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                 {orders.slice(0, 5).map(order => (
-                  <tr key={order.id} className="hover:bg-gray-50">
+                  <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-3 font-medium text-blue-600">{order.order_number}</td>
-                    <td className="px-4 py-3">{order.users?.full_name || '-'}</td>
-                    <td className="px-4 py-3 text-center">{order.classroom}</td>
-                    <td className="px-4 py-3 text-center">{order.year}</td>
-                    <td className="px-4 py-3 text-center">{order.order_items?.length || 0}</td>
+                    <td className="px-4 py-3 dark:text-gray-300">{order.users?.full_name || '-'}</td>
+                    <td className="px-4 py-3 text-center dark:text-gray-300">{order.classroom}</td>
+                    <td className="px-4 py-3 text-center dark:text-gray-300">{order.year}</td>
+                    <td className="px-4 py-3 text-center dark:text-gray-300">{order.order_items?.length || 0}</td>
                     <td className="px-4 py-3 text-center">
                       <button onClick={() => openCreateModal(order)} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700">
                         <Plus size={14} className="inline mr-1" /> สร้างใบเบิก
@@ -1413,19 +1413,19 @@ export default function WithdrawalsPage11() {
       )}
 
       {/* Withdrawals List */}
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h3 className="font-semibold">รายการใบเบิก</h3>
+          <h3 className="font-semibold dark:text-white">รายการใบเบิก</h3>
           <div className="relative w-full md:w-64">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="text" placeholder="ค้นหา..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
+            <input type="text" placeholder="ค้นหา..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-600">
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <th className="text-left px-4 py-3 font-medium">เลขที่ใบเบิก</th>
                 <th className="text-left px-4 py-3 font-medium">วันที่เบิก</th>
                 <th className="text-left px-4 py-3 font-medium">ผู้เบิก</th>
@@ -1435,33 +1435,33 @@ export default function WithdrawalsPage11() {
                 <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {paginated.map(w => {
                 const teacherName = w.requested_by_user?.full_name || w.orders?.users?.full_name || '-'
                 const classroom = gradeLabel[w.grade] || gradeLabel[w.orders?.grade] || w.orders?.classroom || '-'
 
                 return (
-                  <tr key={w.id} className="hover:bg-gray-50">
+                  <tr key={w.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-3 font-medium text-blue-600">{w.withdrawal_number}</td>
-                    <td className="px-4 py-3">{w.withdrawal_date ? new Date(w.withdrawal_date).toLocaleDateString('th-TH') : '-'}</td>
-                    <td className="px-4 py-3">{teacherName}</td>
-                    <td className="px-4 py-3 text-center">{classroom}</td>
+                    <td className="px-4 py-3 dark:text-gray-300">{w.withdrawal_date ? new Date(w.withdrawal_date).toLocaleDateString('th-TH') : '-'}</td>
+                    <td className="px-4 py-3 dark:text-gray-300">{teacherName}</td>
+                    <td className="px-4 py-3 text-center dark:text-gray-300">{classroom}</td>
                     <td className="px-4 py-3 text-center font-medium text-green-600">{w.total_approved || 0}</td>
                     <td className="px-4 py-3 text-center">{statusBadge(w.status)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openDetailModal(w)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="ดูรายละเอียด"><Eye size={16} /></button>
+                        <button onClick={() => openDetailModal(w)} className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg" title="ดูรายละเอียด"><Eye size={16} /></button>
                         {w.status === 'pending' && (
-                          <button onClick={() => openEditModal(w)} className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg" title="แก้ไข"><Edit size={16} /></button>
+                          <button onClick={() => openEditModal(w)} className="p-1.5 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-lg" title="แก้ไข"><Edit size={16} /></button>
                         )}
-                        <button onClick={() => openPrintPreview(w)} className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg" title="พิมพ์"><Printer size={16} /></button>
+                        <button onClick={() => openPrintPreview(w)} className="p-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="พิมพ์"><Printer size={16} /></button>
                         {w.status === 'pending' && (
-                          <button onClick={() => handleApprove(w)} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg" title="อนุมัติ"><CheckCircle size={16} /></button>
+                          <button onClick={() => handleApprove(w)} className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg" title="อนุมัติ"><CheckCircle size={16} /></button>
                         )}
                         {w.status === 'approved' && !w.officer_signature && (
                           <>
                             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={e => handleSignatureUpload(e, w.id)} />
-                            <button onClick={() => fileInputRef.current?.click()} className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg" title="อัพโหลดลายเซ็น"><Upload size={16} /></button>
+                            <button onClick={() => fileInputRef.current?.click()} className="p-1.5 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg" title="อัพโหลดลายเซ็น"><Upload size={16} /></button>
                           </>
                         )}
                       </div>
@@ -1469,17 +1469,17 @@ export default function WithdrawalsPage11() {
                   </tr>
                 )
               })}
-              {paginated.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">ไม่พบรายการ</td></tr>}
+              {paginated.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">ไม่พบรายการ</td></tr>}
             </tbody>
           </table>
         </div>
 
         {filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">แสดง {(currentPage - 1) * PAGE_SIZE + 1} ถึง {Math.min(currentPage * PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">แสดง {(currentPage - 1) * PAGE_SIZE + 1} ถึง {Math.min(currentPage * PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
             <div className="flex gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}>{p}</button>
+                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300'}`}>{p}</button>
               ))}
             </div>
           </div>
@@ -1489,34 +1489,34 @@ export default function WithdrawalsPage11() {
       {/* Create Withdrawal Modal */}
       {showModal && selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold mb-4">สร้างใบเบิกหนังสือ</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">สร้างใบเบิกหนังสือ</h3>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <p className="text-sm"><span className="text-gray-500">เลขที่คำสั่งซื้อ:</span> <span className="font-medium">{selectedOrder.order_number}</span></p>
-              <p className="text-sm"><span className="text-gray-500">ผู้เบิก:</span> <span className="font-medium">{selectedOrder.users?.full_name || '-'}</span></p>
-              <p className="text-sm"><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{selectedOrder.classroom}</span></p>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+              <p className="text-sm dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">เลขที่คำสั่งซื้อ:</span> <span className="font-medium dark:text-white">{selectedOrder.order_number}</span></p>
+              <p className="text-sm dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">ผู้เบิก:</span> <span className="font-medium dark:text-white">{selectedOrder.users?.full_name || '-'}</span></p>
+              <p className="text-sm dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">ชั้นเรียน:</span> <span className="font-medium dark:text-white">{selectedOrder.classroom}</span></p>
             </div>
 
             <table className="w-full text-sm mb-4">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="text-left px-3 py-2">รายการ</th>
-                  <th className="text-center px-2 py-2 w-16">ขอเบิก</th>
-                  <th className="text-center px-2 py-2 w-16">เบิกได้</th>
+                <tr className="bg-gray-100 dark:bg-gray-600">
+                  <th className="text-left px-3 py-2 dark:text-gray-200">รายการ</th>
+                  <th className="text-center px-2 py-2 w-16 dark:text-gray-200">ขอเบิก</th>
+                  <th className="text-center px-2 py-2 w-16 dark:text-gray-200">เบิกได้</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedOrder.order_items?.map(item => (
-                  <tr key={item.book_id} className="border-b">
-                    <td className="px-3 py-2">{item.books?.title}</td>
-                    <td className="px-3 py-2 text-center">{item.quantity}</td>
+                  <tr key={item.book_id} className="border-b dark:border-gray-600">
+                    <td className="px-3 py-2 dark:text-gray-300">{item.books?.title}</td>
+                    <td className="px-3 py-2 text-center dark:text-gray-300">{item.quantity}</td>
                     <td className="px-3 py-2 text-center">
                       <input
                         type="number"
                         min="0"
                         max={item.quantity}
-                        className="w-16 text-center border rounded px-2 py-1"
+                        className="w-16 text-center border rounded px-2 py-1 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                         value={withdrawItems[item.book_id]?.approved || 0}
                         onChange={e => setWithdrawItems(p => ({
                           ...p,
@@ -1530,7 +1530,7 @@ export default function WithdrawalsPage11() {
             </table>
 
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50">ยกเลิก</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">ยกเลิก</button>
               <button onClick={handleCreateWithdrawal} disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 disabled:opacity-50">
                 {saving ? <Loader2 size={16} className="animate-spin inline mr-2" /> : null}
                 สร้างใบเบิก
@@ -1543,35 +1543,35 @@ export default function WithdrawalsPage11() {
       {/* Detail Modal */}
       {showDetailModal && selectedWithdrawal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold mb-4">รายละเอียดใบเบิก</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">รายละเอียดใบเบิก</h3>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-4 grid grid-cols-2 gap-2 text-sm">
-              <p><span className="text-gray-500">เลขที่:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_number}</span></p>
-              <p><span className="text-gray-500">วันที่เบิก:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_date ? new Date(selectedWithdrawal.withdrawal_date).toLocaleDateString('th-TH') : '-'}</span></p>
-              <p><span className="text-gray-500">ผู้เบิก:</span> <span className="font-medium">{selectedWithdrawal.requested_by_user?.full_name || selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
-              <p><span className="text-gray-500">ผู้จ่ายพัสดุ:</span> <span className="font-medium">{selectedWithdrawal.issued_by_user?.full_name || '-'}</span></p>
-              <p><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{gradeLabel[selectedWithdrawal.grade] || gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
-              <p><span className="text-gray-500">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
-              <p><span className="text-gray-500">รวมขอเบิก:</span> <span className="font-medium text-blue-600">{selectedWithdrawal.total_requested || 0} เล่ม</span></p>
-              <p><span className="text-gray-500">รวมเบิกได้:</span> <span className="font-medium text-green-600">{selectedWithdrawal.total_approved || 0} เล่ม</span></p>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4 grid grid-cols-2 gap-2 text-sm">
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">เลขที่:</span> <span className="font-medium dark:text-white">{selectedWithdrawal.withdrawal_number}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">วันที่เบิก:</span> <span className="font-medium dark:text-white">{selectedWithdrawal.withdrawal_date ? new Date(selectedWithdrawal.withdrawal_date).toLocaleDateString('th-TH') : '-'}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">ผู้เบิก:</span> <span className="font-medium dark:text-white">{selectedWithdrawal.requested_by_user?.full_name || selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">ผู้จ่ายพัสดุ:</span> <span className="font-medium dark:text-white">{selectedWithdrawal.issued_by_user?.full_name || '-'}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">ชั้นเรียน:</span> <span className="font-medium dark:text-white">{gradeLabel[selectedWithdrawal.grade] || gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">รวมขอเบิก:</span> <span className="font-medium text-blue-600">{selectedWithdrawal.total_requested || 0} เล่ม</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">รวมเบิกได้:</span> <span className="font-medium text-green-600">{selectedWithdrawal.total_approved || 0} เล่ม</span></p>
             </div>
 
-            <table className="w-full text-sm mb-4 border rounded-lg overflow-hidden">
+            <table className="w-full text-sm mb-4 border dark:border-gray-600 rounded-lg overflow-hidden">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="text-left px-3 py-2">#</th>
-                  <th className="text-left px-3 py-2">รายการ</th>
-                  <th className="text-center px-2 py-2 w-16">ขอเบิก</th>
-                  <th className="text-center px-2 py-2 w-16">เบิกได้</th>
+                <tr className="bg-gray-100 dark:bg-gray-600">
+                  <th className="text-left px-3 py-2 dark:text-gray-200">#</th>
+                  <th className="text-left px-3 py-2 dark:text-gray-200">รายการ</th>
+                  <th className="text-center px-2 py-2 w-16 dark:text-gray-200">ขอเบิก</th>
+                  <th className="text-center px-2 py-2 w-16 dark:text-gray-200">เบิกได้</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedWithdrawal.withdrawal_items?.map((item, idx) => (
-                  <tr key={item.book_id} className="border-b">
-                    <td className="px-3 py-2">{idx + 1}</td>
-                    <td className="px-3 py-2">{item.books?.title}</td>
-                    <td className="px-3 py-2 text-center">{item.requested_qty}</td>
+                  <tr key={item.book_id} className="border-b dark:border-gray-600">
+                    <td className="px-3 py-2 dark:text-gray-300">{idx + 1}</td>
+                    <td className="px-3 py-2 dark:text-gray-300">{item.books?.title}</td>
+                    <td className="px-3 py-2 text-center dark:text-gray-300">{item.requested_qty}</td>
                     <td className="px-3 py-2 text-center font-medium text-green-600">{item.approved_qty}</td>
                   </tr>
                 ))}
@@ -1580,13 +1580,13 @@ export default function WithdrawalsPage11() {
 
             {selectedWithdrawal.officer_signature && (
               <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">ลายเซ็นเจ้าหน้าที่พัสดุ:</p>
-                <img src={selectedWithdrawal.officer_signature} alt="ลายเซ็น" className="h-20 border rounded" />
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">ลายเซ็นเจ้าหน้าที่พัสดุ:</p>
+                <img src={selectedWithdrawal.officer_signature} alt="ลายเซ็น" className="h-20 border dark:border-gray-600 rounded" />
               </div>
             )}
 
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50">ปิด</button>
+              <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">ปิด</button>
               <button onClick={() => openPrintPreview(selectedWithdrawal)} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
                 <Printer size={16} className="inline mr-2" /> พิมพ์ใบเบิก
               </button>
@@ -1598,33 +1598,33 @@ export default function WithdrawalsPage11() {
       {/* New Withdrawal Modal */}
       {showNewWithdrawalModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold mb-4">เพิ่มใบเบิกพัสดุ</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-5xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">เพิ่มใบเบิกพัสดุ</h3>
 
             {/* Header Info */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-gray-50 p-4 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">เลขที่ใบเบิก (ถัดไป)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">เลขที่ใบเบิก (ถัดไป)</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg text-sm bg-blue-50 font-mono font-bold text-blue-700"
+                  className="w-full px-3 py-2 border-2 border-blue-300 dark:border-blue-600 rounded-lg text-sm bg-blue-50 dark:bg-blue-900/30 font-mono font-bold text-blue-700 dark:text-blue-400"
                   value={nextWithdrawalNumber || 'กำลังโหลด...'}
                   disabled
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">วันที่เบิก <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">วันที่เบิก <span className="text-red-500">*</span></label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   value={withdrawalDate}
                   onChange={e => setWithdrawalDate(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ผู้เบิก (ครู) <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ผู้เบิก (ครู) <span className="text-red-500">*</span></label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   value={selectedTeacher}
                   onChange={e => setSelectedTeacher(e.target.value)}
                 >
@@ -1635,9 +1635,9 @@ export default function WithdrawalsPage11() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ผู้จ่ายพัสดุ <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ผู้จ่ายพัสดุ <span className="text-red-500">*</span></label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   value={selectedOfficer}
                   onChange={e => setSelectedOfficer(e.target.value)}
                 >
@@ -1651,9 +1651,9 @@ export default function WithdrawalsPage11() {
 
             {/* Grade Selection */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">เลือกชั้นเรียน <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">เลือกชั้นเรียน <span className="text-red-500">*</span></label>
               <select
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 value={selectedGrade}
                 onChange={e => setSelectedGrade(e.target.value)}
               >
@@ -1668,7 +1668,7 @@ export default function WithdrawalsPage11() {
             {loadingBooks && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="animate-spin text-blue-600" size={24} />
-                <span className="ml-2 text-gray-500">กำลังโหลดรายการหนังสือ...</span>
+                <span className="ml-2 text-gray-500 dark:text-gray-400">กำลังโหลดรายการหนังสือ...</span>
               </div>
             )}
 
@@ -1676,10 +1676,10 @@ export default function WithdrawalsPage11() {
             {!loadingBooks && selectedTeacher && selectedGrade && (
               <>
                 {availableBooks.length > 0 ? (
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b">
+                  <div className="border dark:border-gray-600 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 flex items-center justify-between border-b dark:border-gray-600">
                       <div className="flex items-center gap-4">
-                        <span className="font-medium text-sm">รายการหนังสือที่ได้รับจากสำนักพิมพ์</span>
+                        <span className="font-medium text-sm dark:text-white">รายการหนังสือที่ได้รับจากสำนักพิมพ์</span>
                         <button
                           onClick={toggleSelectAll}
                           className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
@@ -1704,24 +1704,24 @@ export default function WithdrawalsPage11() {
                     {Object.keys(selectedBooks).length === 0 ? (
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="bg-gray-100">
+                          <tr className="bg-gray-100 dark:bg-gray-600">
                             <th className="w-10 px-3 py-2"></th>
-                            <th className="text-left px-3 py-2">รายการ</th>
-                            <th className="text-center px-3 py-2 w-32">คงเหลือในคลัง</th>
+                            <th className="text-left px-3 py-2 dark:text-gray-200">รายการ</th>
+                            <th className="text-center px-3 py-2 w-32 dark:text-gray-200">คงเหลือในคลัง</th>
                           </tr>
                         </thead>
                         <tbody>
                           {availableBooks.map(item => (
                             <tr
                               key={item.book_id}
-                              className="border-b cursor-pointer hover:bg-blue-50"
+                              className="border-b dark:border-gray-600 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30"
                               onClick={() => toggleBookSelection(item.book_id, item.received_quantity)}
                             >
                               <td className="px-3 py-3 text-center">
                                 <Square size={18} className="text-gray-400 mx-auto" />
                               </td>
-                              <td className="px-3 py-3">{item.books?.title}</td>
-                              <td className="px-3 py-3 text-center font-medium">{item.received_quantity}</td>
+                              <td className="px-3 py-3 dark:text-gray-300">{item.books?.title}</td>
+                              <td className="px-3 py-3 text-center font-medium dark:text-gray-300">{item.received_quantity}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1730,17 +1730,17 @@ export default function WithdrawalsPage11() {
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-gray-100 dark:bg-gray-600">
                               <th className="w-10 px-3 py-2"></th>
-                              <th className="text-left px-3 py-2">รายการหนังสือ</th>
-                              <th className="text-center px-2 py-2 w-20">จำนวนขอเบิก</th>
-                              <th className="text-center px-2 py-2 w-20">จำนวนเบิกได้</th>
-                              <th className="text-left px-3 py-2 w-48">หมายเหตุ</th>
+                              <th className="text-left px-3 py-2 dark:text-gray-200">รายการหนังสือ</th>
+                              <th className="text-center px-2 py-2 w-20 dark:text-gray-200">จำนวนขอเบิก</th>
+                              <th className="text-center px-2 py-2 w-20 dark:text-gray-200">จำนวนเบิกได้</th>
+                              <th className="text-left px-3 py-2 w-48 dark:text-gray-200">หมายเหตุ</th>
                             </tr>
                           </thead>
                           <tbody>
                             {availableBooks.filter(item => selectedBooks[item.book_id]).map(item => (
-                              <tr key={item.book_id} className="border-b bg-blue-50">
+                              <tr key={item.book_id} className="border-b dark:border-gray-600 bg-blue-50 dark:bg-blue-900/30">
                                 <td className="px-3 py-3 text-center">
                                   <button
                                     onClick={() => toggleBookSelection(item.book_id, item.received_quantity)}
@@ -1750,8 +1750,8 @@ export default function WithdrawalsPage11() {
                                   </button>
                                 </td>
                                 <td className="px-3 py-3">
-                                  <div className="font-medium">{item.books?.title}</div>
-                                  <div className="text-xs text-gray-500">คงเหลือ: {item.received_quantity} เล่ม</div>
+                                  <div className="font-medium dark:text-white">{item.books?.title}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">คงเหลือ: {item.received_quantity} เล่ม</div>
                                 </td>
                                 <td className="px-3 py-3">
                                   <input
@@ -1764,7 +1764,7 @@ export default function WithdrawalsPage11() {
                                       updateRequestedQty(item.book_id, e.target.value)
                                     }}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="w-20 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                   />
                                 </td>
                                 <td className="px-3 py-3">
@@ -1780,7 +1780,7 @@ export default function WithdrawalsPage11() {
                                     onClick={(e) => e.stopPropagation()}
                                     onKeyDown={(e) => handleApprovedQtyKeyDown(e, item.book_id)}
                                     data-approved-qty={item.book_id}
-                                    className="w-20 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-center focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
                                   />
                                 </td>
                                 <td className="px-3 py-3">
@@ -1793,7 +1793,7 @@ export default function WithdrawalsPage11() {
                                       updateNotes(item.book_id, e.target.value)
                                     }}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                   />
                                 </td>
                               </tr>
@@ -1803,14 +1803,14 @@ export default function WithdrawalsPage11() {
                       </div>
                     )}
                     
-                    <div className="bg-gray-50 px-4 py-3 border-t">
+                    <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-t dark:border-gray-600">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           เลือกแล้ว <span className="font-medium text-blue-600">{Object.keys(selectedBooks).length}</span> รายการ
                           จากทั้งหมด {availableBooks.length} รายการ
                         </p>
                         {Object.keys(selectedBooks).length > 0 && (
-                          <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-4 text-sm dark:text-gray-300">
                             <div>
                               รวมขอเบิก: <span className="font-bold text-blue-600">{totalRequested}</span> เล่ม
                             </div>
@@ -1823,11 +1823,11 @@ export default function WithdrawalsPage11() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 rounded-lg p-8 text-center">
-                    <FileText size={40} className="text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">ไม่พบหนังสือในคลังพัสดุ</p>
-                    <p className="text-sm text-gray-400 mt-1">ชั้น {gradeLabel[selectedGrade]} ปีการศึกษา {new Date().getFullYear() + 543}</p>
-                    <p className="text-sm text-gray-400">กรุณาตรวจสอบการรับหนังสือและอัปเดต stock</p>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
+                    <FileText size={40} className="text-gray-300 dark:text-gray-500 mx-auto mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400">ไม่พบหนังสือในคลังพัสดุ</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">ชั้น {gradeLabel[selectedGrade]} ปีการศึกษา {new Date().getFullYear() + 543}</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500">กรุณาตรวจสอบการรับหนังสือและอัปเดต stock</p>
                   </div>
                 )}
               </>
@@ -1835,9 +1835,9 @@ export default function WithdrawalsPage11() {
 
             {/* Empty state */}
             {!loadingBooks && (!selectedTeacher || !selectedGrade) && (
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <User size={40} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">กรุณาเลือกผู้เบิก, ผู้จ่ายพัสดุ และชั้นเรียน</p>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
+                <User size={40} className="text-gray-300 dark:text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">กรุณาเลือกผู้เบิก, ผู้จ่ายพัสดุ และชั้นเรียน</p>
               </div>
             )}
 
@@ -1852,7 +1852,7 @@ export default function WithdrawalsPage11() {
                   setAvailableBooks([])
                   setSelectedBooks({})
                 }}
-                className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50"
+                className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
               >
                 ยกเลิก
               </button>
@@ -1875,21 +1875,21 @@ export default function WithdrawalsPage11() {
       {/* Edit Withdrawal Modal */}
       {showEditModal && selectedWithdrawal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold mb-4">แก้ไขใบเบิก</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-4xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">แก้ไขใบเบิก</h3>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-4 grid grid-cols-2 gap-2 text-sm">
-              <p><span className="text-gray-500">เลขที่:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_number}</span></p>
-              <p><span className="text-gray-500">วันที่เบิก:</span> <span className="font-medium">{selectedWithdrawal.withdrawal_date ? new Date(selectedWithdrawal.withdrawal_date).toLocaleDateString('th-TH') : '-'}</span></p>
-              <p><span className="text-gray-500">ผู้เบิก:</span> <span className="font-medium">{selectedWithdrawal.requested_by_user?.full_name || selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
-              <p><span className="text-gray-500">ชั้นเรียน:</span> <span className="font-medium">{gradeLabel[selectedWithdrawal.grade] || gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
-              <p><span className="text-gray-500">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4 grid grid-cols-2 gap-2 text-sm">
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">เลขที่:</span> <span className="font-medium dark:text-white">{selectedWithdrawal.withdrawal_number}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">วันที่เบิก:</span> <span className="font-medium dark:text-white">{selectedWithdrawal.withdrawal_date ? new Date(selectedWithdrawal.withdrawal_date).toLocaleDateString('th-TH') : '-'}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">ผู้เบิก:</span> <span className="font-medium dark:text-white">{selectedWithdrawal.requested_by_user?.full_name || selectedWithdrawal.orders?.users?.full_name || '-'}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">ชั้นเรียน:</span> <span className="font-medium dark:text-white">{gradeLabel[selectedWithdrawal.grade] || gradeLabel[selectedWithdrawal.orders?.grade] || selectedWithdrawal.orders?.classroom || '-'}</span></p>
+              <p className="dark:text-gray-300"><span className="text-gray-500 dark:text-gray-400">สถานะ:</span> {statusBadge(selectedWithdrawal.status)}</p>
             </div>
 
             {/* รายการหนังสือที่แก้ไขได้ */}
-            <div className="border rounded-lg overflow-hidden mb-4">
-              <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
-                <h4 className="font-medium text-sm">รายการหนังสือ</h4>
+            <div className="border dark:border-gray-600 rounded-lg overflow-hidden mb-4">
+              <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b dark:border-gray-600 flex items-center justify-between">
+                <h4 className="font-medium text-sm dark:text-white">รายการหนังสือ</h4>
                 <button
                   onClick={openAddBookToEditModal}
                   className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
@@ -1903,21 +1903,21 @@ export default function WithdrawalsPage11() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-gray-100">
-                        <th className="text-left px-3 py-2">#</th>
-                        <th className="text-left px-3 py-2">รายการหนังสือ</th>
-                        <th className="text-center px-2 py-2 w-20">จำนวนขอเบิก</th>
-                        <th className="text-center px-2 py-2 w-20">จำนวนเบิกได้</th>
-                        <th className="text-left px-3 py-2 w-48">หมายเหตุ</th>
-                        <th className="text-center px-3 py-2 w-20">ลบ</th>
+                      <tr className="bg-gray-100 dark:bg-gray-600">
+                        <th className="text-left px-3 py-2 dark:text-gray-200">#</th>
+                        <th className="text-left px-3 py-2 dark:text-gray-200">รายการหนังสือ</th>
+                        <th className="text-center px-2 py-2 w-20 dark:text-gray-200">จำนวนขอเบิก</th>
+                        <th className="text-center px-2 py-2 w-20 dark:text-gray-200">จำนวนเบิกได้</th>
+                        <th className="text-left px-3 py-2 w-48 dark:text-gray-200">หมายเหตุ</th>
+                        <th className="text-center px-3 py-2 w-20 dark:text-gray-200">ลบ</th>
                       </tr>
                     </thead>
                     <tbody>
                       {editingItems.map((item, idx) => (
-                        <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className="px-3 py-3">{idx + 1}</td>
+                        <tr key={idx} className="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td className="px-3 py-3 dark:text-gray-300">{idx + 1}</td>
                           <td className="px-3 py-3">
-                            <div className="font-medium">{item.book_title}</div>
+                            <div className="font-medium dark:text-white">{item.book_title}</div>
                           </td>
                           <td className="px-3 py-3">
                             <input
@@ -1925,7 +1925,7 @@ export default function WithdrawalsPage11() {
                               min="0"
                               value={item.requested_qty}
                               onChange={(e) => updateEditingItem(idx, 'requested_qty', Math.max(0, Number(e.target.value)))}
-                              className="w-20 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                             />
                           </td>
                           <td className="px-3 py-3">
@@ -1935,7 +1935,7 @@ export default function WithdrawalsPage11() {
                               max={item.requested_qty}
                               value={item.approved_qty}
                               onChange={(e) => updateEditingItem(idx, 'approved_qty', Math.max(0, Math.min(Number(e.target.value), item.requested_qty)))}
-                              className="w-20 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-green-500"
+                              className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-center focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
                             />
                           </td>
                           <td className="px-3 py-3">
@@ -1944,13 +1944,13 @@ export default function WithdrawalsPage11() {
                               placeholder="หมายเหตุ..."
                               value={item.notes}
                               onChange={(e) => updateEditingItem(idx, 'notes', e.target.value)}
-                              className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                             />
                           </td>
                           <td className="px-3 py-3 text-center">
                             <button
                               onClick={() => handleDeleteItem(item.id, idx)}
-                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                              className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                               title="ลบรายการ"
                             >
                               <Trash2 size={16} />
@@ -1962,15 +1962,15 @@ export default function WithdrawalsPage11() {
                   </table>
                 </div>
               ) : (
-                <div className="p-8 text-center text-gray-400">
+                <div className="p-8 text-center text-gray-400 dark:text-gray-500">
                   <p>ไม่มีรายการหนังสือ</p>
                 </div>
               )}
 
               {/* สรุปยอด */}
               {editingItems.length > 0 && (
-                <div className="bg-gray-50 px-4 py-3 border-t">
-                  <div className="flex items-center justify-end gap-4 text-sm">
+                <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-t dark:border-gray-600">
+                  <div className="flex items-center justify-end gap-4 text-sm dark:text-gray-300">
                     <div>
                       รวมขอเบิก: <span className="font-bold text-blue-600">{editingItems.reduce((sum, item) => sum + (item.requested_qty || 0), 0)}</span> เล่ม
                     </div>
@@ -1988,7 +1988,7 @@ export default function WithdrawalsPage11() {
                   setShowEditModal(false)
                   setEditingItems([])
                 }}
-                className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50"
+                className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
               >
                 ยกเลิก
               </button>
@@ -2011,12 +2011,12 @@ export default function WithdrawalsPage11() {
       {/* Add Book to Edit Modal */}
       {showAddBookToEditModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">เพิ่มรายการหนังสือ</h3>
+              <h3 className="text-lg font-bold dark:text-white">เพิ่มรายการหนังสือ</h3>
               <button
                 onClick={() => setShowAddBookToEditModal(false)}
-                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2024,30 +2024,30 @@ export default function WithdrawalsPage11() {
               </button>
             </div>
 
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               เลือกหนังสือจากคลังพัสดุที่ยังไม่มีในใบเบิกนี้
             </p>
 
             {loadingBooksForEdit ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="animate-spin text-blue-600" size={24} />
-                <span className="ml-2 text-gray-500">กำลังโหลดรายการหนังสือ...</span>
+                <span className="ml-2 text-gray-500 dark:text-gray-400">กำลังโหลดรายการหนังสือ...</span>
               </div>
             ) : availableBooksForEdit.length > 0 ? (
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border dark:border-gray-600 rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="text-left px-3 py-2">รายการหนังสือ</th>
-                      <th className="text-center px-3 py-2 w-28">คงเหลือ</th>
-                      <th className="text-center px-3 py-2 w-24">เพิ่ม</th>
+                    <tr className="bg-gray-100 dark:bg-gray-600">
+                      <th className="text-left px-3 py-2 dark:text-gray-200">รายการหนังสือ</th>
+                      <th className="text-center px-3 py-2 w-28 dark:text-gray-200">คงเหลือ</th>
+                      <th className="text-center px-3 py-2 w-24 dark:text-gray-200">เพิ่ม</th>
                     </tr>
                   </thead>
                   <tbody>
                     {availableBooksForEdit.map(stock => (
-                      <tr key={stock.book_id} className="border-b hover:bg-gray-50">
+                      <tr key={stock.book_id} className="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-3 py-3">
-                          <div className="font-medium">{stock.books?.title || '-'}</div>
+                          <div className="font-medium dark:text-white">{stock.books?.title || '-'}</div>
                         </td>
                         <td className="px-3 py-3 text-center font-medium text-green-600">
                           {stock.available_quantity} เล่ม
@@ -2067,17 +2067,17 @@ export default function WithdrawalsPage11() {
                 </table>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <FileText size={40} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">ไม่มีหนังสือเพิ่มเติมในคลังพัสดุ</p>
-                <p className="text-sm text-gray-400 mt-1">หนังสือทั้งหมดถูกเพิ่มในใบเบิกนี้แล้ว</p>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
+                <FileText size={40} className="text-gray-300 dark:text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">ไม่มีหนังสือเพิ่มเติมในคลังพัสดุ</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">หนังสือทั้งหมดถูกเพิ่มในใบเบิกนี้แล้ว</p>
               </div>
             )}
 
             <div className="flex justify-end mt-4">
               <button
                 onClick={() => setShowAddBookToEditModal(false)}
-                className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50"
+                className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
               >
                 ปิด
               </button>
@@ -2089,10 +2089,10 @@ export default function WithdrawalsPage11() {
       {/* Print Preview Modal */}
       {showPrintPreviewModal && printPreviewWithdrawal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-800">ตัวอย่างใบเบิกพัสดุ</h3>
+            <div className="px-6 py-4 border-b dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">ตัวอย่างใบเบิกพัสดุ</h3>
               <div className="flex gap-2">
                 <button
                   onClick={handlePrint}
@@ -2108,7 +2108,7 @@ export default function WithdrawalsPage11() {
                 </button>
                 <button
                   onClick={() => setShowPrintPreviewModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                 >
                   ปิด
                 </button>
@@ -2116,7 +2116,7 @@ export default function WithdrawalsPage11() {
             </div>
 
             {/* Preview Content */}
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
               <div
                 ref={printRef}
                 className="bg-white mx-auto shadow-lg"

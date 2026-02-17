@@ -227,25 +227,25 @@ export default function InventoryPage1() {
   const lowStock = items.filter(i => (i.book_stock?.[0]?.available_quantity || 0) <= (i.book_stock?.[0]?.min_quantity || 5))
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
+    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">จัดการหนังสือเรียน</h1>
-          <p className="text-gray-500 text-sm mt-1">จัดการหนังสือเรียนทั้งหมด ({items.length} รายการ)</p>
+          <h1 className="text-2xl font-bold dark:text-white">จัดการหนังสือเรียน</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">จัดการหนังสือเรียนทั้งหมด ({items.length} รายการ)</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <input type="file" accept=".csv" ref={fileInputRef} onChange={handleCsvUpload} className="hidden" />
           <button onClick={() => fileInputRef.current?.click()} disabled={csvUploading} className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm hover:bg-green-700 disabled:opacity-50">
             {csvUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} นำเข้า CSV
           </button>
-          <button onClick={exportCsv} className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-xl text-sm hover:bg-gray-50">
+          <button onClick={exportCsv} className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">
             <Download size={16} /> ส่งออก CSV
           </button>
-          <button onClick={exportPdf} className="flex items-center gap-2 px-4 py-2.5 border border-red-300 text-red-600 rounded-xl text-sm hover:bg-red-50">
+          <button onClick={exportPdf} className="flex items-center gap-2 px-4 py-2.5 border border-red-300 dark:border-red-800 text-red-600 rounded-xl text-sm hover:bg-red-50 dark:hover:bg-red-900/30">
             <FileText size={16} /> ส่งออก PDF
           </button>
           <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
@@ -256,39 +256,39 @@ export default function InventoryPage1() {
 
       {/* Low Stock Warning */}
       {lowStock.length > 0 && (
-        <div className="flex items-center gap-3 bg-yellow-50 border border-yellow-100 rounded-xl px-5 py-3">
+        <div className="flex items-center gap-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-100 dark:border-yellow-800 rounded-xl px-5 py-3">
           <AlertTriangle size={20} className="text-yellow-600" />
-          <p className="text-sm"><span className="font-medium">แจ้งเตือน:</span> มี {lowStock.length} รายการที่สต็อกต่ำกว่าเกณฑ์</p>
+          <p className="text-sm dark:text-gray-300"><span className="font-medium">แจ้งเตือน:</span> มี {lowStock.length} รายการที่สต็อกต่ำกว่าเกณฑ์</p>
         </div>
       )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-blue-50"><Package size={24} className="text-blue-600" /></div>
-          <div><p className="text-sm text-gray-500">หนังสือทั้งหมด</p><p className="text-2xl font-bold">{items.length}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30"><Package size={24} className="text-blue-600" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">หนังสือทั้งหมด</p><p className="text-2xl font-bold dark:text-white">{items.length}</p></div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-green-50"><Package size={24} className="text-green-600" /></div>
-          <div><p className="text-sm text-gray-500">มีสต็อก</p><p className="text-2xl font-bold">{items.filter(i => (i.book_stock?.[0]?.available_quantity || 0) > 0).length}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/30"><Package size={24} className="text-green-600" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">มีสต็อก</p><p className="text-2xl font-bold dark:text-white">{items.filter(i => (i.book_stock?.[0]?.available_quantity || 0) > 0).length}</p></div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-yellow-50"><AlertTriangle size={24} className="text-yellow-600" /></div>
-          <div><p className="text-sm text-gray-500">สต็อกต่ำ</p><p className="text-2xl font-bold">{lowStock.length}</p></div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/30"><AlertTriangle size={24} className="text-yellow-600" /></div>
+          <div><p className="text-sm text-gray-500 dark:text-gray-400">สต็อกต่ำ</p><p className="text-2xl font-bold dark:text-white">{lowStock.length}</p></div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
         <div className="relative mb-5">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input type="text" placeholder="ค้นหาชื่อหนังสือ, กลุ่มสาระ..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
+          <input type="text" placeholder="ค้นหาชื่อหนังสือ, กลุ่มสาระ..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-600">
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <th className="text-left px-4 py-3 font-medium">ชื่อหนังสือ</th>
                 <th className="text-left px-4 py-3 font-medium">ระดับชั้น</th>
                 <th className="text-left px-4 py-3 font-medium">กลุ่มสาระ</th>
@@ -297,48 +297,48 @@ export default function InventoryPage1() {
                 <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {paginated.map(item => {
                 const stock = item.book_stock?.[0]?.available_quantity || 0
                 const minQty = item.book_stock?.[0]?.min_quantity || 5
                 const isLow = stock <= minQty
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50">
+                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-3">
-                      <p className="font-medium">{item.title}</p>
+                      <p className="font-medium dark:text-white">{item.title}</p>
                       <p className="text-xs text-gray-400">{item.publisher || '-'}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{gradeLabel[item.grade] || item.grade}</td>
-                    <td className="px-4 py-3 text-gray-600">{item.subject || '-'}</td>
-                    <td className="px-4 py-3 text-right">{Number(item.price).toLocaleString()} บาท</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{gradeLabel[item.grade] || item.grade}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{item.subject || '-'}</td>
+                    <td className="px-4 py-3 text-right dark:text-gray-300">{Number(item.price).toLocaleString()} บาท</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${isLow ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${isLow ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'}`}>
                         {stock}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openEdit(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit3 size={15} /></button>
-                        <button onClick={() => handleDelete(item.id, item.title)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={15} /></button>
+                        <button onClick={() => openEdit(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"><Edit3 size={15} /></button>
+                        <button onClick={() => handleDelete(item.id, item.title)} className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"><Trash2 size={15} /></button>
                       </div>
                     </td>
                   </tr>
                 )
               })}
-              {paginated.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">ไม่พบรายการ</td></tr>}
+              {paginated.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">ไม่พบรายการ</td></tr>}
             </tbody>
           </table>
         </div>
 
         {filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
             <div className="flex gap-1">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ก่อนหน้า</button>
+              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-300">ก่อนหน้า</button>
               {Array.from({length: totalPages}, (_, i) => i+1).map(p => (
-                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}>{p}</button>
+                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300'}`}>{p}</button>
               ))}
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ถัดไป</button>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-300">ถัดไป</button>
             </div>
           </div>
         )}
@@ -347,20 +347,20 @@ export default function InventoryPage1() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 mx-4">
-            <h3 className="text-lg font-bold mb-4">{editItem ? 'แก้ไขหนังสือ' : 'เพิ่มหนังสือใหม่'}</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg p-6 mx-4">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">{editItem ? 'แก้ไขหนังสือ' : 'เพิ่มหนังสือใหม่'}</h3>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium">ชื่อหนังสือ *</label>
+                <label className="text-sm font-medium dark:text-gray-300">ชื่อหนังสือ *</label>
                 <input type="text" className="input-field mt-1" value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} />
               </div>
               <div>
-                <label className="text-sm font-medium">ราคา (บาท) *</label>
+                <label className="text-sm font-medium dark:text-gray-300">ราคา (บาท) *</label>
                 <input type="number" className="input-field mt-1" value={form.price} onChange={e => setForm(p => ({...p, price: e.target.value}))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium">ระดับ</label>
+                  <label className="text-sm font-medium dark:text-gray-300">ระดับ</label>
                   <select className="input-field mt-1" value={form.level} onChange={e => setForm(p => ({...p, level: e.target.value}))}>
                     <option value="kindergarten">อนุบาล</option>
                     <option value="primary">ประถม</option>
@@ -368,7 +368,7 @@ export default function InventoryPage1() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">ชั้นเรียน</label>
+                  <label className="text-sm font-medium dark:text-gray-300">ชั้นเรียน</label>
                   <select className="input-field mt-1" value={form.grade} onChange={e => setForm(p => ({...p, grade: e.target.value}))}>
                     <option value="kg2">อนุบาล 2</option><option value="kg3">อนุบาล 3</option>
                     <option value="p1">ป.1</option><option value="p2">ป.2</option><option value="p3">ป.3</option>
@@ -378,13 +378,13 @@ export default function InventoryPage1() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-sm font-medium">ผู้แต่ง</label><input type="text" className="input-field mt-1" value={form.author} onChange={e => setForm(p => ({...p, author: e.target.value}))} /></div>
-                <div><label className="text-sm font-medium">กลุ่มสาระการเรียนรู้</label><select className="input-field mt-1" value={form.subject} onChange={e => setForm(p => ({...p, subject: e.target.value}))}><option value="">-- เลือกกลุ่มสาระ --</option>{subjectGroupOptions.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                <div><label className="text-sm font-medium dark:text-gray-300">ผู้แต่ง</label><input type="text" className="input-field mt-1" value={form.author} onChange={e => setForm(p => ({...p, author: e.target.value}))} /></div>
+                <div><label className="text-sm font-medium dark:text-gray-300">กลุ่มสาระการเรียนรู้</label><select className="input-field mt-1" value={form.subject} onChange={e => setForm(p => ({...p, subject: e.target.value}))}><option value="">-- เลือกกลุ่มสาระ --</option>{subjectGroupOptions.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
               </div>
-              <div><label className="text-sm font-medium">สำนักพิมพ์</label><input type="text" className="input-field mt-1" value={form.publisher} onChange={e => setForm(p => ({...p, publisher: e.target.value}))} /></div>
+              <div><label className="text-sm font-medium dark:text-gray-300">สำนักพิมพ์</label><input type="text" className="input-field mt-1" value={form.publisher} onChange={e => setForm(p => ({...p, publisher: e.target.value}))} /></div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50">ยกเลิก</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">ยกเลิก</button>
               <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">บันทึก</button>
             </div>
           </div>

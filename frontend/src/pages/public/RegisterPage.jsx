@@ -145,11 +145,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4">
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-2">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 px-4">
+      <div className="w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-2">
 
         {/* Left panel */}
-        <div className="hidden md:flex flex-col justify-between p-10 bg-green-50">
+        <div className="hidden md:flex flex-col justify-between p-10 bg-green-50 dark:bg-gray-700">
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
@@ -160,11 +160,11 @@ export default function RegisterPage() {
               </span>
             </div>
 
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-3xl font-bold mb-4 dark:text-white">
               สมัครสมาชิก<br />เพื่อเข้าใช้งานระบบ
             </h2>
 
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
               ระบบบริหารจัดการหนังสือเรียนสำหรับครูประจำชั้น
               โรงเรียนบ้านค้อดอนแคน
             </p>
@@ -179,19 +179,19 @@ export default function RegisterPage() {
 
         {/* Right panel (Register Form) */}
         <div className="p-8 md:p-10">
-          <h2 className="text-2xl font-bold mb-2">สมัครสมาชิก</h2>
-          <p className="text-gray-500 mb-6">
+          <h2 className="text-2xl font-bold mb-2 dark:text-white">สมัครสมาชิก</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
             กรุณากรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้
           </p>
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm">
+            <div className="mb-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-2 rounded-lg text-sm">
+            <div className="mb-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-2 rounded-lg text-sm">
               {success}
             </div>
           )}
@@ -199,7 +199,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 dark:text-gray-200">
                 ชื่อ-นามสกุล
               </label>
               <input
@@ -217,7 +217,7 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 dark:text-gray-200">
                 อีเมล
               </label>
               <input
@@ -235,17 +235,17 @@ export default function RegisterPage() {
 
             {/* Role - ครูเท่านั้น */}
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 dark:text-gray-200">
                 ตำแหน่ง
               </label>
-              <div className="flex items-center gap-2 py-3 px-4 rounded-xl border-2 border-green-600 bg-green-50 text-green-700 text-sm font-medium">
+              <div className="flex items-center gap-2 py-3 px-4 rounded-xl border-2 border-green-600 dark:border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium">
                 <span className="text-lg">👩‍🏫</span> ครู
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium mb-1">รหัสผ่าน</label>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-200">รหัสผ่าน</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -270,7 +270,7 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium mb-1">ยืนยันรหัสผ่าน</label>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-200">ยืนยันรหัสผ่าน</label>
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="confirmPassword"
@@ -294,7 +294,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="text-sm text-center text-gray-500 mt-6">
+          <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-6">
             มีบัญชีอยู่แล้ว?{' '}
             <Link to="/login" className="text-blue-600 hover:underline">
               เข้าสู่ระบบ
@@ -304,7 +304,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-4 text-xs text-gray-400">
+      <div className="absolute bottom-4 text-xs text-gray-400 dark:text-gray-500">
         © 2024 Textbook Ordering System. All rights reserved.
       </div>
     </div>

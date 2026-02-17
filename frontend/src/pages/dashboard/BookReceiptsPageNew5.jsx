@@ -1005,7 +1005,7 @@ const generateReceiptNumber = async () => {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="animate-spin text-blue-600" size={32} />
-        <span className="ml-3 text-gray-500">กำลังโหลด...</span>
+        <span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span>
       </div>
     )
   }
@@ -1014,8 +1014,8 @@ const generateReceiptNumber = async () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">รับหนังสือจากสำนักพิมพ์</h1>
-          <p className="text-gray-500 text-sm mt-1">บันทึกการรับหนังสือจากสำนักพิมพ์</p>
+          <h1 className="text-2xl font-bold dark:text-white">รับหนังสือจากสำนักพิมพ์</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">บันทึกการรับหนังสือจากสำนักพิมพ์</p>
         </div>
         <button
           onClick={openReceiveModal}
@@ -1027,31 +1027,31 @@ const generateReceiptNumber = async () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-blue-50">
-            <Package size={24} className="text-blue-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30">
+            <Package size={24} className="text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">ใบรับทั้งหมด</p>
-            <p className="text-2xl font-bold">{totalReceipts}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">ใบรับทั้งหมด</p>
+            <p className="text-2xl font-bold dark:text-white">{totalReceipts}</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-green-50">
-            <BookOpen size={24} className="text-green-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/30">
+            <BookOpen size={24} className="text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">หนังสือที่รับแล้ว</p>
-            <p className="text-2xl font-bold">{totalBooksReceived.toLocaleString()} เล่ม</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">หนังสือที่รับแล้ว</p>
+            <p className="text-2xl font-bold dark:text-white">{totalBooksReceived.toLocaleString()} เล่ม</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-yellow-50">
-            <Calendar size={24} className="text-yellow-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/30">
+            <Calendar size={24} className="text-yellow-600 dark:text-yellow-400" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">รับล่าสุด</p>
-            <p className="text-lg font-bold">
+            <p className="text-sm text-gray-500 dark:text-gray-400">รับล่าสุด</p>
+            <p className="text-lg font-bold dark:text-white">
               {receipts[0] ? new Date(receipts[0].receipt_date).toLocaleDateString('th-TH') : '-'}
             </p>
           </div>
@@ -1059,15 +1059,15 @@ const generateReceiptNumber = async () => {
       </div>
 
       {/* Receipts Table */}
-      <div className="bg-white rounded-xl border p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h3 className="font-semibold">ประวัติการรับหนังสือ</h3>
+          <h3 className="font-semibold dark:text-white">ประวัติการรับหนังสือ</h3>
           <div className="relative w-full md:w-64">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="ค้นหา..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
               value={search}
               onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
             />
@@ -1077,7 +1077,7 @@ const generateReceiptNumber = async () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-600">
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <th className="text-left px-4 py-3 font-medium">เลขที่ใบรับ</th>
                 <th className="text-center px-4 py-3 font-medium">วันที่รับ</th>
                 <th className="text-center px-4 py-3 font-medium">ชั้น</th>
@@ -1089,7 +1089,7 @@ const generateReceiptNumber = async () => {
                 <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {paginated.map(receipt => {
                 const itemCount = receipt.book_receipt_items?.length || 0
                 const totalQty = receipt.book_receipt_items?.reduce((s, i) => s + (i.received_qty || 0), 0) || 0
@@ -1098,9 +1098,9 @@ const generateReceiptNumber = async () => {
                 const allTransferred = transferredCount === itemCount && itemCount > 0
 
                 return (
-                  <tr key={receipt.id} className={allTransferred ? 'bg-green-50/30' : 'hover:bg-gray-50'}>
-                    <td className="px-4 py-3 font-medium text-blue-600">{receipt.receipt_number}</td>
-                    <td className="px-4 py-3 text-center">
+                  <tr key={receipt.id} className={allTransferred ? 'bg-green-50/30 dark:bg-green-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}>
+                    <td className="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{receipt.receipt_number}</td>
+                    <td className="px-4 py-3 text-center dark:text-gray-300">
                       {new Date(receipt.receipt_date).toLocaleDateString('th-TH')}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -1108,14 +1108,14 @@ const generateReceiptNumber = async () => {
                         {gradeLabel[receipt.grade] || receipt.grade || '-'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm">{receipt.subject_group || 'ทุกกลุ่มสาระ'}</td>
+                    <td className="px-4 py-3 text-sm dark:text-gray-300">{receipt.subject_group || 'ทุกกลุ่มสาระ'}</td>
                     <td className="px-4 py-3 text-center">
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                         ครั้งที่ {receipt.delivery_number || '-'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center">{itemCount}</td>
-                    <td className="px-4 py-3 text-center font-medium text-green-600">{totalQty}</td>
+                    <td className="px-4 py-3 text-center dark:text-gray-300">{itemCount}</td>
+                    <td className="px-4 py-3 text-center font-medium text-green-600 dark:text-green-400">{totalQty}</td>
                     <td className="px-4 py-3 text-center">
                       {allTransferred ? (
                         <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
@@ -1126,7 +1126,7 @@ const generateReceiptNumber = async () => {
                           โอนบางส่วน ({transferredCount}/{itemCount})
                         </span>
                       ) : (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full text-xs font-medium">
                           รอโอน
                         </span>
                       )}
@@ -1135,7 +1135,7 @@ const generateReceiptNumber = async () => {
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => openDetailModal(receipt)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
+                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"
                           title="ดูรายละเอียด"
                         >
                           <Eye size={16} />
@@ -1145,7 +1145,7 @@ const generateReceiptNumber = async () => {
                           className={`p-1.5 rounded-lg ${
                             allTransferred
                               ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-yellow-600 hover:bg-yellow-50'
+                              : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/30'
                           }`}
                           title={allTransferred ? 'โอนครบแล้ว ไม่สามารถแก้ไขได้' : 'แก้ไข/โอนไปสต๊อก'}
                           disabled={allTransferred}
@@ -1157,7 +1157,7 @@ const generateReceiptNumber = async () => {
                           className={`p-1.5 rounded-lg ${
                             hasTransferred
                               ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-red-600 hover:bg-red-50'
+                              : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30'
                           }`}
                           title={hasTransferred ? 'มีรายการโอนแล้ว ไม่สามารถลบได้' : 'ลบ'}
                           disabled={hasTransferred}
@@ -1171,7 +1171,7 @@ const generateReceiptNumber = async () => {
               })}
               {paginated.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={9} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                     {search ? 'ไม่พบรายการที่ค้นหา' : 'ยังไม่มีประวัติการรับหนังสือ'}
                   </td>
                 </tr>
@@ -1182,7 +1182,7 @@ const generateReceiptNumber = async () => {
 
         {filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               แสดง {(currentPage - 1) * PAGE_SIZE + 1} ถึง {Math.min(currentPage * PAGE_SIZE, filtered.length)} จาก {filtered.length}
             </p>
             <div className="flex gap-1">
@@ -1190,7 +1190,7 @@ const generateReceiptNumber = async () => {
                 <button
                   key={p}
                   onClick={() => setCurrentPage(p)}
-                  className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300'}`}
                 >
                   {p}
                 </button>
@@ -1203,9 +1203,9 @@ const generateReceiptNumber = async () => {
       {/* Receive Modal - เหมือนเดิม */}
       {showReceiveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-4xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">รับหนังสือจากสำนักพิมพ์</h3>
+              <h3 className="text-lg font-bold dark:text-white">รับหนังสือจากสำนักพิมพ์</h3>
               {selectedGrade && (
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                   ครั้งที่ {deliveryNumber}
@@ -1215,9 +1215,9 @@ const generateReceiptNumber = async () => {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ชั้นเรียน <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ชั้นเรียน <span className="text-red-500">*</span></label>
                 <select
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   value={selectedGrade}
                   onChange={e => setSelectedGrade(e.target.value)}
                 >
@@ -1228,9 +1228,9 @@ const generateReceiptNumber = async () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">กลุ่มสาระการเรียนรู้</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">กลุ่มสาระการเรียนรู้</label>
                 <select
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   value={selectedSubject}
                   onChange={e => setSelectedSubject(e.target.value)}
                 >
@@ -1243,19 +1243,19 @@ const generateReceiptNumber = async () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">วันที่รับ</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">วันที่รับ</label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   value={receiptDate}
                   onChange={e => setReceiptDate(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">หมายเหตุ</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                   placeholder="หมายเหตุ (ถ้ามี)"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
@@ -1266,15 +1266,15 @@ const generateReceiptNumber = async () => {
             {loadingBooks && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="animate-spin text-blue-600" size={24} />
-                <span className="ml-2 text-gray-500">กำลังโหลดรายการหนังสือ...</span>
+                <span className="ml-2 text-gray-500 dark:text-gray-400">กำลังโหลดรายการหนังสือ...</span>
               </div>
             )}
 
             {!loadingBooks && selectedGrade && filteredBooks.length > 0 && (
-              <div className="border rounded-lg overflow-hidden mb-4">
+              <div className="border dark:border-gray-700 rounded-lg overflow-hidden mb-4">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
                       <th className="text-left px-3 py-2">#</th>
                       <th className="text-left px-3 py-2">รายการหนังสือ</th>
                       <th className="text-left px-3 py-2">กลุ่มสาระ</th>
@@ -1288,14 +1288,14 @@ const generateReceiptNumber = async () => {
                     {filteredBooks.map((book, idx) => {
                       const remaining = book.total_ordered - book.total_received
                       return (
-                        <tr key={book.book_id} className="border-b">
-                          <td className="px-3 py-3">{idx + 1}</td>
-                          <td className="px-3 py-3">{book.title}</td>
-                          <td className="px-3 py-3 text-xs text-gray-500">{book.typeofbook_name || '-'}</td>
-                          <td className="px-3 py-3 text-center">{book.total_ordered}</td>
-                          <td className="px-3 py-3 text-center text-green-600 font-medium">{book.total_received}</td>
+                        <tr key={book.book_id} className="border-b dark:border-gray-700">
+                          <td className="px-3 py-3 dark:text-gray-300">{idx + 1}</td>
+                          <td className="px-3 py-3 dark:text-gray-300">{book.title}</td>
+                          <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400">{book.typeofbook_name || '-'}</td>
+                          <td className="px-3 py-3 text-center dark:text-gray-300">{book.total_ordered}</td>
+                          <td className="px-3 py-3 text-center text-green-600 dark:text-green-400 font-medium">{book.total_received}</td>
                           <td className="px-3 py-3 text-center">
-                            <span className={remaining > 0 ? 'text-orange-600 font-medium' : 'text-gray-400'}>
+                            <span className={remaining > 0 ? 'text-orange-600 dark:text-orange-400 font-medium' : 'text-gray-400'}>
                               {remaining}
                             </span>
                           </td>
@@ -1305,7 +1305,7 @@ const generateReceiptNumber = async () => {
                               min="0"
                               max={remaining}
                               ref={el => inputRefs.current[book.book_id] = el}
-                              className="w-20 text-center border rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              className="w-20 text-center border dark:border-gray-600 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
                               value={receiveItems[book.book_id] || 0}
                               onChange={e => {
                                 const val = Math.min(Math.max(0, Number(e.target.value)), remaining)
@@ -1336,25 +1336,25 @@ const generateReceiptNumber = async () => {
             )}
 
             {!loadingBooks && selectedGrade && filteredBooks.length === 0 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center mb-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-8 text-center mb-4">
                 <BookOpen size={40} className="text-yellow-400 mx-auto mb-3" />
-                <p className="text-yellow-700 whitespace-pre-line">{noDataReason || 'ไม่พบรายการหนังสือสำหรับชั้นและกลุ่มสาระที่เลือก'}</p>
-                <p className="text-sm text-gray-500 mt-3">
+                <p className="text-yellow-700 dark:text-yellow-400 whitespace-pre-line">{noDataReason || 'ไม่พบรายการหนังสือสำหรับชั้นและกลุ่มสาระที่เลือก'}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
                   กรุณาตรวจสอบว่ามีคำสั่งซื้อสำหรับชั้นนี้แล้วหรือยังในหน้า "จัดการคำสั่งซื้อ"
                 </p>
               </div>
             )}
 
             {!loadingBooks && !selectedGrade && (
-              <div className="bg-gray-50 rounded-lg p-8 text-center mb-4">
-                <Package size={40} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">กรุณาเลือกชั้นเรียนเพื่อแสดงรายการหนังสือ</p>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center mb-4">
+                <Package size={40} className="text-gray-300 dark:text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">กรุณาเลือกชั้นเรียนเพื่อแสดงรายการหนังสือ</p>
               </div>
             )}
 
             {selectedGrade && filteredBooks.length > 0 && (
-              <div className="bg-blue-50 rounded-lg p-3 mb-4">
-                <p className="text-sm text-blue-700">
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
                   <strong>รวมรับครั้งนี้:</strong> {Object.values(receiveItems).reduce((a, b) => a + b, 0)} เล่ม
                   จาก {filteredBooks.length} รายการ
                 </p>
@@ -1364,7 +1364,7 @@ const generateReceiptNumber = async () => {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowReceiveModal(false)}
-                className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50"
+                className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
               >
                 ยกเลิก
               </button>
@@ -1384,24 +1384,24 @@ const generateReceiptNumber = async () => {
       {/* Detail Modal - เหมือนเดิม */}
       {showDetailModal && selectedReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold mb-4">รายละเอียดใบรับหนังสือ</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">รายละเอียดใบรับหนังสือ</h3>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-4 grid grid-cols-2 gap-2 text-sm">
-              <p><span className="text-gray-500">เลขที่:</span> <span className="font-medium">{selectedReceipt.receipt_number || '-'}</span></p>
-              <p><span className="text-gray-500">วันที่รับ:</span> <span className="font-medium">{selectedReceipt.receipt_date ? new Date(selectedReceipt.receipt_date).toLocaleDateString('th-TH') : '-'}</span></p>
-              <p><span className="text-gray-500">ชั้น:</span> <span className="font-medium">{gradeLabel[selectedReceipt.grade] || selectedReceipt.grade || '-'}</span></p>
-              <p><span className="text-gray-500">ครั้งที่:</span> <span className="font-medium">{selectedReceipt.delivery_number || '-'}</span></p>
-              <p className="col-span-2"><span className="text-gray-500">กลุ่มสาระ:</span> <span className="font-medium">{selectedReceipt.subject_group || 'ทุกกลุ่มสาระ'}</span></p>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4 grid grid-cols-2 gap-2 text-sm">
+              <p><span className="text-gray-500 dark:text-gray-400">เลขที่:</span> <span className="font-medium dark:text-white">{selectedReceipt.receipt_number || '-'}</span></p>
+              <p><span className="text-gray-500 dark:text-gray-400">วันที่รับ:</span> <span className="font-medium dark:text-white">{selectedReceipt.receipt_date ? new Date(selectedReceipt.receipt_date).toLocaleDateString('th-TH') : '-'}</span></p>
+              <p><span className="text-gray-500 dark:text-gray-400">ชั้น:</span> <span className="font-medium dark:text-white">{gradeLabel[selectedReceipt.grade] || selectedReceipt.grade || '-'}</span></p>
+              <p><span className="text-gray-500 dark:text-gray-400">ครั้งที่:</span> <span className="font-medium dark:text-white">{selectedReceipt.delivery_number || '-'}</span></p>
+              <p className="col-span-2"><span className="text-gray-500 dark:text-gray-400">กลุ่มสาระ:</span> <span className="font-medium dark:text-white">{selectedReceipt.subject_group || 'ทุกกลุ่มสาระ'}</span></p>
               {selectedReceipt.notes && (
-                <p className="col-span-2"><span className="text-gray-500">หมายเหตุ:</span> <span className="font-medium">{selectedReceipt.notes}</span></p>
+                <p className="col-span-2"><span className="text-gray-500 dark:text-gray-400">หมายเหตุ:</span> <span className="font-medium dark:text-white">{selectedReceipt.notes}</span></p>
               )}
             </div>
 
             {selectedReceipt.book_receipt_items && selectedReceipt.book_receipt_items.length > 0 ? (
-              <table className="w-full text-sm border rounded-lg overflow-hidden">
+              <table className="w-full text-sm border dark:border-gray-700 rounded-lg overflow-hidden">
                 <thead>
-                  <tr className="bg-gray-100">
+                  <tr className="bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
                     <th className="text-left px-4 py-2">#</th>
                     <th className="text-left px-4 py-2">รายการหนังสือ</th>
                     <th className="text-center px-4 py-2 w-24">จำนวนรับ</th>
@@ -1410,17 +1410,17 @@ const generateReceiptNumber = async () => {
                 </thead>
                 <tbody>
                   {selectedReceipt.book_receipt_items.map((item, idx) => (
-                    <tr key={item.id || idx} className="border-t">
-                      <td className="px-4 py-2">{idx + 1}</td>
-                      <td className="px-4 py-2">{item.books?.title || '-'}</td>
-                      <td className="px-4 py-2 text-center font-medium text-green-600">{item.received_qty || 0}</td>
+                    <tr key={item.id || idx} className="border-t dark:border-gray-700">
+                      <td className="px-4 py-2 dark:text-gray-300">{idx + 1}</td>
+                      <td className="px-4 py-2 dark:text-gray-300">{item.books?.title || '-'}</td>
+                      <td className="px-4 py-2 text-center font-medium text-green-600 dark:text-green-400">{item.received_qty || 0}</td>
                       <td className="px-4 py-2 text-center">
                         {item.transferred_to_stock ? (
                           <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs">
                             โอนแล้ว
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                          <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full text-xs">
                             รอโอน
                           </span>
                         )}
@@ -1429,9 +1429,9 @@ const generateReceiptNumber = async () => {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-gray-50 border-t">
-                    <td colSpan={2} className="px-4 py-2 text-right font-medium">รวมทั้งสิ้น:</td>
-                    <td className="px-4 py-2 text-center font-bold text-green-600">
+                  <tr className="bg-gray-50 dark:bg-gray-700 border-t dark:border-gray-600">
+                    <td colSpan={2} className="px-4 py-2 text-right font-medium dark:text-gray-300">รวมทั้งสิ้น:</td>
+                    <td className="px-4 py-2 text-center font-bold text-green-600 dark:text-green-400">
                       {selectedReceipt.book_receipt_items.reduce((s, i) => s + (i.received_qty || 0), 0)} เล่ม
                     </td>
                     <td></td>
@@ -1439,15 +1439,15 @@ const generateReceiptNumber = async () => {
                 </tfoot>
               </table>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <p className="text-gray-500">ไม่มีรายการหนังสือ</p>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
+                <p className="text-gray-500 dark:text-gray-400">ไม่มีรายการหนังสือ</p>
               </div>
             )}
 
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50"
+                className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
               >
                 ปิด
               </button>
@@ -1459,57 +1459,57 @@ const generateReceiptNumber = async () => {
       {/* Edit Modal - ปรับปรุงใหม่ */}
       {showEditModal && editingReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-5xl p-6 mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">แก้ไข / โอนไปสต๊อก</h3>
+              <h3 className="text-lg font-bold dark:text-white">แก้ไข / โอนไปสต๊อก</h3>
               <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
                 {editingReceipt.receipt_number}
               </span>
             </div>
 
             {/* ข้อมูลพื้นฐาน */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-4 grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4 grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ชั้นเรียน</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ชั้นเรียน</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
                   value={gradeLabel[editingReceipt.grade] || editingReceipt.grade}
                   disabled
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ครั้งที่</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ครั้งที่</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
                   value={`ครั้งที่ ${editingReceipt.delivery_number}`}
                   disabled
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">กลุ่มสาระ</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">กลุ่มสาระ</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
                   value={editingReceipt.subject_group || 'ทุกกลุ่มสาระ'}
                   disabled
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">วันที่รับ</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">วันที่รับ</label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   value={editReceiptDate}
                   onChange={e => setEditReceiptDate(e.target.value)}
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">หมายเหตุ</label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                   placeholder="หมายเหตุ (ถ้ามี)"
                   value={editNotes}
                   onChange={e => setEditNotes(e.target.value)}
@@ -1528,7 +1528,7 @@ const generateReceiptNumber = async () => {
                     })
                     setSelectedForTransfer(newSelected)
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                 >
                   เลือกทั้งหมด (รายการที่ยังไม่โอน)
                 </button>
@@ -1540,22 +1540,22 @@ const generateReceiptNumber = async () => {
                     })
                     setSelectedForTransfer(newSelected)
                   }}
-                  className="text-sm text-gray-600 hover:text-gray-700"
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
                   ยกเลิกทั้งหมด
                 </button>
               </div>
-              <p className="text-sm text-gray-600">
-                เลือก: <strong>{Object.values(selectedForTransfer).filter(Boolean).length}</strong> รายการ
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                เลือก: <strong className="dark:text-white">{Object.values(selectedForTransfer).filter(Boolean).length}</strong> รายการ
               </p>
             </div>
 
             {/* ตารางหนังสือ */}
             {editingBooks && editingBooks.length > 0 ? (
-              <div className="border rounded-lg overflow-hidden mb-4">
+              <div className="border dark:border-gray-700 rounded-lg overflow-hidden mb-4">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
                       <th className="text-center px-3 py-2 w-12">
                         <span className="text-xs">เลือก</span>
                       </th>
@@ -1565,7 +1565,7 @@ const generateReceiptNumber = async () => {
                       <th className="text-center px-3 py-2 w-20">สั่ง</th>
                       <th className="text-center px-3 py-2 w-20">รับแล้ว</th>
                       <th className="text-center px-3 py-2 w-20">คงเหลือ</th>
-                      <th className="text-center px-3 py-2 w-28">จำนวนรับ<br/><span className="text-xs font-normal text-gray-500">(ครั้งนี้)</span></th>
+                      <th className="text-center px-3 py-2 w-28">จำนวนรับ<br/><span className="text-xs font-normal text-gray-500 dark:text-gray-400">(ครั้งนี้)</span></th>
                       <th className="text-center px-3 py-2 w-24">สถานะ</th>
                     </tr>
                   </thead>
@@ -1579,11 +1579,11 @@ const generateReceiptNumber = async () => {
                       const isTransferred = receiptItem.transferred_to_stock
 
                       return (
-                        <tr key={receiptItem.id} className={`border-b ${isTransferred ? 'bg-green-50/50' : ''}`}>
+                        <tr key={receiptItem.id} className={`border-b dark:border-gray-700 ${isTransferred ? 'bg-green-50/50 dark:bg-green-900/20' : ''}`}>
                           <td className="px-3 py-3 text-center">
                             {isTransferred ? (
                               <div className="flex items-center justify-center" title="โอนแล้ว">
-                                <CheckSquare size={18} className="text-green-600" />
+                                <CheckSquare size={18} className="text-green-600 dark:text-green-400" />
                               </div>
                             ) : (
                               <input
@@ -1599,24 +1599,24 @@ const generateReceiptNumber = async () => {
                               />
                             )}
                           </td>
-                          <td className="px-3 py-3">{idx + 1}</td>
-                          <td className="px-3 py-3">{book.title}</td>
-                          <td className="px-3 py-3 text-xs text-gray-500">{book.typeofbook_name || '-'}</td>
-                          <td className="px-3 py-3 text-center">{book.total_ordered}</td>
-                          <td className="px-3 py-3 text-center text-green-600 font-medium">{book.total_received}</td>
+                          <td className="px-3 py-3 dark:text-gray-300">{idx + 1}</td>
+                          <td className="px-3 py-3 dark:text-gray-300">{book.title}</td>
+                          <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400">{book.typeofbook_name || '-'}</td>
+                          <td className="px-3 py-3 text-center dark:text-gray-300">{book.total_ordered}</td>
+                          <td className="px-3 py-3 text-center text-green-600 dark:text-green-400 font-medium">{book.total_received}</td>
                           <td className="px-3 py-3 text-center">
-                            <span className={remaining > 0 ? 'text-orange-600 font-medium' : 'text-gray-400'}>
+                            <span className={remaining > 0 ? 'text-orange-600 dark:text-orange-400 font-medium' : 'text-gray-400'}>
                               {remaining}
                             </span>
                           </td>
                           <td className="px-3 py-3 text-center">
                             {isTransferred ? (
-                              <span className="text-green-600 font-medium">{currentQty}</span>
+                              <span className="text-green-600 dark:text-green-400 font-medium">{currentQty}</span>
                             ) : (
                               <input
                                 type="number"
                                 min="0"
-                                className="w-20 text-center border rounded px-2 py-1 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                className="w-20 text-center border dark:border-gray-600 rounded px-2 py-1 focus:ring-2 focus:ring-orange-500 focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
                                 value={currentQty}
                                 onChange={e => {
                                   const val = Math.max(0, Number(e.target.value))
@@ -1643,7 +1643,7 @@ const generateReceiptNumber = async () => {
                                 โอนแล้ว
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                              <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full text-xs">
                                 รอโอน
                               </span>
                             )}
@@ -1655,20 +1655,20 @@ const generateReceiptNumber = async () => {
                 </table>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-8 text-center mb-4">
-                <BookOpen size={40} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">กำลังโหลดรายการหนังสือ...</p>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center mb-4">
+                <BookOpen size={40} className="text-gray-300 dark:text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">กำลังโหลดรายการหนังสือ...</p>
               </div>
             )}
 
             {/* Summary */}
-            <div className="bg-orange-50 rounded-lg p-3 mb-4">
-              <p className="text-sm text-orange-700">
+            <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-3 mb-4">
+              <p className="text-sm text-orange-700 dark:text-orange-300">
                 <strong>รวมรับทั้งหมด:</strong> {Object.values(editReceiveItems).reduce((a, b) => a + b, 0)} เล่ม
                 จาก {editingReceipt.book_receipt_items?.length || 0} รายการ
               </p>
-              <p className="text-sm text-gray-600 mt-1">
-                <strong>เลือกโอนไปสต๊อก:</strong> {Object.values(selectedForTransfer).filter(Boolean).length} รายการ
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <strong className="dark:text-gray-300">เลือกโอนไปสต๊อก:</strong> {Object.values(selectedForTransfer).filter(Boolean).length} รายการ
               </p>
             </div>
 
@@ -1676,7 +1676,7 @@ const generateReceiptNumber = async () => {
             <div className="flex justify-between gap-3">
               <button
                 onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50"
+                className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
               >
                 ปิด
               </button>

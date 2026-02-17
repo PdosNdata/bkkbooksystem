@@ -55,7 +55,7 @@ const SidebarNew = ({ role = 'admin' }) => {
         <div key={`menu-${index}-${item.label}`} className="mb-1">
           <button
             onClick={() => toggleMenu(item.label)}
-            className="w-full flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <div className="flex items-center gap-3">
               {Icon && <Icon className="w-5 h-5" />}
@@ -78,9 +78,9 @@ const SidebarNew = ({ role = 'admin' }) => {
                     to={subItem.path}
                     className={({ isActive }) => 
                       `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                        isActive 
-                          ? 'bg-blue-50 text-blue-700' 
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        isActive
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                       }`
                     }
                   >
@@ -101,9 +101,9 @@ const SidebarNew = ({ role = 'admin' }) => {
         to={item.path}
         className={({ isActive }) => 
           `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors mb-1 ${
-            isActive 
-              ? 'bg-blue-50 text-blue-700' 
-              : 'text-gray-700 hover:bg-gray-100'
+            isActive
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`
         }
       >
@@ -119,9 +119,9 @@ const SidebarNew = ({ role = 'admin' }) => {
   };
 
   return (
-    <div className="w-64 bg-white h-screen border-r border-gray-200 p-4">
+    <div className="w-64 bg-white dark:bg-gray-800 h-screen border-r border-gray-200 dark:border-gray-700 p-4">
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-800">ระบบจัดการหนังสือเรียน</h2>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">ระบบจัดการหนังสือเรียน</h2>
       </div>
       <nav>
         {menuConfig[role]?.map((item, index) => renderMenuItem(item, index))}

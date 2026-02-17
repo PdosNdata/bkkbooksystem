@@ -140,7 +140,7 @@ export default function DashboardPage() {
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { font: { size: 12 }, stepSize: 1 } },
+      y: { beginAtZero: true, grid: { color: document.documentElement.classList.contains('dark') ? '#374151' : '#f3f4f6' }, ticks: { font: { size: 12 }, stepSize: 1 } },
       x: { grid: { display: false }, ticks: { font: { size: 12 } } },
     },
   }
@@ -172,10 +172,11 @@ export default function DashboardPage() {
       ctx.font = 'bold 24px Sarabun, sans-serif'
       ctx.textBaseline = 'middle'
       ctx.textAlign = 'center'
-      ctx.fillStyle = '#1f2937'
+      const isDark = document.documentElement.classList.contains('dark')
+      ctx.fillStyle = isDark ? '#f9fafb' : '#1f2937'
       ctx.fillText(totalOrders.toLocaleString(), width / 2, height / 2 - 10)
       ctx.font = '12px Sarabun, sans-serif'
-      ctx.fillStyle = '#9ca3af'
+      ctx.fillStyle = isDark ? '#d1d5db' : '#9ca3af'
       ctx.fillText('คำสั่งซื้อทั้งหมด', width / 2, height / 2 + 14)
       ctx.save()
     },

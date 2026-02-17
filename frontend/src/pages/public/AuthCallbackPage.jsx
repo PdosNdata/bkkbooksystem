@@ -42,10 +42,10 @@ export default function AuthCallbackPage() {
   }, [navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800">
       <div className="text-center">
         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-gray-600 text-lg">กำลังเข้าสู่ระบบ...</p>
+        <p className="text-gray-600 dark:text-gray-300 text-lg">กำลังเข้าสู่ระบบ...</p>
       </div>
     </div>
   )

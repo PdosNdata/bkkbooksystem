@@ -355,15 +355,15 @@ export default function MyOrdersPage() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
+    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
   if (!teacherGrade) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Info size={48} className="text-yellow-500 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-700 mb-2">ยังไม่ได้กำหนดชั้นเรียน</h2>
-        <p className="text-gray-500">กรุณาติดต่อผู้ดูแลระบบเพื่อกำหนดชั้นเรียนที่รับผิดชอบ</p>
+        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">ยังไม่ได้กำหนดชั้นเรียน</h2>
+        <p className="text-gray-500 dark:text-gray-400">กรุณาติดต่อผู้ดูแลระบบเพื่อกำหนดชั้นเรียนที่รับผิดชอบ</p>
       </div>
     )
   }
@@ -372,22 +372,22 @@ export default function MyOrdersPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">บันทึกความต้องการสั่งซื้อหนังสือเรียน</h1>
-          <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold dark:text-white">บันทึกความต้องการสั่งซื้อหนังสือเรียน</h1>
+          <div className="flex items-center gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1"><Calendar size={14} /> ปีการศึกษา {selectedYear}</span>
           </div>
         </div>
-        <div className="bg-white rounded-xl border p-5">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
           <div className="mb-4">
-            <label className="text-xs text-gray-500">ปีการศึกษา</label>
-            <select className="input-field mt-1" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+            <label className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
+            <select className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
               {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={y} value={y}>{y}</option> })}
             </select>
           </div>
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Info size={48} className="text-yellow-500 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">ไม่พบงบประมาณสำหรับปีการศึกษา {selectedYear}</h2>
-            <p className="text-gray-500">กรุณาติดต่อผู้ดูแลระบบเพื่อกำหนดงบประมาณ หรือเลือกปีการศึกษาอื่น</p>
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">ไม่พบงบประมาณสำหรับปีการศึกษา {selectedYear}</h2>
+            <p className="text-gray-500 dark:text-gray-400">กรุณาติดต่อผู้ดูแลระบบเพื่อกำหนดงบประมาณ หรือเลือกปีการศึกษาอื่น</p>
           </div>
         </div>
       </div>
@@ -399,18 +399,18 @@ export default function MyOrdersPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">บันทึกความต้องการสั่งซื้อหนังสือเรียน</h1>
-          <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold dark:text-white">บันทึกความต้องการสั่งซื้อหนังสือเรียน</h1>
+          <div className="flex items-center gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1"><Calendar size={14} /> ปีการศึกษา {selectedYear}</span>
             {teacherGrade && <span>• <BookOpen size={14} className="inline" /> ภาคเรียนที่ 1</span>}
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-white border rounded-xl px-4 py-2.5 text-sm">
-            <span className="text-gray-500">งบประมาณคงเหลือ</span>
+          <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm">
+            <span className="text-gray-500 dark:text-gray-400">งบประมาณคงเหลือ</span>
             <p className={`text-lg font-bold ${remaining >= 0 ? 'text-blue-600' : 'text-red-600'}`}>{remaining.toLocaleString()} บาท</p>
           </div>
-          <button onClick={handleSaveDraft} className="flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm hover:bg-gray-50">
+          <button onClick={handleSaveDraft} className="flex items-center gap-2 px-4 py-2.5 border dark:border-gray-700 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white">
             <Save size={16} /> บันทึกร่าง
           </button>
           <button onClick={handleSubmitOrder} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 disabled:opacity-50">
@@ -422,45 +422,45 @@ export default function MyOrdersPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar - ข้อมูลพื้นฐาน */}
         <div className="w-full lg:w-72 space-y-4">
-          <div className="bg-white rounded-xl border p-5">
-            <h3 className="font-semibold flex items-center gap-2 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
+            <h3 className="font-semibold flex items-center gap-2 mb-4 dark:text-white">
               <BookOpen size={18} className="text-blue-600" /> ข้อมูลพื้นฐาน
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-gray-500">ปีการศึกษา</label>
-                <select className="input-field mt-1" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+                <label className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
+                <select className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
                   {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={y} value={y}>{y}</option> })}
                 </select>
               </div>
               {teacherGrade && (
                 <div>
-                  <label className="text-xs text-gray-500">ชั้นที่รับผิดชอบ</label>
-                  <div className="input-field mt-1 bg-blue-50 text-center font-semibold text-blue-700">{gradeLabel[teacherGrade]}{teacherRoom ? `/${teacherRoom}` : ''} ({gradeStudentCount} คน)</div>
+                  <label className="text-xs text-gray-500 dark:text-gray-400">ชั้นที่รับผิดชอบ</label>
+                  <div className="input-field mt-1 bg-blue-50 dark:bg-blue-900/30 text-center font-semibold text-blue-700 dark:text-blue-300">{gradeLabel[teacherGrade]}{teacherRoom ? `/${teacherRoom}` : ''} ({gradeStudentCount} คน)</div>
                 </div>
               )}
               <div>
-                <label className="text-xs text-gray-500">งบประมาณที่ได้รับ (บาท)</label>
-                <div className="input-field mt-1 bg-gray-50 text-center font-semibold">{budgetAmount.toLocaleString()}</div>
+                <label className="text-xs text-gray-500 dark:text-gray-400">งบประมาณที่ได้รับ (บาท)</label>
+                <div className="input-field mt-1 bg-gray-50 dark:bg-gray-700 text-center font-semibold dark:text-white">{budgetAmount.toLocaleString()}</div>
               </div>
             </div>
           </div>
 
           {/* สรุปรายการ */}
-          <div className="bg-white rounded-xl border p-5">
-            <h3 className="font-semibold mb-3">สรุปรายการ</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
+            <h3 className="font-semibold mb-3 dark:text-white">สรุปรายการ</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">รายการวิชาที่สั่ง</span>
-                <span className="font-medium">{totalSubjects} รายการ</span>
+                <span className="text-gray-500 dark:text-gray-400">รายการวิชาที่สั่ง</span>
+                <span className="font-medium dark:text-white">{totalSubjects} รายการ</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">จำนวนเล่มใหม่</span>
-                <span className="font-medium">{totalNewBooks.toLocaleString()} เล่ม</span>
+                <span className="text-gray-500 dark:text-gray-400">จำนวนเล่มใหม่</span>
+                <span className="font-medium dark:text-white">{totalNewBooks.toLocaleString()} เล่ม</span>
               </div>
-              <hr className="my-2" />
+              <hr className="my-2 dark:border-gray-700" />
               <div className="flex justify-between">
-                <span className="font-medium">ยอดรวมสุทธิ</span>
+                <span className="font-medium dark:text-white">ยอดรวมสุทธิ</span>
                 <span className={`text-lg font-bold ${totalAmount > budgetAmount && budgetAmount > 0 ? 'text-red-600' : 'text-blue-600'}`}>{totalAmount.toLocaleString()} บาท</span>
               </div>
             </div>
@@ -469,9 +469,9 @@ export default function MyOrdersPage() {
               <div className="mt-3">
                 <div className="flex justify-between text-xs mb-1">
                   <span className={usedPct > 100 ? 'text-red-600' : 'text-green-600'}>ใช้ไป {usedPct}%</span>
-                  <span className="text-gray-400">เหลือ {remaining.toLocaleString()} บาท</span>
+                  <span className="text-gray-400 dark:text-gray-500">เหลือ {remaining.toLocaleString()} บาท</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
+                <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
                   <div className={`h-2 rounded-full transition-all ${usedPct > 100 ? 'bg-red-500' : usedPct > 80 ? 'bg-yellow-500' : 'bg-green-500'}`} style={{ width: `${Math.min(usedPct, 100)}%` }} />
                 </div>
               </div>
@@ -481,34 +481,34 @@ export default function MyOrdersPage() {
 
         {/* Main - ตารางหนังสือ */}
         <div className="flex-1">
-          <div className="bg-white rounded-xl border p-5">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
             {/* Filters */}
             <div className="flex flex-col md:flex-row gap-3 mb-4">
               <div className="relative flex-1">
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder="ค้นหารายวิชา..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
+                <input type="text" placeholder="ค้นหารายวิชา..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
               </div>
               {teacherGrade && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-500">ชั้น:</span>
-                  <div className="border rounded-lg px-3 py-2.5 text-sm bg-blue-50 text-blue-700 font-medium">{gradeLabel[teacherGrade]}{teacherRoom ? `/${teacherRoom}` : ''}</div>
+                  <span className="text-gray-500 dark:text-gray-400">ชั้น:</span>
+                  <div className="border dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">{gradeLabel[teacherGrade]}{teacherRoom ? `/${teacherRoom}` : ''}</div>
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-500">กลุ่มสาระ:</span>
-                <select className="border rounded-lg px-3 py-2.5 text-sm" value={subjectFilter} onChange={e => { setSubjectFilter(e.target.value); setCurrentPage(1) }}>
+                <span className="text-gray-500 dark:text-gray-400">กลุ่มสาระ:</span>
+                <select className="border dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm dark:bg-gray-700 dark:text-white" value={subjectFilter} onChange={e => { setSubjectFilter(e.target.value); setCurrentPage(1) }}>
                   <option value="all">ทั้งหมด</option>
                   {subjectGroupOptions.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              <button onClick={exportExcel} className="flex items-center gap-1 px-3 py-2.5 border rounded-lg text-sm hover:bg-gray-50"><Download size={14} /> Excel</button>
+              <button onClick={exportExcel} className="flex items-center gap-1 px-3 py-2.5 border dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white"><Download size={14} /> Excel</button>
             </div>
 
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 text-gray-600">
+                  <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                     <th className="text-center px-3 py-3 font-medium w-10">#</th>
                     <th className="text-left px-3 py-3 font-medium">ชื่อรายวิชา</th>
                     <th className="text-left px-3 py-3 font-medium w-32">กลุ่มสาระ</th>
@@ -520,7 +520,7 @@ export default function MyOrdersPage() {
                     <th className="text-right px-3 py-3 font-medium w-28">รวมเป็นเงิน</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {paginated.map((book, idx) => {
                     const globalIdx = (currentPage - 1) * PAGE_SIZE + idx + 1
                     const studentCount = students.filter(s => {
@@ -532,21 +532,21 @@ export default function MyOrdersPage() {
                     const rowTotal = newCount * Number(book.price || 0)
 
                     return (
-                      <tr key={book.id} className="hover:bg-gray-50">
-                        <td className="px-3 py-3 text-center text-gray-400">{globalIdx}</td>
+                      <tr key={book.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-3 py-3 text-center text-gray-400 dark:text-gray-500">{globalIdx}</td>
                         <td className="px-3 py-3">
-                          <p className="font-medium">{book.title}</p>
+                          <p className="font-medium dark:text-white">{book.title}</p>
                         </td>
-                        <td className="px-3 py-3 text-sm text-gray-600">{book.subject || '-'}</td>
-                        <td className="px-3 py-3 text-center">{gradeLabel[book.grade]}</td>
-                        <td className="px-3 py-3 text-right">{Number(book.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                        <td className="px-3 py-3 text-center font-medium">{studentCount}</td>
+                        <td className="px-3 py-3 text-sm text-gray-600 dark:text-gray-300">{book.subject || '-'}</td>
+                        <td className="px-3 py-3 text-center dark:text-white">{gradeLabel[book.grade]}</td>
+                        <td className="px-3 py-3 text-right dark:text-white">{Number(book.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 py-3 text-center font-medium dark:text-white">{studentCount}</td>
                         <td className="px-3 py-2 text-center">
                           <input
                             id={`oldBooks-${idx}`}
                             type="number"
                             min="0"
-                            className="w-16 text-center border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-16 text-center border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                             value={oldCount}
                             onChange={e => handleOldChange(book.id, e.target.value)}
                             onKeyDown={e => handleKeyDown(e, idx, 'oldBooks')}
@@ -558,26 +558,26 @@ export default function MyOrdersPage() {
                             id={`newOrders-${idx}`}
                             type="number"
                             min="0"
-                            className="w-16 text-center border border-blue-300 bg-blue-50 rounded-lg px-2 py-1.5 text-sm font-medium text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-16 text-center border border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/30 rounded-lg px-2 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={newCount}
                             onChange={e => handleNewChange(book.id, e.target.value)}
                             onKeyDown={e => handleKeyDown(e, idx, 'newOrders')}
                             onFocus={handleFocus}
                           />
                         </td>
-                        <td className="px-3 py-3 text-right font-medium">{rowTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 py-3 text-right font-medium dark:text-white">{rowTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                       </tr>
                     )
                   })}
                   {paginated.length === 0 && (
-                    <tr><td colSpan={9} className="px-3 py-8 text-center text-gray-400">ไม่พบรายการหนังสือ</td></tr>
+                    <tr><td colSpan={9} className="px-3 py-8 text-center text-gray-400 dark:text-gray-500">ไม่พบรายการหนังสือ</td></tr>
                   )}
                 </tbody>
                 {paginated.length > 0 && (
                   <tfoot>
-                    <tr className="bg-gray-50 font-medium">
+                    <tr className="bg-gray-50 dark:bg-gray-700 font-medium">
                       <td colSpan={5}></td>
-                      <td className="px-3 py-3 text-center">รวมทั้งหมด (เล่ม)</td>
+                      <td className="px-3 py-3 text-center dark:text-white">รวมทั้งหมด (เล่ม)</td>
                       <td></td>
                       <td className="px-3 py-3 text-center text-blue-600 font-bold">{totalNewBooks.toLocaleString()}</td>
                       <td className="px-3 py-3 text-right text-blue-600 font-bold">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} บาท</td>
@@ -590,24 +590,24 @@ export default function MyOrdersPage() {
             {/* Pagination */}
             {filtered.length > PAGE_SIZE && (
               <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-gray-500">แสดง {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, filtered.length)} จาก {filtered.length} รายการ</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">แสดง {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, filtered.length)} จาก {filtered.length} รายการ</p>
                 <div className="flex gap-1">
-                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">&lt;</button>
+                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-white">&lt;</button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                    <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}>{p}</button>
+                    <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white'}`}>{p}</button>
                   ))}
-                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">&gt;</button>
+                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-white">&gt;</button>
                 </div>
               </div>
             )}
           </div>
 
           {/* คำแนะนำ */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4">
-            <h4 className="font-medium flex items-center gap-2 text-blue-800 mb-2">
+          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mt-4">
+            <h4 className="font-medium flex items-center gap-2 text-blue-800 dark:text-blue-300 mb-2">
               <Info size={16} /> คำแนะนำการใช้งาน
             </h4>
-            <ul className="text-sm text-blue-700 space-y-1 list-disc pl-5">
+            <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-disc pl-5">
               <li>กรอกจำนวน <b>"หนังสือเก่า"</b> ที่มีอยู่แล้วในท้องสมุดหรือคลังโรงเรียน</li>
               <li>ระบบจะคำนวณยอดที่ต้อง <b>"สั่งซื้อใหม่"</b> ให้โดยอัตโนมัติ (จำนวนนักเรียนทั้งหมด – หนังสือเก่า)</li>
               <li>ตรวจสอบยอดรวมเงินเทียบกับงบประมาณที่มุมซ้ายบน</li>

@@ -868,21 +868,21 @@ export default function DistributionsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2 dark:text-white">
             <UserCheck className="text-blue-600" />
             แจกหนังสือให้นักเรียน
           </h1>
-          <p className="text-gray-500 text-sm mt-1">บัญชีแจกหนังสือเรียนตามชั้น</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">บัญชีแจกหนังสือเรียนตามชั้น</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border p-6">
-        <h2 className="text-lg font-semibold mb-4">เลือกข้อมูลสำหรับแจกหนังสือ</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">เลือกข้อมูลสำหรับแจกหนังสือ</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Grade Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ชั้นเรียน</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ชั้นเรียน</label>
             <select
               value={selectedGrade}
               onChange={(e) => setSelectedGrade(e.target.value)}
@@ -897,7 +897,7 @@ export default function DistributionsPage() {
 
           {/* Year Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ปีการศึกษา</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ปีการศึกษา</label>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
@@ -911,7 +911,7 @@ export default function DistributionsPage() {
 
           {/* Semester Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ภาคเรียน</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ภาคเรียน</label>
             <select
               value={selectedSemester}
               onChange={(e) => setSelectedSemester(e.target.value)}
@@ -924,7 +924,7 @@ export default function DistributionsPage() {
 
           {/* Distribution Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">วันที่แจก</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">วันที่แจก</label>
             <input
               type="date"
               value={distributionDate}
@@ -967,14 +967,14 @@ export default function DistributionsPage() {
       {loading && (
         <div className="flex items-center justify-center h-32">
           <Loader2 className="animate-spin text-blue-600" size={32} />
-          <span className="ml-3 text-gray-500">กำลังโหลดข้อมูล...</span>
+          <span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</span>
         </div>
       )}
 
       {/* Books Table Preview */}
       {!loading && selectedGrade && books.length > 0 && (
-        <div className="bg-white rounded-xl border p-6">
-          <h3 className="text-lg font-semibold mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold mb-4 dark:text-white">
             รายการหนังสือที่แจกแล้ว ชั้น{gradeLabel[selectedGrade]} ปีการศึกษา {selectedYear}
           </h3>
           <div className="overflow-x-auto">
@@ -1001,7 +1001,7 @@ export default function DistributionsPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
             รวมทั้งหมด {books.length} รายการ (รวม {books.reduce((sum, b) => sum + b.quantity, 0)} เล่ม แจกนักเรียนคนละ 1 เล่ม)
           </p>
         </div>
@@ -1009,8 +1009,8 @@ export default function DistributionsPage() {
 
       {/* Student Distribution Summary - รายชื่อนักเรียนที่ได้รับหนังสือ พร้อมปุ่มพิมพ์ */}
       {!loading && selectedGrade && distributionHistory.length > 0 && (
-        <div className="bg-white rounded-xl border p-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-white">
             <Users size={20} className="text-green-600" />
             รายชื่อนักเรียนที่ได้รับหนังสือ - พิมพ์บัญชีรายบุคคล
           </h3>
@@ -1029,13 +1029,13 @@ export default function DistributionsPage() {
               return Array.from(uniqueStudents.values()).map(student => (
                 <div
                   key={student.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border hover:border-blue-200 hover:bg-blue-50 transition-all"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all"
                 >
                   <div className="flex-1">
-                    <div className={`font-medium ${student.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}`}>
+                    <div className={`font-medium ${student.gender === 'female' ? 'text-pink-600 dark:text-pink-400' : 'text-sky-600 dark:text-sky-400'}`}>
                       {student.prefix}{student.first_name} {student.last_name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       รหัส: {student.student_id} | ได้รับ {student.bookCount} เล่ม
                     </div>
                   </div>
@@ -1056,8 +1056,8 @@ export default function DistributionsPage() {
 
       {/* Distribution History */}
       {!loading && selectedGrade && distributionHistory.length > 0 && (
-        <div className="bg-white rounded-xl border p-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-white">
             <History size={20} className="text-blue-600" />
             ประวัติการแจกหนังสือ (ล่าสุด 100 รายการ)
           </h3>
@@ -1076,10 +1076,10 @@ export default function DistributionsPage() {
               <tbody>
                 {distributionHistory.slice(0, 20).map((item, idx) => (
                   <tr key={item.id}>
-                    <td className="text-center text-gray-400">{idx + 1}</td>
-                    <td className="font-mono text-blue-700">{item.students?.student_id || '-'}</td>
+                    <td className="text-center text-gray-400 dark:text-gray-500">{idx + 1}</td>
+                    <td className="font-mono text-blue-700 dark:text-blue-400">{item.students?.student_id || '-'}</td>
                     <td>
-                      <span className={item.students?.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}>
+                      <span className={item.students?.gender === 'female' ? 'text-pink-600 dark:text-pink-400' : 'text-sky-600 dark:text-sky-400'}>
                         {item.students?.prefix} {item.students?.first_name} {item.students?.last_name}
                       </span>
                     </td>
@@ -1089,7 +1089,7 @@ export default function DistributionsPage() {
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => openStudentPrintPreview(item.students)}
-                          className="text-blue-600 hover:bg-blue-50 p-1 rounded"
+                          className="text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 p-1 rounded"
                           title="พิมพ์บัญชีแจกหนังสือ"
                         >
                           <Printer size={16} />
@@ -1100,7 +1100,7 @@ export default function DistributionsPage() {
                             `${item.students?.first_name} ${item.students?.last_name}`,
                             item.books?.title
                           )}
-                          className="text-red-600 hover:bg-red-50 p-1 rounded"
+                          className="text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 p-1 rounded"
                           title="ลบรายการ"
                         >
                           <XCircle size={16} />
@@ -1113,7 +1113,7 @@ export default function DistributionsPage() {
             </table>
           </div>
           {distributionHistory.length > 20 && (
-            <p className="text-sm text-gray-400 mt-2 text-center">
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2 text-center">
               แสดง 20 รายการแรก จากทั้งหมด {distributionHistory.length} รายการ
             </p>
           )}
@@ -1122,10 +1122,10 @@ export default function DistributionsPage() {
 
       {/* Empty State */}
       {!loading && selectedGrade && books.length === 0 && distributionHistory.length === 0 && (
-        <div className="bg-white rounded-xl border p-6">
-          <div className="flex items-center justify-center h-32 text-gray-400">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <div className="flex items-center justify-center h-32 text-gray-400 dark:text-gray-500">
             <div className="text-center">
-              <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
+              <BookOpen size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <p className="text-lg font-medium">ไม่พบข้อมูลการแจกหนังสือ</p>
               <p className="text-sm mt-1">คลิกปุ่ม "แจกนักเรียน" เพื่อเริ่มบันทึกการแจก</p>
             </div>
@@ -1135,10 +1135,10 @@ export default function DistributionsPage() {
 
       {/* Initial State */}
       {!loading && !selectedGrade && (
-        <div className="bg-white rounded-xl border p-6">
-          <div className="flex items-center justify-center h-32 text-gray-400">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <div className="flex items-center justify-center h-32 text-gray-400 dark:text-gray-500">
             <div className="text-center">
-              <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
+              <BookOpen size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <p className="text-lg font-medium">กรุณาเลือกชั้นเรียน</p>
               <p className="text-sm mt-1">เลือกชั้นเรียนเพื่อดูรายการหนังสือที่จะแจก</p>
             </div>
@@ -1149,10 +1149,10 @@ export default function DistributionsPage() {
       {/* Print Preview Modal */}
       {showPrintPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-800">ตัวอย่างบัญชีแจกหนังสือเรียน</h3>
+            <div className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">ตัวอย่างบัญชีแจกหนังสือเรียน</h3>
               <div className="flex gap-2">
                 <button
                   onClick={handlePrint}
@@ -1168,7 +1168,7 @@ export default function DistributionsPage() {
                 </button>
                 <button
                   onClick={() => setShowPrintPreview(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-300"
                 >
                   ปิด
                 </button>
@@ -1176,7 +1176,7 @@ export default function DistributionsPage() {
             </div>
 
             {/* Preview Content */}
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
               <div
                 ref={printRef}
                 className="bg-white mx-auto shadow-lg"
@@ -1279,7 +1279,7 @@ export default function DistributionsPage() {
       {/* Distribute Modal */}
       {showDistributeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white">
               <h3 className="text-xl font-bold flex items-center gap-2">
@@ -1292,16 +1292,16 @@ export default function DistributionsPage() {
             {/* Modal Body */}
             <div className="flex-1 overflow-hidden flex">
               {/* Left Panel - Students */}
-              <div className="w-1/2 border-r flex flex-col">
-                <div className="p-4 bg-gray-50 border-b">
+              <div className="w-1/2 border-r dark:border-gray-700 flex flex-col">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold flex items-center gap-2">
+                    <h4 className="font-semibold flex items-center gap-2 dark:text-white">
                       <Users size={18} className="text-blue-600" />
                       รายชื่อนักเรียน ({filteredStudents.length} คน)
                     </h4>
                     <button
                       onClick={toggleSelectAllStudents}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                       {selectedStudents.length === filteredStudents.length ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งหมด'}
                     </button>
@@ -1311,21 +1311,21 @@ export default function DistributionsPage() {
                     <input
                       type="text"
                       placeholder="ค้นหานักเรียน..."
-                      className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm"
+                      className="w-full pl-9 pr-4 py-2 border dark:border-gray-600 rounded-lg text-sm dark:bg-gray-800 dark:text-white"
                       value={searchStudent}
                       onChange={(e) => setSearchStudent(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-4 dark:bg-gray-800">
                   {loadingStudents ? (
                     <div className="flex items-center justify-center h-32">
                       <Loader2 className="animate-spin text-blue-600" size={24} />
-                      <span className="ml-2 text-gray-500">กำลังโหลด...</span>
+                      <span className="ml-2 text-gray-500 dark:text-gray-400">กำลังโหลด...</span>
                     </div>
                   ) : filteredStudents.length === 0 ? (
-                    <div className="text-center text-gray-400 py-8">
+                    <div className="text-center text-gray-400 dark:text-gray-500 py-8">
                       ไม่พบนักเรียนในชั้นนี้
                     </div>
                   ) : (
@@ -1339,8 +1339,8 @@ export default function DistributionsPage() {
                             key={student.id}
                             className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
                               isSelected
-                                ? 'bg-blue-50 border border-blue-200'
-                                : 'bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                                ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700'
+                                : 'bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 hover:border-gray-200 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600'
                             }`}
                           >
                             <input
@@ -1351,16 +1351,16 @@ export default function DistributionsPage() {
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <span className={`text-sm font-medium ${student.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}`}>
+                                <span className={`text-sm font-medium ${student.gender === 'female' ? 'text-pink-600 dark:text-pink-400' : 'text-sky-600 dark:text-sky-400'}`}>
                                   {student.prefix} {student.first_name} {student.last_name}
                                 </span>
                                 {hasDistributed && (
-                                  <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                                  <span className="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded">
                                     ได้รับแล้ว {student.distributed_books.size} เล่ม
                                   </span>
                                 )}
                               </div>
-                              <div className="text-xs text-gray-400 mt-0.5">
+                              <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                                 รหัส: {student.student_id}
                               </div>
                             </div>
@@ -1371,34 +1371,34 @@ export default function DistributionsPage() {
                   )}
                 </div>
 
-                <div className="p-4 bg-gray-50 border-t">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 border-t dark:border-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                     <CheckCircle2 size={16} className="text-green-600" />
-                    เลือกแล้ว: <span className="font-semibold text-blue-600">{selectedStudents.length}</span> คน
+                    เลือกแล้ว: <span className="font-semibold text-blue-600 dark:text-blue-400">{selectedStudents.length}</span> คน
                   </div>
                 </div>
               </div>
 
               {/* Right Panel - Books */}
               <div className="w-1/2 flex flex-col">
-                <div className="p-4 bg-gray-50 border-b">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold flex items-center gap-2">
+                    <h4 className="font-semibold flex items-center gap-2 dark:text-white">
                       <BookOpen size={18} className="text-green-600" />
                       รายการหนังสือ ({selectedBooks.length} เล่ม)
                     </h4>
                     <button
                       onClick={toggleSelectAllBooks}
-                      className="text-sm text-green-600 hover:text-green-800"
+                      className="text-sm text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
                     >
                       {selectedBooks.every(b => b.selected) ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งหมด'}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-4 dark:bg-gray-800">
                   {selectedBooks.length === 0 ? (
-                    <div className="text-center text-gray-400 py-8">
+                    <div className="text-center text-gray-400 dark:text-gray-500 py-8">
                       ไม่พบหนังสือในคลัง
                     </div>
                   ) : (
@@ -1408,8 +1408,8 @@ export default function DistributionsPage() {
                           key={book.book_stock_id}
                           className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
                             book.selected
-                              ? 'bg-green-50 border border-green-200'
-                              : 'bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                              ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700'
+                              : 'bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 hover:border-gray-200 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600'
                           }`}
                         >
                           <input
@@ -1419,8 +1419,8 @@ export default function DistributionsPage() {
                             className="w-4 h-4 text-green-600 rounded"
                           />
                           <div className="flex-1">
-                            <div className="font-medium text-sm">{book.title}</div>
-                            <div className="text-xs text-gray-400 mt-0.5">
+                            <div className="font-medium text-sm dark:text-white">{book.title}</div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                               {book.subject || 'ไม่ระบุวิชา'}
                             </div>
                           </div>
@@ -1430,24 +1430,24 @@ export default function DistributionsPage() {
                   )}
                 </div>
 
-                <div className="p-4 bg-gray-50 border-t">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 border-t dark:border-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                     <BookOpen size={16} className="text-green-600" />
-                    เลือกแล้ว: <span className="font-semibold text-green-600">{selectedBooks.filter(b => b.selected).length}</span> เล่ม
+                    เลือกแล้ว: <span className="font-semibold text-green-600 dark:text-green-400">{selectedBooks.filter(b => b.selected).length}</span> เล่ม
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t bg-gray-50 flex justify-between items-center">
-              <div className="text-sm text-gray-600">
+            <div className="px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
                 วันที่แจก: <span className="font-medium">{formatShortThaiDate(distributionDate)}</span>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDistributeModal(false)}
-                  className="px-5 py-2.5 border border-gray-300 rounded-xl text-sm hover:bg-gray-100"
+                  className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-300"
                 >
                   ปิด
                 </button>
@@ -1477,10 +1477,10 @@ export default function DistributionsPage() {
       {/* Student Print Preview Modal - พิมพ์บัญชีแจกหนังสือรายบุคคล */}
       {showStudentPrintPreview && selectedStudentForPrint && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-800">
+            <div className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                 บัญชีแจกหนังสือเรียน - {selectedStudentForPrint.prefix}{selectedStudentForPrint.first_name} {selectedStudentForPrint.last_name}
               </h3>
               <div className="flex gap-2">
@@ -1504,7 +1504,7 @@ export default function DistributionsPage() {
                     setSelectedStudentForPrint(null)
                     setStudentDistributions([])
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-300"
                 >
                   ปิด
                 </button>
@@ -1512,16 +1512,16 @@ export default function DistributionsPage() {
             </div>
 
             {/* Preview Content */}
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
               {loadingStudentDistributions ? (
                 <div className="flex items-center justify-center h-64">
                   <Loader2 className="animate-spin text-blue-600" size={32} />
-                  <span className="ml-3 text-gray-500">กำลังโหลดข้อมูล...</span>
+                  <span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</span>
                 </div>
               ) : studentDistributions.length === 0 ? (
-                <div className="flex items-center justify-center h-64 text-gray-400">
+                <div className="flex items-center justify-center h-64 text-gray-400 dark:text-gray-500">
                   <div className="text-center">
-                    <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
+                    <BookOpen size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                     <p className="text-lg font-medium">ไม่พบข้อมูลการแจกหนังสือ</p>
                     <p className="text-sm mt-1">นักเรียนคนนี้ยังไม่ได้รับหนังสือในปีการศึกษานี้</p>
                   </div>
@@ -1630,7 +1630,7 @@ export default function DistributionsPage() {
       {/* Batch Print Modal - พิมพ์หลายคนในครั้งเดียว */}
       {showBatchPrintModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b bg-gradient-to-r from-purple-600 to-purple-700 text-white">
               <h3 className="text-xl font-bold flex items-center gap-2">
@@ -1643,23 +1643,23 @@ export default function DistributionsPage() {
             {/* Modal Body */}
             <div className="flex-1 overflow-hidden flex">
               {/* Left Panel - Student Selection */}
-              <div className={`${batchPrintData.length > 0 ? 'w-1/3' : 'w-full'} border-r flex flex-col`}>
-                <div className="p-4 bg-gray-50 border-b">
+              <div className={`${batchPrintData.length > 0 ? 'w-1/3' : 'w-full'} border-r dark:border-gray-700 flex flex-col`}>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold flex items-center gap-2">
+                    <h4 className="font-semibold flex items-center gap-2 dark:text-white">
                       <Users size={18} className="text-purple-600" />
                       นักเรียนที่ได้รับหนังสือ ({getUniqueStudentsWithDistributions().length} คน)
                     </h4>
                     <button
                       onClick={toggleSelectAllForPrint}
-                      className="text-sm text-purple-600 hover:text-purple-800"
+                      className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
                     >
                       {selectedStudentsForPrint.length === getUniqueStudentsWithDistributions().length ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งชั้น'}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-4 dark:bg-gray-800">
                   <div className="space-y-2">
                     {getUniqueStudentsWithDistributions().map((student) => {
                       const isSelected = selectedStudentsForPrint.includes(student.id)
@@ -1668,8 +1668,8 @@ export default function DistributionsPage() {
                           key={student.id}
                           className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
                             isSelected
-                              ? 'bg-purple-50 border border-purple-200'
-                              : 'bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                              ? 'bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700'
+                              : 'bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 hover:border-gray-200 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600'
                           }`}
                         >
                           <input
@@ -1679,10 +1679,10 @@ export default function DistributionsPage() {
                             className="w-4 h-4 text-purple-600 rounded"
                           />
                           <div className="flex-1">
-                            <div className={`text-sm font-medium ${student.gender === 'female' ? 'text-pink-600' : 'text-sky-600'}`}>
+                            <div className={`text-sm font-medium ${student.gender === 'female' ? 'text-pink-600 dark:text-pink-400' : 'text-sky-600 dark:text-sky-400'}`}>
                               {student.prefix}{student.first_name} {student.last_name}
                             </div>
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-gray-400 dark:text-gray-500">
                               รหัส: {student.student_id} | ได้รับ {student.bookCount} เล่ม
                             </div>
                           </div>
@@ -1692,10 +1692,10 @@ export default function DistributionsPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-gray-50 border-t space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 border-t dark:border-gray-600 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                     <CheckCircle2 size={16} className="text-purple-600" />
-                    เลือกแล้ว: <span className="font-semibold text-purple-600">{selectedStudentsForPrint.length}</span> คน
+                    เลือกแล้ว: <span className="font-semibold text-purple-600 dark:text-purple-400">{selectedStudentsForPrint.length}</span> คน
                   </div>
                   <button
                     onClick={prepareBatchPrint}
@@ -1720,8 +1720,8 @@ export default function DistributionsPage() {
               {/* Right Panel - Print Preview */}
               {batchPrintData.length > 0 && (
                 <div className="w-2/3 flex flex-col">
-                  <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
-                    <h4 className="font-semibold flex items-center gap-2">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600 flex items-center justify-between">
+                    <h4 className="font-semibold flex items-center gap-2 dark:text-white">
                       <FileText size={18} className="text-green-600" />
                       ตัวอย่างก่อนพิมพ์ ({batchPrintData.length} คน)
                     </h4>
@@ -1741,7 +1741,7 @@ export default function DistributionsPage() {
                     </div>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+                  <div className="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
                     <div ref={batchPrintRef}>
                       {batchPrintData.map((data, pageIdx) => (
                         <div
@@ -1840,14 +1840,14 @@ export default function DistributionsPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
+            <div className="px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-end">
               <button
                 onClick={() => {
                   setShowBatchPrintModal(false)
                   setSelectedStudentsForPrint([])
                   setBatchPrintData([])
                 }}
-                className="px-5 py-2.5 border border-gray-300 rounded-xl text-sm hover:bg-gray-100"
+                className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-300"
               >
                 ปิด
               </button>

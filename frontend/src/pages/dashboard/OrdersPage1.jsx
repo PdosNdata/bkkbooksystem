@@ -179,26 +179,26 @@ export default function OrdersPage1() {
   const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500">กำลังโหลด...</span></div>
+    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">จัดการคำสั่งซื้อ</h1>
-          <p className="text-gray-500 text-sm mt-1">รายการคำสั่งซื้อหนังสือเรียนทั้งหมด ({orders.length} รายการ)</p>
+          <h1 className="text-2xl font-bold dark:text-white">จัดการคำสั่งซื้อ</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">รายการคำสั่งซื้อหนังสือเรียนทั้งหมด ({orders.length} รายการ)</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5">
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-3 mb-5">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="text" placeholder="ค้นหารหัสคำสั่งซื้อ, ชื่อครู, ชั้นเรียน..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
+            <input type="text" placeholder="ค้นหารหัสคำสั่งซื้อ, ชื่อครู, ชั้นเรียน..." className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1) }} />
           </div>
-          <select className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1) }}>
+          <select className="border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-white dark:bg-gray-800 dark:text-gray-200" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1) }}>
             <option value="all">ทุกสถานะ</option>
             {Object.entries(statusMap).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
@@ -206,9 +206,9 @@ export default function OrdersPage1() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm dark:text-gray-200">
             <thead>
-              <tr className="bg-gray-50 text-gray-600">
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <th className="text-left px-4 py-3 font-medium">รหัสคำสั่งซื้อ</th>
                 <th className="text-left px-4 py-3 font-medium">ครูผู้สั่ง</th>
                 <th className="text-left px-4 py-3 font-medium">ชั้นเรียน</th>
@@ -219,24 +219,24 @@ export default function OrdersPage1() {
                 <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {paginated.map(order => (
-                <tr key={order.id} className="hover:bg-gray-50">
+                <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-4 py-3 font-medium text-blue-600">{order.order_number}</td>
-                  <td className="px-4 py-3 text-gray-600">{order.users?.full_name || '-'}</td>
-                  <td className="px-4 py-3 text-gray-600">{order.classroom || '-'}</td>
-                  <td className="px-4 py-3 text-center">{order.total_quantity} เล่ม</td>
-                  <td className="px-4 py-3 text-right">{Number(order.total_amount || 0).toLocaleString()} บาท</td>
-                  <td className="px-4 py-3 text-gray-600">{formatDate(order.created_at)}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{order.users?.full_name || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{order.classroom || '-'}</td>
+                  <td className="px-4 py-3 text-center dark:text-gray-300">{order.total_quantity} เล่ม</td>
+                  <td className="px-4 py-3 text-right dark:text-gray-300">{Number(order.total_amount || 0).toLocaleString()} บาท</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatDate(order.created_at)}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${statusMap[order.status]?.style || 'bg-gray-100'}`}>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${statusMap[order.status]?.style || 'bg-gray-100 dark:bg-gray-600'}`}>
                       {statusMap[order.status]?.label || order.status}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <div className="relative inline-block">
                       <select
-                        className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:ring-2 focus:ring-blue-500"
+                        className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
                         value={order.status}
                         onChange={e => updateStatus(order.id, e.target.value)}
                       >
@@ -256,13 +256,13 @@ export default function OrdersPage1() {
         {/* Pagination */}
         {filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length} รายการ</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length} รายการ</p>
             <div className="flex gap-1">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ก่อนหน้า</button>
+              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-700">ก่อนหน้า</button>
               {Array.from({length: totalPages}, (_, i) => i+1).map(p => (
-                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}>{p}</button>
+                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300'}`}>{p}</button>
               ))}
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ถัดไป</button>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-700">ถัดไป</button>
             </div>
           </div>
         )}
