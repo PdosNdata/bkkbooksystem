@@ -242,21 +242,21 @@ export default function UserManagementPage() {
                 <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {paginated.map(u => (
-                <tr key={u.id} className="hover:bg-gray-50">
+                <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
+                      <div className="w-9 h-9 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
                         {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" /> : <User size={16} className="text-blue-500" />}
                       </div>
-                      <span className="font-medium">{u.full_name}</span>
+                      <span className="font-medium dark:text-white">{u.full_name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{u.email}</td>
                   <td className="px-4 py-3 text-center">
                     <select
-                      className="text-xs border rounded-lg px-2 py-1.5 bg-white"
+                      className="text-xs border dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 dark:text-gray-200"
                       value={u.role}
                       onChange={e => updateRole(u.id, e.target.value)}
                     >
@@ -266,32 +266,32 @@ export default function UserManagementPage() {
                   <td className="px-4 py-3 text-center">
                     {u.role === 'teacher' ? (
                       u.homeroom_grade ? (
-                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
                           {gradeLabel[u.homeroom_grade] || u.homeroom_grade}{u.homeroom_room ? `/${u.homeroom_room}` : ''}
                         </span>
                       ) : (
                         <span className="text-xs text-gray-400">ยังไม่กำหนด</span>
                       )
                     ) : (
-                      <span className="text-xs text-gray-300">-</span>
+                      <span className="text-xs text-gray-300 dark:text-gray-500">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${u.is_active !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${u.is_active !== false ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
                       {u.is_active !== false ? 'ใช้งาน' : 'ระงับ'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{formatDate(u.created_at)}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(u.created_at)}</td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {u.role === 'teacher' && (
-                        <button onClick={() => openEditUser(u)} className="text-xs px-3 py-1.5 rounded-lg border text-blue-600 border-blue-200 hover:bg-blue-50">
+                        <button onClick={() => openEditUser(u)} className="text-xs px-3 py-1.5 rounded-lg border text-blue-600 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30">
                           <Edit3 size={13} className="inline mr-1" />กำหนดชั้น
                         </button>
                       )}
                       <button
                         onClick={() => toggleActive(u.id, u.is_active !== false, u.full_name)}
-                        className={`text-xs px-3 py-1.5 rounded-lg border ${u.is_active !== false ? 'text-red-600 border-red-200 hover:bg-red-50' : 'text-green-600 border-green-200 hover:bg-green-50'}`}
+                        className={`text-xs px-3 py-1.5 rounded-lg border ${u.is_active !== false ? 'text-red-600 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/30' : 'text-green-600 border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
                       >
                         {u.is_active !== false ? 'ระงับ' : 'เปิดใช้งาน'}
                       </button>
@@ -306,13 +306,13 @@ export default function UserManagementPage() {
 
         {filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">แสดง {(currentPage-1)*PAGE_SIZE+1} ถึง {Math.min(currentPage*PAGE_SIZE, filtered.length)} จาก {filtered.length}</p>
             <div className="flex gap-1">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ก่อนหน้า</button>
+              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-300">ก่อนหน้า</button>
               {Array.from({length: totalPages}, (_, i) => i+1).map(p => (
-                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`}>{p}</button>
+                <button key={p} onClick={() => setCurrentPage(p)} className={`px-3 py-1.5 rounded-lg text-sm ${p === currentPage ? 'bg-blue-600 text-white' : 'border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300'}`}>{p}</button>
               ))}
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-40">ถัดไป</button>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm disabled:opacity-40 dark:text-gray-300">ถัดไป</button>
             </div>
           </div>
         )}
@@ -321,23 +321,23 @@ export default function UserManagementPage() {
       {/* Add User Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 mx-4">
-            <h3 className="text-lg font-bold mb-4">เพิ่มผู้ใช้ใหม่</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 mx-4">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">เพิ่มผู้ใช้ใหม่</h3>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium">ชื่อ-นามสกุล *</label>
+                <label className="text-sm font-medium dark:text-gray-200">ชื่อ-นามสกุล *</label>
                 <input type="text" className="input-field mt-1" placeholder="เช่น สมชาย ใจดี" value={addForm.full_name} onChange={e => setAddForm(p => ({...p, full_name: e.target.value}))} />
               </div>
               <div>
-                <label className="text-sm font-medium">อีเมล *</label>
+                <label className="text-sm font-medium dark:text-gray-200">อีเมล *</label>
                 <input type="email" className="input-field mt-1" placeholder="example@email.com" value={addForm.email} onChange={e => setAddForm(p => ({...p, email: e.target.value}))} />
               </div>
               <div>
-                <label className="text-sm font-medium">รหัสผ่าน *</label>
+                <label className="text-sm font-medium dark:text-gray-200">รหัสผ่าน *</label>
                 <input type="password" className="input-field mt-1" placeholder="อย่างน้อย 6 ตัวอักษร" value={addForm.password} onChange={e => setAddForm(p => ({...p, password: e.target.value}))} />
               </div>
               <div>
-                <label className="text-sm font-medium">ตำแหน่ง *</label>
+                <label className="text-sm font-medium dark:text-gray-200">ตำแหน่ง *</label>
                 <select className="input-field mt-1" value={addForm.role} onChange={e => setAddForm(p => ({...p, role: e.target.value}))}>
                   <option value="teacher">ครู</option>
                   <option value="staff">เจ้าหน้าที่พัสดุ</option>
@@ -348,14 +348,14 @@ export default function UserManagementPage() {
               {addForm.role === 'teacher' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium">ครูประจำชั้น</label>
+                    <label className="text-sm font-medium dark:text-gray-200">ครูประจำชั้น</label>
                     <select className="input-field mt-1" value={addForm.homeroom_grade} onChange={e => setAddForm(p => ({...p, homeroom_grade: e.target.value}))}>
                       <option value="">ไม่ระบุ</option>
                       {gradeOptions.filter(g => g).map(g => <option key={g} value={g}>{gradeLabel[g]}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">ห้อง</label>
+                    <label className="text-sm font-medium dark:text-gray-200">ห้อง</label>
                     <select className="input-field mt-1" value={addForm.homeroom_room} onChange={e => setAddForm(p => ({...p, homeroom_room: e.target.value}))}>
                       <option value="">ไม่ระบุ</option>
                       {['1','2','3','4','5','6'].map(c => <option key={c} value={c}>{c}</option>)}
@@ -365,7 +365,7 @@ export default function UserManagementPage() {
               )}
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50">ยกเลิก</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">ยกเลิก</button>
               <button onClick={handleAddTeacher} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">เพิ่มผู้ใช้</button>
             </div>
           </div>
@@ -375,19 +375,19 @@ export default function UserManagementPage() {
       {/* Edit Homeroom Modal */}
       {editUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 mx-4">
-            <h3 className="text-lg font-bold mb-4">กำหนดครูประจำชั้น</h3>
-            <p className="text-sm text-gray-500 mb-4">{editUser.full_name}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm p-6 mx-4">
+            <h3 className="text-lg font-bold mb-4 dark:text-white">กำหนดครูประจำชั้น</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{editUser.full_name}</p>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium">ชั้นเรียน</label>
+                <label className="text-sm font-medium dark:text-gray-200">ชั้นเรียน</label>
                 <select className="input-field mt-1" value={editUser.homeroom_grade} onChange={e => setEditUser(p => ({...p, homeroom_grade: e.target.value}))}>
                   <option value="">ไม่ระบุ</option>
                   {gradeOptions.filter(g => g).map(g => <option key={g} value={g}>{gradeLabel[g]}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium">ห้อง</label>
+                <label className="text-sm font-medium dark:text-gray-200">ห้อง</label>
                 <select className="input-field mt-1" value={editUser.homeroom_room} onChange={e => setEditUser(p => ({...p, homeroom_room: e.target.value}))}>
                   <option value="">ไม่ระบุ</option>
                   {['1','2','3','4','5','6'].map(c => <option key={c} value={c}>{c}</option>)}
@@ -395,7 +395,7 @@ export default function UserManagementPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setEditUser(null)} className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-50">ยกเลิก</button>
+              <button onClick={() => setEditUser(null)} className="px-4 py-2 border dark:border-gray-600 rounded-xl text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">ยกเลิก</button>
               <button onClick={handleUpdateUser} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">บันทึก</button>
             </div>
           </div>
