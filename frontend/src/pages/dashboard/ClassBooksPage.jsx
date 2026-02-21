@@ -20,9 +20,9 @@ export default function ClassBooksPage() {
       .select('*, inventory(stock_quantity)')
       .eq('is_active', true)
 
-    // ถ้าครูมี homeroom_subject ให้กรองหนังสือตามวิชา
-    if (user?.homeroom_subject) {
-      query = query.eq('subject', user.homeroom_subject)
+    // ถ้าครูมี homeroom_subjects ให้กรองหนังสือตามวิชาที่สอน
+    if (user?.homeroom_subjects && user.homeroom_subjects.length > 0) {
+      query = query.in('subject', user.homeroom_subjects)
     }
 
     const { data } = await query.order('grade', { ascending: true })
@@ -32,7 +32,7 @@ export default function ClassBooksPage() {
 
   useEffect(() => {
     if (user) fetchBooks()
-  }, [user?.homeroom_subject])
+  }, [user?.homeroom_subjects])
 
 
   const filtered = books.filter(b => {
