@@ -11,6 +11,7 @@ const roleLabels = {
 }
 const gradeLabel = { kg2: 'อนุบาล 2', kg3: 'อนุบาล 3', p1: 'ป.1', p2: 'ป.2', p3: 'ป.3', p4: 'ป.4', p5: 'ป.5', p6: 'ป.6', m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' }
 const gradeOptions = ['', 'kg2','kg3','p1','p2','p3','p4','p5','p6','m1','m2','m3']
+const subjectOptions = ['', 'ภาษาไทย', 'คณิตศาสตร์', 'วิทยาศาสตร์และเทคโนโลยี', 'สังคมศึกษา ศาสนาและวัฒนธรรม', 'สุขศึกษาและพลศึกษา', 'ศิลปะ', 'การงานอาชีพ', 'ภาษาต่างประเทศ']
 
 const PAGE_SIZE = 10
 
@@ -22,7 +23,7 @@ export default function UserManagementPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [showModal, setShowModal] = useState(false)
   const [editUser, setEditUser] = useState(null)
-  const [addForm, setAddForm] = useState({ email: '', password: '', full_name: '', role: 'teacher', homeroom_grade: '', homeroom_room: '' })
+  const [addForm, setAddForm] = useState({ email: '', password: '', full_name: '', role: 'teacher', homeroom_grade: '', homeroom_room: '', homeroom_subject: '' })
 
   useEffect(() => { fetchUsers() }, [])
 
@@ -80,6 +81,7 @@ export default function UserManagementPage() {
         role: addForm.role,
         homeroom_grade: addForm.homeroom_grade || null,
         homeroom_room: addForm.homeroom_room || null,
+        homeroom_subject: addForm.homeroom_subject || null,
         is_active: true
       })
     }
@@ -94,7 +96,7 @@ export default function UserManagementPage() {
 
     Swal.fire({ icon: 'success', title: 'เพิ่มผู้ใช้สำเร็จ', timer: 1500, showConfirmButton: false })
     setShowModal(false)
-    setAddForm({ email: '', password: '', full_name: '', role: 'teacher', homeroom_grade: '', homeroom_room: '' })
+    setAddForm({ email: '', password: '', full_name: '', role: 'teacher', homeroom_grade: '', homeroom_room: '', homeroom_subject: '' })
     fetchUsers()
   }
 
@@ -140,7 +142,7 @@ export default function UserManagementPage() {
   }
 
   const openEditUser = (u) => {
-    setEditUser({ id: u.id, full_name: u.full_name, homeroom_grade: u.homeroom_grade || '', homeroom_room: u.homeroom_room || '' })
+    setEditUser({ id: u.id, full_name: u.full_name, homeroom_grade: u.homeroom_grade || '', homeroom_room: u.homeroom_room || '', homeroom_subject: u.homeroom_subject || '' })
   }
 
   const handleUpdateUser = async () => {
@@ -148,6 +150,7 @@ export default function UserManagementPage() {
     const { error } = await supabase.from('users').update({
       homeroom_grade: editUser.homeroom_grade || null,
       homeroom_room: editUser.homeroom_room || null,
+      homeroom_subject: editUser.homeroom_subject || null,
     }).eq('id', editUser.id)
 
     if (error) {
@@ -346,19 +349,28 @@ export default function UserManagementPage() {
                 </select>
               </div>
               {addForm.role === 'teacher' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium dark:text-gray-200">ครูประจำชั้น</label>
-                    <select className="input-field mt-1" value={addForm.homeroom_grade} onChange={e => setAddForm(p => ({...p, homeroom_grade: e.target.value}))}>
-                      <option value="">ไม่ระบุ</option>
-                      {gradeOptions.filter(g => g).map(g => <option key={g} value={g}>{gradeLabel[g]}</option>)}
-                    </select>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium dark:text-gray-200">ครูประจำชั้น</label>
+                      <select className="input-field mt-1" value={addForm.homeroom_grade} onChange={e => setAddForm(p => ({...p, homeroom_grade: e.target.value}))}>
+                        <option value="">ไม่ระบุ</option>
+                        {gradeOptions.filter(g => g).map(g => <option key={g} value={g}>{gradeLabel[g]}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium dark:text-gray-200">ห้อง</label>
+                      <select className="input-field mt-1" value={addForm.homeroom_room} onChange={e => setAddForm(p => ({...p, homeroom_room: e.target.value}))}>
+                        <option value="">ไม่ระบุ</option>
+                        {['1','2','3','4','5','6'].map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium dark:text-gray-200">ห้อง</label>
-                    <select className="input-field mt-1" value={addForm.homeroom_room} onChange={e => setAddForm(p => ({...p, homeroom_room: e.target.value}))}>
+                    <label className="text-sm font-medium dark:text-gray-200">ครูประจำวิชา</label>
+                    <select className="input-field mt-1" value={addForm.homeroom_subject} onChange={e => setAddForm(p => ({...p, homeroom_subject: e.target.value}))}>
                       <option value="">ไม่ระบุ</option>
-                      {['1','2','3','4','5','6'].map(c => <option key={c} value={c}>{c}</option>)}
+                      {subjectOptions.filter(s => s).map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                 </div>
@@ -376,7 +388,7 @@ export default function UserManagementPage() {
       {editUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm p-6 mx-4">
-            <h3 className="text-lg font-bold mb-4 dark:text-white">กำหนดครูประจำชั้น</h3>
+            <h3 className="text-lg font-bold mb-4 dark:text-white">กำหนดหน้าที่ครู</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{editUser.full_name}</p>
             <div className="space-y-3">
               <div>
@@ -391,6 +403,13 @@ export default function UserManagementPage() {
                 <select className="input-field mt-1" value={editUser.homeroom_room} onChange={e => setEditUser(p => ({...p, homeroom_room: e.target.value}))}>
                   <option value="">ไม่ระบุ</option>
                   {['1','2','3','4','5','6'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium dark:text-gray-200">ครูประจำวิชา</label>
+                <select className="input-field mt-1" value={editUser.homeroom_subject} onChange={e => setEditUser(p => ({...p, homeroom_subject: e.target.value}))}>
+                  <option value="">ไม่ระบุ</option>
+                  {subjectOptions.filter(s => s).map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
             </div>
