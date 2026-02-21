@@ -12,18 +12,27 @@ export default function ClassBooksPage() {
   const [search, setSearch] = useState('')
   const [gradeFilter, setGradeFilter] = useState('all')
 
-  useEffect(() => { fetchBooks() }, [])
 
   const fetchBooks = async () => {
     setLoading(true)
-    const { data } = await supabase
+    let query = supabase
       .from('books')
       .select('*, inventory(stock_quantity)')
       .eq('is_active', true)
-      .order('grade', { ascending: true })
+
+    // ถ้าครูมี homeroom_subject ให้กรองหนังสือตามวิชา
+    if (user?.homeroom_subject) {
+      query = query.eq('subject', user.homeroom_subject)
+    }
+
+    const { data } = await query.order('grade', { ascending: true })
     setBooks(data || [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    if (user) fetchBooks()
+  }, [user?.homeroom_subject])
 
 
   const filtered = books.filter(b => {
