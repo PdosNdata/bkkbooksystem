@@ -153,9 +153,6 @@ export default function ClassBooksPage() {
               <div className="flex items-center justify-between mt-4">
                 <div>
                   <p className="text-lg font-bold text-blue-600">{Number(book.price).toLocaleString()} บาท</p>
-                  <p className={`text-xs ${stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                    คงเหลือ: {stock} เล่ม
-                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => updateCart(book.id, -1)} disabled={qty === 0} className="w-8 h-8 border dark:border-gray-600 rounded-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30 dark:text-gray-200">
