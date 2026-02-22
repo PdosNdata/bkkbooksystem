@@ -414,8 +414,8 @@ export default function MyOrdersPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
           <div className="mb-4">
             <label htmlFor="select-year-nobudget" className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
-            <select id="select-year-nobudget" className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
-              {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={y} value={y}>{y}</option> })}
+            <select id="select-year-nobudget" name="academicYearNoBudget" className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+              {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={`year-nobudget-${y}`} value={y}>{y}</option> })}
             </select>
           </div>
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -463,8 +463,8 @@ export default function MyOrdersPage() {
             <div className="space-y-3">
               <div>
                 <label htmlFor="select-year" className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
-                <select id="select-year" className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
-                  {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={y} value={y}>{y}</option> })}
+                <select id="select-year" name="academicYear" className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+                  {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={`year-${y}`} value={y}>{y}</option> })}
                 </select>
               </div>
               {teacherGrade && (
@@ -540,9 +540,9 @@ export default function MyOrdersPage() {
               )}
               <div className="flex items-center gap-2 text-sm">
                 <label htmlFor="select-subject" className="text-gray-500 dark:text-gray-400">กลุ่มสาระ:</label>
-                <select id="select-subject" className="border dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm dark:bg-gray-700 dark:text-white" value={subjectFilter} onChange={e => { setSubjectFilter(e.target.value); setCurrentPage(1) }}>
-                  <option value="all">ทั้งหมด</option>
-                  {subjectGroupOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                <select id="select-subject" name="subjectFilter" className="border dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm dark:bg-gray-700 dark:text-white" value={subjectFilter} onChange={e => { setSubjectFilter(e.target.value); setCurrentPage(1) }}>
+                  <option key="subject-all" value="all">ทั้งหมด</option>
+                  {subjectGroupOptions.map(s => <option key={`subject-${s}`} value={s}>{s}</option>)}
                 </select>
               </div>
               <button onClick={exportExcel} className="flex items-center gap-1 px-3 py-2.5 border dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white"><Download size={14} /> Excel</button>
