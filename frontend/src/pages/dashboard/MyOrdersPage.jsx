@@ -27,9 +27,14 @@ export default function MyOrdersPage() {
   const [oldBooks, setOldBooks] = useState({})
   const [newOrders, setNewOrders] = useState({})
 
-  // ครูประจำชั้น
+  // ครูประจำชั้น / ครูประจำวิชา
   const [teacherGrade, setTeacherGrade] = useState('')
   const [teacherRoom, setTeacherRoom] = useState('')
+  const [teacherSubjects, setTeacherSubjects] = useState([])
+
+  // ข้อมูลหนังสือส่งแล้ว และ รับเอาไปแจก
+  const [deliveredBooks, setDeliveredBooks] = useState({})
+  const [distributedBooks, setDistributedBooks] = useState({})
 
   // ดึงข้อมูลชั้นครูจาก users table
   useEffect(() => {
@@ -38,32 +43,42 @@ export default function MyOrdersPage() {
       // ลองจาก user object ก่อน
       let grade = user?.homeroom_grade || user?.user_metadata?.homeroom_grade || ''
       let room = user?.homeroom_room || user?.user_metadata?.homeroom_room || ''
+      let subjects = user?.homeroom_subjects || []
       // ถ้าไม่มี ดึงจาก users table
-      if (!grade) {
-        const { data } = await supabase.from('users').select('homeroom_grade, homeroom_room').eq('id', user.id).single()
+      if (!grade && (!subjects || subjects.length === 0)) {
+        const { data } = await supabase.from('users').select('homeroom_grade, homeroom_room, homeroom_subjects').eq('id', user.id).single()
         if (data) {
           grade = data.homeroom_grade || ''
           room = data.homeroom_room || ''
+          subjects = data.homeroom_subjects || []
         }
       }
       setTeacherGrade(grade)
       setTeacherRoom(room)
+      setTeacherSubjects(subjects || [])
     }
     fetchTeacherInfo()
   }, [user])
 
-  useEffect(() => { if (teacherGrade) fetchData() }, [selectedYear, teacherGrade])
+  // ดึงข้อมูลเมื่อมี teacherGrade หรือ teacherSubjects
+  useEffect(() => {
+    if (teacherGrade || (teacherSubjects && teacherSubjects.length > 0)) fetchData()
+  }, [selectedYear, teacherGrade, teacherSubjects?.length])
 
   const fetchData = async () => {
     setLoading(true)
 
-    // ดึงหนังสือตามชั้นของครู (ถ้ามี)
+    // ดึงหนังสือตามชั้นของครู หรือ ตามกลุ่มสาระของครูประจำวิชา
     let bookQuery = supabase.from('books').select('*').eq('is_active', true).order('grade').order('title')
     if (teacherGrade) {
+      // ครูประจำชั้น - กรองตามชั้น
       bookQuery = bookQuery.eq('grade', teacherGrade)
+    } else if (teacherSubjects && teacherSubjects.length > 0) {
+      // ครูประจำวิชา - กรองตามกลุ่มสาระ
+      bookQuery = bookQuery.in('subject', teacherSubjects)
     }
 
-    const [bookRes, studentRes, budgetRes, existingOrderRes] = await Promise.all([
+    const [bookRes, studentRes, budgetRes, existingOrderRes, deliveredRes, distributedRes] = await Promise.all([
       bookQuery,
       supabase.from('students').select('grade, classroom'),
       supabase.from('budgets').select('*').eq('year', selectedYear),
@@ -73,12 +88,30 @@ export default function MyOrdersPage() {
         .eq('teacher_id', user.id)
         .eq('year', selectedYear)
         .eq('grade', teacherGrade || 'p1')
-        .single()
+        .single(),
+      // ดึงข้อมูลหนังสือที่ส่งแล้ว (จาก book_receipt_items)
+      supabase.from('book_receipt_items').select('book_id, received_qty'),
+      // ดึงข้อมูลหนังสือที่แจกแล้ว (จาก student_book_distributions)
+      supabase.from('student_book_distributions').select('book_id').eq('academic_year', String(selectedYear))
     ])
 
     setBooks(bookRes.data || [])
     setStudents(studentRes.data || [])
     setBudgets(budgetRes.data || [])
+
+    // คำนวณจำนวนหนังสือส่งแล้ว (รวมต่อ book_id)
+    const deliveredMap = {}
+    ;(deliveredRes.data || []).forEach(item => {
+      deliveredMap[item.book_id] = (deliveredMap[item.book_id] || 0) + (item.received_qty || 0)
+    })
+    setDeliveredBooks(deliveredMap)
+
+    // คำนวณจำนวนหนังสือที่แจกแล้ว (นับต่อ book_id)
+    const distributedMap = {}
+    ;(distributedRes.data || []).forEach(item => {
+      distributedMap[item.book_id] = (distributedMap[item.book_id] || 0) + 1
+    })
+    setDistributedBooks(distributedMap)
 
     // ตั้งค่า oldBooks และ newOrders
     const initOld = {}
@@ -340,17 +373,18 @@ export default function MyOrdersPage() {
   }
 
   const exportExcel = () => {
-    const header = ['#', 'ชื่อรายวิชา', 'รหัสวิชา', 'ระดับชั้น', 'ราคา/เล่ม', 'นร.ทั้งหมด', 'หนังสือเก่า', 'สั่งซื้อใหม่', 'รวมเป็นเงิน']
+    const header = ['#', 'ชื่อรายวิชา', 'รหัสวิชา', 'ระดับชั้น', 'ราคา/เล่ม', 'นร.ทั้งหมด', 'หนังสือเก่า', 'สั่งซื้อใหม่', 'หนังสือส่งแล้ว', 'รับเอาไปแจก', 'รวมเป็นเงิน']
     const rows = filtered.map((b, i) => {
       const count = students.filter(s => s.grade === b.grade).length
-      return [i + 1, b.title, b.isbn || '-', gradeLabel[b.grade], Number(b.price).toFixed(2), count, oldBooks[b.id] || 0, newOrders[b.id] || 0, ((newOrders[b.id] || 0) * Number(b.price)).toFixed(2)]
+      return [i + 1, b.title, b.isbn || '-', gradeLabel[b.grade], Number(b.price).toFixed(2), count, oldBooks[b.id] || 0, newOrders[b.id] || 0, deliveredBooks[b.id] || 0, distributedBooks[b.id] || 0, ((newOrders[b.id] || 0) * Number(b.price)).toFixed(2)]
     })
     const csv = '\uFEFF' + [header.join(','), ...rows.map(r => r.join(','))].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `สำรวจหนังสือ_${gradeLabel[teacherGrade] || 'ทั้งหมด'}_${selectedYear}.csv`
+    const fileLabel = teacherGrade ? gradeLabel[teacherGrade] : (teacherSubjects.length > 0 ? 'ครูประจำวิชา' : 'ทั้งหมด')
+    a.download = `สำรวจหนังสือ_${fileLabel}_${selectedYear}.csv`
     a.click()
   }
 
@@ -358,12 +392,12 @@ export default function MyOrdersPage() {
     return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /><span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลด...</span></div>
   }
 
-  if (!teacherGrade) {
+  if (!teacherGrade && (!teacherSubjects || teacherSubjects.length === 0)) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Info size={48} className="text-yellow-500 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">ยังไม่ได้กำหนดชั้นเรียน</h2>
-        <p className="text-gray-500 dark:text-gray-400">กรุณาติดต่อผู้ดูแลระบบเพื่อกำหนดชั้นเรียนที่รับผิดชอบ</p>
+        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">ยังไม่ได้กำหนดชั้นเรียนหรือกลุ่มสาระ</h2>
+        <p className="text-gray-500 dark:text-gray-400">กรุณาติดต่อผู้ดูแลระบบเพื่อกำหนดชั้นเรียนหรือกลุ่มสาระที่รับผิดชอบ</p>
       </div>
     )
   }
@@ -437,6 +471,16 @@ export default function MyOrdersPage() {
                 <div>
                   <label className="text-xs text-gray-500 dark:text-gray-400">ชั้นที่รับผิดชอบ</label>
                   <div className="input-field mt-1 bg-blue-50 dark:bg-blue-900/30 text-center font-semibold text-blue-700 dark:text-blue-300">{gradeLabel[teacherGrade]}{teacherRoom ? `/${teacherRoom}` : ''} ({gradeStudentCount} คน)</div>
+                </div>
+              )}
+              {!teacherGrade && teacherSubjects && teacherSubjects.length > 0 && (
+                <div>
+                  <label className="text-xs text-gray-500 dark:text-gray-400">กลุ่มสาระที่รับผิดชอบ</label>
+                  <div className="mt-1 space-y-1">
+                    {teacherSubjects.map((subj, idx) => (
+                      <span key={idx} className="inline-block bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded mr-1 mb-1">{subj}</span>
+                    ))}
+                  </div>
                 </div>
               )}
               <div>
@@ -517,6 +561,8 @@ export default function MyOrdersPage() {
                     <th className="text-center px-3 py-3 font-medium w-20">นร. ทั้งหมด</th>
                     <th className="text-center px-3 py-3 font-medium w-24">หนังสือเก่า</th>
                     <th className="text-center px-3 py-3 font-medium w-24">สั่งซื้อใหม่</th>
+                    <th className="text-center px-3 py-3 font-medium w-24">หนังสือส่งแล้ว</th>
+                    <th className="text-center px-3 py-3 font-medium w-24">รับเอาไปแจก</th>
                     <th className="text-right px-3 py-3 font-medium w-28">รวมเป็นเงิน</th>
                   </tr>
                 </thead>
@@ -565,21 +611,25 @@ export default function MyOrdersPage() {
                             onFocus={handleFocus}
                           />
                         </td>
+                        <td className="px-3 py-3 text-center text-green-600 dark:text-green-400 font-medium">{deliveredBooks[book.id] || 0}</td>
+                        <td className="px-3 py-3 text-center text-purple-600 dark:text-purple-400 font-medium">{distributedBooks[book.id] || 0}</td>
                         <td className="px-3 py-3 text-right font-medium dark:text-white">{rowTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                       </tr>
                     )
                   })}
                   {paginated.length === 0 && (
-                    <tr><td colSpan={9} className="px-3 py-8 text-center text-gray-400 dark:text-gray-500">ไม่พบรายการหนังสือ</td></tr>
+                    <tr><td colSpan={11} className="px-3 py-8 text-center text-gray-400 dark:text-gray-500">ไม่พบรายการหนังสือ</td></tr>
                   )}
                 </tbody>
                 {paginated.length > 0 && (
                   <tfoot>
                     <tr className="bg-gray-50 dark:bg-gray-700 font-medium">
                       <td colSpan={5}></td>
-                      <td className="px-3 py-3 text-center dark:text-white">รวมทั้งหมด (เล่ม)</td>
+                      <td className="px-3 py-3 text-center dark:text-white">รวมทั้งหมด</td>
                       <td></td>
                       <td className="px-3 py-3 text-center text-blue-600 font-bold">{totalNewBooks.toLocaleString()}</td>
+                      <td className="px-3 py-3 text-center text-green-600 font-bold">{Object.values(deliveredBooks).reduce((a, b) => a + b, 0).toLocaleString()}</td>
+                      <td className="px-3 py-3 text-center text-purple-600 font-bold">{Object.values(distributedBooks).reduce((a, b) => a + b, 0).toLocaleString()}</td>
                       <td className="px-3 py-3 text-right text-blue-600 font-bold">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} บาท</td>
                     </tr>
                   </tfoot>
