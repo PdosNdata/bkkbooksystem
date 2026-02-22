@@ -4,6 +4,20 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
 
+// ดึงข้อมูลเพิ่มเติมจากตาราง users (homeroom_subjects, homeroom_grade, homeroom_room)
+const fetchUserProfile = async (userId) => {
+  try {
+    const { data } = await supabase
+      .from('users')
+      .select('homeroom_subjects, homeroom_grade, homeroom_room')
+      .eq('id', userId)
+      .single();
+    return data || {};
+  } catch {
+    return {};
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   // const [user, setUser] = useState({
   //   id: 1,
@@ -31,12 +45,16 @@ export const AuthProvider = ({ children }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const u = session.user;
+        const profile = await fetchUserProfile(u.id);
         const userData = {
           id: u.id,
           email: u.email,
           name: u.user_metadata?.full_name || u.user_metadata?.name || u.email,
           role: u.user_metadata?.role || 'teacher',
           avatar: u.user_metadata?.avatar_url || null,
+          homeroom_subjects: profile.homeroom_subjects || null,
+          homeroom_grade: profile.homeroom_grade || null,
+          homeroom_room: profile.homeroom_room || null,
         };
         localStorage.setItem('token', session.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
@@ -72,13 +90,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(`บัญชีนี้ไม่ใช่ตำแหน่ง${roleLabel} กรุณาเลือกตำแหน่งให้ถูกต้อง`);
       }
 
-      const userData = {
-        id: authData.user.id,
-        email: authData.user.email,
-        name: authData.user.user_metadata?.full_name || authData.user.email,
-        role: userRole,
-      };
-
       // upsert ลงตาราง users เผื่อยังไม่มี
       await supabase.from('users').upsert({
         id: authData.user.id,
@@ -87,6 +98,18 @@ export const AuthProvider = ({ children }) => {
         role: userRole,
         is_active: true,
       }, { onConflict: 'id' });
+
+      // ดึงข้อมูลเพิ่มเติมจากตาราง users
+      const profile = await fetchUserProfile(authData.user.id);
+      const userData = {
+        id: authData.user.id,
+        email: authData.user.email,
+        name: authData.user.user_metadata?.full_name || authData.user.email,
+        role: userRole,
+        homeroom_subjects: profile.homeroom_subjects || null,
+        homeroom_grade: profile.homeroom_grade || null,
+        homeroom_room: profile.homeroom_room || null,
+      };
 
       // บันทึก token และ user data
       localStorage.setItem('token', authData.session.access_token);
@@ -196,15 +219,19 @@ export const AuthProvider = ({ children }) => {
 
   // ตรวจสอบ session จาก OAuth callback (Google)
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         const u = session.user;
+        const profile = await fetchUserProfile(u.id);
         const userData = {
           id: u.id,
           email: u.email,
           name: u.user_metadata?.full_name || u.user_metadata?.name || u.email,
           role: u.user_metadata?.role || 'teacher',
           avatar: u.user_metadata?.avatar_url || null,
+          homeroom_subjects: profile.homeroom_subjects || null,
+          homeroom_grade: profile.homeroom_grade || null,
+          homeroom_room: profile.homeroom_room || null,
         };
         localStorage.setItem('token', session.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
