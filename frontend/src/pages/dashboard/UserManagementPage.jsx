@@ -262,6 +262,7 @@ export default function UserManagementPage() {
                 <th className="text-left px-4 py-3 font-medium">อีเมล</th>
                 <th className="text-center px-4 py-3 font-medium">ตำแหน่ง</th>
                 <th className="text-center px-4 py-3 font-medium">ครูประจำชั้น</th>
+                <th className="text-center px-4 py-3 font-medium">ครูประจำวิชา</th>
                 <th className="text-center px-4 py-3 font-medium">สถานะ</th>
                 <th className="text-left px-4 py-3 font-medium">วันที่สมัคร</th>
                 <th className="text-center px-4 py-3 font-medium">ดำเนินการ</th>
@@ -302,6 +303,19 @@ export default function UserManagementPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
+                    {u.role === 'teacher' && u.homeroom_subjects?.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        {u.homeroom_subjects.map(subject => (
+                          <span key={subject} className="px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 whitespace-nowrap">
+                            {subject}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-center">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${u.is_active !== false ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
                       {u.is_active !== false ? 'ใช้งาน' : 'ระงับ'}
                     </span>
@@ -324,7 +338,7 @@ export default function UserManagementPage() {
                   </td>
                 </tr>
               ))}
-              {paginated.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">ไม่พบผู้ใช้</td></tr>}
+              {paginated.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">ไม่พบผู้ใช้</td></tr>}
             </tbody>
           </table>
         </div>
