@@ -32,7 +32,7 @@ export default function ClassBooksPage() {
 
   useEffect(() => {
     if (user) fetchBooks()
-  }, [user?.homeroom_subjects])
+  }, [user?.id, user?.homeroom_subjects?.length])
 
 
   const filtered = books.filter(b => {
