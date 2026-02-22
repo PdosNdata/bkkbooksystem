@@ -413,8 +413,8 @@ export default function MyOrdersPage() {
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
           <div className="mb-4">
-            <label className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
-            <select className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+            <label htmlFor="select-year-nobudget" className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
+            <select id="select-year-nobudget" className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
               {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={y} value={y}>{y}</option> })}
             </select>
           </div>
@@ -462,8 +462,8 @@ export default function MyOrdersPage() {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
-                <select className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+                <label htmlFor="select-year" className="text-xs text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
+                <select id="select-year" className="input-field mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600" value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
                   {[0, -1, 1].map(d => { const y = new Date().getFullYear() + 543 + d; return <option key={y} value={y}>{y}</option> })}
                 </select>
               </div>
@@ -539,8 +539,8 @@ export default function MyOrdersPage() {
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-500 dark:text-gray-400">กลุ่มสาระ:</span>
-                <select className="border dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm dark:bg-gray-700 dark:text-white" value={subjectFilter} onChange={e => { setSubjectFilter(e.target.value); setCurrentPage(1) }}>
+                <label htmlFor="select-subject" className="text-gray-500 dark:text-gray-400">กลุ่มสาระ:</label>
+                <select id="select-subject" className="border dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm dark:bg-gray-700 dark:text-white" value={subjectFilter} onChange={e => { setSubjectFilter(e.target.value); setCurrentPage(1) }}>
                   <option value="all">ทั้งหมด</option>
                   {subjectGroupOptions.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
