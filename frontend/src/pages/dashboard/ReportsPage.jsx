@@ -8,6 +8,12 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Le
 
 const gradeLabel = { kg2: 'อนุบาล 2', kg3: 'อนุบาล 3', p1: 'ป.1', p2: 'ป.2', p3: 'ป.3', p4: 'ป.4', p5: 'ป.5', p6: 'ป.6', m1: 'ม.1', m2: 'ม.2', m3: 'ม.3' }
 const gradeOptions = ['kg2', 'kg3', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'm1', 'm2', 'm3']
+const gradeFullLabel = {
+  kg2: 'อนุบาล 2', kg3: 'อนุบาล 3',
+  p1: 'ชั้นประถมศึกษาปีที่ 1', p2: 'ชั้นประถมศึกษาปีที่ 2', p3: 'ชั้นประถมศึกษาปีที่ 3',
+  p4: 'ชั้นประถมศึกษาปีที่ 4', p5: 'ชั้นประถมศึกษาปีที่ 5', p6: 'ชั้นประถมศึกษาปีที่ 6',
+  m1: 'ชั้นมัธยมศึกษาปีที่ 1', m2: 'ชั้นมัธยมศึกษาปีที่ 2', m3: 'ชั้นมัธยมศึกษาปีที่ 3',
+}
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
@@ -24,6 +30,13 @@ export default function ReportsPage() {
   const [pendingBooks, setPendingBooks] = useState([])
   const [loadingPendingBooks, setLoadingPendingBooks] = useState(false)
 
+  // สรุปรายการหนังสือเรียนทั้งหมด
+  const [summaryBooks, setSummaryBooks] = useState([])
+  const [summaryOrderMap, setSummaryOrderMap] = useState({})
+  const [summaryReceiptMap, setSummaryReceiptMap] = useState({}) // { book_id: { 1: qty, 2: qty } }
+  const [summaryDistMap, setSummaryDistMap] = useState({})
+  const [loadingSummary, setLoadingSummary] = useState(false)
+
   // Generate year options for pending books (Buddhist Era)
   const currentBuddhistYear = new Date().getFullYear() + 543
   const yearOptions = Array.from({ length: 5 }, (_, i) => (currentBuddhistYear - 2 + i).toString())
@@ -37,6 +50,8 @@ export default function ReportsPage() {
       fetchPendingBooks()
     }
   }, [pendingBooksYear, pendingBooksGrade, pendingBooksSubject])
+
+  useEffect(() => { fetchSummaryReport() }, [selectedYear])
 
   const fetchData = async () => {
     setLoading(true)
@@ -130,6 +145,43 @@ export default function ReportsPage() {
     setLoadingPendingBooks(false)
   }
 
+  const fetchSummaryReport = async () => {
+    setLoadingSummary(true)
+    try {
+      const [booksRes, orderItemsRes, receiptsRes, distributionsRes] = await Promise.all([
+        supabase.from('books').select('id, title, grade, subject, price').eq('is_active', true).order('grade').order('subject').order('title'),
+        supabase.from('order_items').select('book_id, quantity, orders!inner(year)').eq('orders.year', selectedYear),
+        supabase.from('book_receipt_items').select('book_id, received_qty, book_receipts!inner(delivery_number)'),
+        supabase.from('student_book_distributions').select('book_id').eq('academic_year', String(selectedYear))
+      ])
+
+      setSummaryBooks(booksRes.data || [])
+
+      const oMap = {}
+      ;(orderItemsRes.data || []).forEach(item => {
+        oMap[item.book_id] = (oMap[item.book_id] || 0) + (item.quantity || 0)
+      })
+      setSummaryOrderMap(oMap)
+
+      const rMap = {}
+      ;(receiptsRes.data || []).forEach(item => {
+        const dn = item.book_receipts?.delivery_number || 1
+        if (!rMap[item.book_id]) rMap[item.book_id] = {}
+        rMap[item.book_id][dn] = (rMap[item.book_id][dn] || 0) + (item.received_qty || 0)
+      })
+      setSummaryReceiptMap(rMap)
+
+      const dMap = {}
+      ;(distributionsRes.data || []).forEach(item => {
+        dMap[item.book_id] = (dMap[item.book_id] || 0) + 1
+      })
+      setSummaryDistMap(dMap)
+    } catch (err) {
+      console.error('Fetch summary error:', err)
+    }
+    setLoadingSummary(false)
+  }
+
   const totalBudget = budgets.reduce((s, b) => s + Number(b.amount || 0), 0)
   const totalUsed = budgets.reduce((s, b) => s + Number(b.used_amount || 0), 0)
   const totalOrders = orders.length
@@ -163,6 +215,133 @@ export default function ReportsPage() {
   }
 
   const handlePrint = () => window.print()
+
+  // ฟังก์ชันพิมพ์สรุปรายการหนังสือเรียน
+  const handlePrintSummary = () => {
+    if (summaryBooks.length === 0) return
+
+    // จัดกลุ่มหนังสือตามชั้น แล้วตาม subject
+    const grouped = {}
+    gradeOptions.forEach(g => {
+      const booksInGrade = summaryBooks.filter(b => b.grade === g)
+      if (booksInGrade.length > 0) grouped[g] = booksInGrade
+    })
+
+    let tableRows = ''
+    Object.entries(grouped).forEach(([grade, books]) => {
+      const isKindergarten = grade.startsWith('kg')
+      tableRows += `<tr><td colspan="8" style="background:#2563eb;color:white;font-weight:700;padding:8px;">${gradeFullLabel[grade]}</td></tr>`
+
+      if (isKindergarten) {
+        books.forEach(book => {
+          const ordered = summaryOrderMap[book.id] || 0
+          const r1 = summaryReceiptMap[book.id]?.[1] || 0
+          const r2 = summaryReceiptMap[book.id]?.[2] || 0
+          const totalReceived = r1 + r2
+          const shortage = ordered - totalReceived
+          const dist = summaryDistMap[book.id] || 0
+          tableRows += `<tr>
+            <td style="padding:6px 8px;">${book.title}</td>
+            <td class="text-center">${ordered}</td>
+            <td class="text-right">${Number(book.price || 0).toLocaleString()}</td>
+            <td class="text-center">${r1}</td>
+            <td class="text-center">${r2}</td>
+            <td class="text-center">${totalReceived}</td>
+            <td class="text-center" style="background:#fff1f2;">${shortage > 0 ? shortage : 0}</td>
+            <td class="text-center" style="background:#eff6ff;">${dist}</td>
+          </tr>`
+        })
+      } else {
+        const subjectMap = {}
+        books.forEach(book => {
+          const subj = book.subject || 'อื่นๆ'
+          if (!subjectMap[subj]) subjectMap[subj] = []
+          subjectMap[subj].push(book)
+        })
+        Object.entries(subjectMap).forEach(([subject, sBooks]) => {
+          tableRows += `<tr><td colspan="8" style="background:#dbeafe;font-weight:600;padding:6px 8px 6px 24px;">${subject}</td></tr>`
+          sBooks.forEach(book => {
+            const ordered = summaryOrderMap[book.id] || 0
+            const r1 = summaryReceiptMap[book.id]?.[1] || 0
+            const r2 = summaryReceiptMap[book.id]?.[2] || 0
+            const totalReceived = r1 + r2
+            const shortage = ordered - totalReceived
+            const dist = summaryDistMap[book.id] || 0
+            tableRows += `<tr>
+              <td style="padding:6px 8px;">${book.title}</td>
+              <td class="text-center">${ordered}</td>
+              <td class="text-right">${Number(book.price || 0).toLocaleString()}</td>
+              <td class="text-center">${r1}</td>
+              <td class="text-center">${r2}</td>
+              <td class="text-center">${totalReceived}</td>
+              <td class="text-center" style="background:#fff1f2;">${shortage > 0 ? shortage : 0}</td>
+              <td class="text-center" style="background:#eff6ff;">${dist}</td>
+            </tr>`
+          })
+        })
+      }
+    })
+
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>สรุปรายการหนังสือเรียน ปีการศึกษา ${selectedYear}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Sarabun', sans-serif; font-size: 11pt; padding: 15mm; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .header h1 { font-size: 16pt; font-weight: 700; margin-bottom: 5px; }
+          .header p { font-size: 10pt; color: #666; }
+          table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+          th, td { border: 1px solid #ccc; padding: 5px 8px; }
+          th { background: #2563eb; color: white; font-weight: 600; text-align: center; }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          .footer { margin-top: 20px; font-size: 9pt; color: #999; text-align: center; }
+          @media print {
+            body { padding: 5mm; }
+            @page { size: A4 landscape; margin: 5mm; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>สรุปรายการหนังสือเรียน</h1>
+          <p>โรงเรียนบ้านค้อดอนแคน — ปีการศึกษา ${selectedYear}</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2">รายการหนังสือ</th>
+              <th rowspan="2">จำนวนใบสั่งซื้อ<br/>ทั้งสิ้น</th>
+              <th rowspan="2">ราคา</th>
+              <th colspan="3">ส่งสำนักพิมพ์</th>
+              <th rowspan="2">ขาดส่งจริง<br/>ทั้งหมด</th>
+              <th rowspan="2">แจกให้<br/>นักเรียน</th>
+            </tr>
+            <tr>
+              <th>ครั้งที่ 1</th>
+              <th>ครั้งที่ 2</th>
+              <th>ส่งทั้งหมด</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+        <div class="footer">
+          พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </div>
+      </body>
+      </html>
+    `)
+    printWindow.document.close()
+    setTimeout(() => printWindow.print(), 500)
+  }
 
   // ฟังก์ชันพิมพ์รายงานหนังสือค้างส่ง
   const handlePrintPendingBooks = () => {
@@ -404,6 +583,143 @@ export default function ReportsPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* สรุปรายการหนังสือเรียน */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6 print:break-before-page">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold flex items-center gap-2 dark:text-white">
+            <FileText size={20} className="text-green-600 dark:text-green-400" />
+            สรุปรายการหนังสือเรียนปีการศึกษา {selectedYear}
+          </h3>
+          {summaryBooks.length > 0 && !loadingSummary && (
+            <button
+              onClick={handlePrintSummary}
+              className="flex items-center gap-2 px-4 py-2 text-sm border dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 print:hidden"
+            >
+              <Printer size={16} />
+              พิมพ์สรุปรายการ
+            </button>
+          )}
+        </div>
+
+        {loadingSummary ? (
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="animate-spin text-green-600 dark:text-green-400" size={24} />
+            <span className="ml-3 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</span>
+          </div>
+        ) : summaryBooks.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-blue-600 text-white">
+                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">รายการหนังสือ</th>
+                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-28">จำนวนใบสั่งซื้อ<br/>ทั้งสิ้น</th>
+                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ราคา</th>
+                  <th colSpan={3} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium">ส่งสำนักพิมพ์</th>
+                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-24">ขาดส่งจริง<br/>ทั้งหมด</th>
+                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-24">แจกให้<br/>นักเรียน</th>
+                </tr>
+                <tr className="bg-blue-600 text-white">
+                  <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ครั้งที่ 1</th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ครั้งที่ 2</th>
+                  <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ส่งทั้งหมด</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const rows = []
+                  gradeOptions.forEach(grade => {
+                    const booksInGrade = summaryBooks.filter(b => b.grade === grade)
+                    if (booksInGrade.length === 0) return
+
+                    const isKindergarten = grade.startsWith('kg')
+
+                    // Grade header row
+                    rows.push(
+                      <tr key={`grade-${grade}`}>
+                        <td colSpan={8} className="border border-gray-200 dark:border-gray-700 px-3 py-2 bg-blue-600 text-white font-bold">
+                          {gradeFullLabel[grade]}
+                        </td>
+                      </tr>
+                    )
+
+                    if (isKindergarten) {
+                      // Kindergarten: no subject grouping
+                      booksInGrade.forEach(book => {
+                        const ordered = summaryOrderMap[book.id] || 0
+                        const r1 = summaryReceiptMap[book.id]?.[1] || 0
+                        const r2 = summaryReceiptMap[book.id]?.[2] || 0
+                        const totalReceived = r1 + r2
+                        const shortage = ordered - totalReceived
+                        const dist = summaryDistMap[book.id] || 0
+                        rows.push(
+                          <tr key={`book-${book.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 dark:text-gray-200">{book.title}</td>
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{ordered}</td>
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-right dark:text-gray-200">{Number(book.price || 0).toLocaleString()}</td>
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r1}</td>
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r2}</td>
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{totalReceived}</td>
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-red-50 dark:bg-red-900/20 dark:text-gray-200">{shortage > 0 ? shortage : 0}</td>
+                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/20 dark:text-gray-200">{dist}</td>
+                          </tr>
+                        )
+                      })
+                    } else {
+                      // Group by subject
+                      const subjectMap = {}
+                      booksInGrade.forEach(book => {
+                        const subj = book.subject || 'อื่นๆ'
+                        if (!subjectMap[subj]) subjectMap[subj] = []
+                        subjectMap[subj].push(book)
+                      })
+
+                      Object.entries(subjectMap).forEach(([subject, sBooks]) => {
+                        // Subject sub-header
+                        rows.push(
+                          <tr key={`subject-${grade}-${subject}`}>
+                            <td colSpan={8} className="border border-gray-200 dark:border-gray-700 px-3 py-2 pl-6 bg-blue-50 dark:bg-blue-900/30 font-semibold text-blue-800 dark:text-blue-300">
+                              {subject}
+                            </td>
+                          </tr>
+                        )
+
+                        sBooks.forEach(book => {
+                          const ordered = summaryOrderMap[book.id] || 0
+                          const r1 = summaryReceiptMap[book.id]?.[1] || 0
+                          const r2 = summaryReceiptMap[book.id]?.[2] || 0
+                          const totalReceived = r1 + r2
+                          const shortage = ordered - totalReceived
+                          const dist = summaryDistMap[book.id] || 0
+                          rows.push(
+                            <tr key={`book-${book.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 dark:text-gray-200">{book.title}</td>
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{ordered}</td>
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-right dark:text-gray-200">{Number(book.price || 0).toLocaleString()}</td>
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r1}</td>
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r2}</td>
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{totalReceived}</td>
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-red-50 dark:bg-red-900/20 dark:text-gray-200">{shortage > 0 ? shortage : 0}</td>
+                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/20 dark:text-gray-200">{dist}</td>
+                            </tr>
+                          )
+                        })
+                      })
+                    }
+                  })
+                  return rows
+                })()}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-32 text-gray-400 dark:text-gray-500">
+            <FileText size={40} className="mb-2 text-gray-300 dark:text-gray-600" />
+            <p>ไม่พบข้อมูลหนังสือเรียน</p>
+            <p className="text-xs mt-1">ยังไม่มีรายการหนังสือในระบบ</p>
+          </div>
+        )}
       </div>
 
       {/* รายงานหนังสือค้างส่ง */}
