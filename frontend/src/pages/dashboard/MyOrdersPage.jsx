@@ -196,8 +196,8 @@ export default function MyOrdersPage() {
   const totalNewBooks = summaryItems.reduce((sum, b) => sum + (newOrders[b.id] || 0), 0)
   const totalAmount = summaryItems.reduce((sum, b) => sum + (newOrders[b.id] || 0) * Number(b.price || 0), 0)
 
-  // งบประมาณ
-  const gradeBudget = budgets.find(bg => bg.grade === (teacherGrade || filtered[0]?.grade))
+  // งบประมาณ (ใช้ books แทน filtered เพื่อไม่ให้ budget เปลี่ยนตาม subject filter)
+  const gradeBudget = budgets.find(bg => bg.grade === (teacherGrade || books[0]?.grade))
   const budgetAmount = gradeBudget ? Number(gradeBudget.amount) : 0
   const remaining = budgetAmount - totalAmount
   const usedPct = budgetAmount > 0 ? Math.round((totalAmount / budgetAmount) * 100) : 0
