@@ -246,9 +246,11 @@ export default function ReportsPage() {
     })
 
     let tableRows = ''
+    let grandTotalOrdered = 0, grandTotalR1 = 0, grandTotalR2 = 0, grandTotalReceived = 0, grandTotalShortage = 0, grandTotalDist = 0
+
     Object.entries(grouped).forEach(([grade, books]) => {
       const isKindergarten = grade.startsWith('kg')
-      tableRows += `<tr><td colspan="8" style="background:#2563eb;color:white;font-weight:700;padding:8px;">${gradeFullLabel[grade]}</td></tr>`
+      tableRows += `<tr><td colspan="8" class="grade-header">${gradeFullLabel[grade]}</td></tr>`
 
       if (isKindergarten) {
         books.forEach(book => {
@@ -258,6 +260,8 @@ export default function ReportsPage() {
           const totalReceived = r1 + r2
           const shortage = ordered - totalReceived
           const dist = summaryDistMap[book.id] || 0
+          grandTotalOrdered += ordered; grandTotalR1 += r1; grandTotalR2 += r2
+          grandTotalReceived += totalReceived; grandTotalShortage += shortage > 0 ? shortage : 0; grandTotalDist += dist
           tableRows += `<tr>
             <td style="padding:6px 8px;">${book.title}</td>
             <td class="text-center">${ordered}</td>
@@ -266,7 +270,7 @@ export default function ReportsPage() {
             <td class="text-center">${r2}</td>
             <td class="text-center">${totalReceived}</td>
             <td class="text-center" style="background:#fff1f2;">${shortage > 0 ? shortage : 0}</td>
-            <td class="text-center" style="background:#eff6ff;">${dist}</td>
+            <td class="text-center">${dist}</td>
           </tr>`
         })
       } else {
@@ -277,7 +281,7 @@ export default function ReportsPage() {
           subjectMap[subj].push(book)
         })
         Object.entries(subjectMap).forEach(([subject, sBooks]) => {
-          tableRows += `<tr><td colspan="8" style="background:#dbeafe;font-weight:600;padding:6px 8px 6px 24px;">${subject}</td></tr>`
+          tableRows += `<tr><td colspan="8" class="subject-header">${subject}</td></tr>`
           sBooks.forEach(book => {
             const ordered = summaryOrderMap[book.id] || 0
             const r1 = summaryReceiptMap[book.id]?.[1] || 0
@@ -285,6 +289,8 @@ export default function ReportsPage() {
             const totalReceived = r1 + r2
             const shortage = ordered - totalReceived
             const dist = summaryDistMap[book.id] || 0
+            grandTotalOrdered += ordered; grandTotalR1 += r1; grandTotalR2 += r2
+            grandTotalReceived += totalReceived; grandTotalShortage += shortage > 0 ? shortage : 0; grandTotalDist += dist
             tableRows += `<tr>
               <td style="padding:6px 8px;">${book.title}</td>
               <td class="text-center">${ordered}</td>
@@ -293,12 +299,24 @@ export default function ReportsPage() {
               <td class="text-center">${r2}</td>
               <td class="text-center">${totalReceived}</td>
               <td class="text-center" style="background:#fff1f2;">${shortage > 0 ? shortage : 0}</td>
-              <td class="text-center" style="background:#eff6ff;">${dist}</td>
+              <td class="text-center">${dist}</td>
             </tr>`
           })
         })
       }
     })
+
+    // แถวสรุปรวมทั้งหมด
+    tableRows += `<tr class="totals-row">
+      <td style="padding:8px;"><strong>รวมทั้งหมด</strong></td>
+      <td class="text-center"><strong>${grandTotalOrdered.toLocaleString()}</strong></td>
+      <td class="text-center">-</td>
+      <td class="text-center"><strong>${grandTotalR1.toLocaleString()}</strong></td>
+      <td class="text-center"><strong>${grandTotalR2.toLocaleString()}</strong></td>
+      <td class="text-center"><strong>${grandTotalReceived.toLocaleString()}</strong></td>
+      <td class="text-center" style="background:#fff1f2;"><strong>${grandTotalShortage.toLocaleString()}</strong></td>
+      <td class="text-center"><strong>${grandTotalDist.toLocaleString()}</strong></td>
+    </tr>`
 
     const printWindow = window.open('', '_blank')
     printWindow.document.write(`
@@ -315,8 +333,11 @@ export default function ReportsPage() {
           .header h1 { font-size: 16pt; font-weight: 700; margin-bottom: 5px; }
           .header p { font-size: 10pt; color: #666; }
           table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-          th, td { border: 1px solid #ccc; padding: 5px 8px; }
-          th { background: #2563eb; color: white; font-weight: 600; text-align: center; }
+          th, td { border: 1px solid #999; padding: 5px 8px; }
+          th { font-weight: 700; text-align: center; }
+          .grade-header { font-weight: 700; text-align: left; background: #f3f4f6; }
+          .subject-header { font-weight: 600; text-align: left; padding-left: 20px; background: #f9fafb; }
+          .totals-row { font-weight: 700; background: #f3f4f6; }
           .text-center { text-align: center; }
           .text-right { text-align: right; }
           .footer { margin-top: 20px; font-size: 9pt; color: #999; text-align: center; }
