@@ -612,23 +612,26 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">รายการหนังสือ</th>
-                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-28">จำนวนใบสั่งซื้อ<br/>ทั้งสิ้น</th>
-                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ราคา</th>
-                  <th colSpan={3} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium">ส่งสำนักพิมพ์</th>
-                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-24">ขาดส่งจริง<br/>ทั้งหมด</th>
-                  <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-24">แจกให้<br/>นักเรียน</th>
+                <tr className="dark:text-gray-200">
+                  <th rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left font-bold">รายการหนังสือ</th>
+                  <th rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold w-28">จำนวนใบสั่งซื้อ<br/>ทั้งสิ้น</th>
+                  <th rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold w-20">ราคา</th>
+                  <th colSpan={3} className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold">ส่งสำนักพิมพ์</th>
+                  <th rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold w-24">ขาดส่งจริง<br/>ทั้งหมด</th>
+                  <th rowSpan={2} className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold w-24">แจกให้<br/>นักเรียน</th>
                 </tr>
-                <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                  <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ครั้งที่ 1</th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ครั้งที่ 2</th>
-                  <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ส่งทั้งหมด</th>
+                <tr className="dark:text-gray-200">
+                  <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold w-20">ครั้งที่ 1</th>
+                  <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold w-20">ครั้งที่ 2</th>
+                  <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-bold w-20">ส่งทั้งหมด</th>
                 </tr>
               </thead>
               <tbody>
                 {(() => {
                   const rows = []
+                  let totalOrdered = 0, totalR1 = 0, totalR2 = 0, totalReceived = 0, totalShortage = 0, totalDist = 0
+                  const td = 'border border-gray-300 dark:border-gray-600 px-3 py-2 dark:text-gray-200'
+
                   gradeOptions.forEach(grade => {
                     const booksInGrade = summaryBooks.filter(b => b.grade === grade)
                     if (booksInGrade.length === 0) return
@@ -638,76 +641,69 @@ export default function ReportsPage() {
                     // Grade header row
                     rows.push(
                       <tr key={`grade-${grade}`}>
-                        <td colSpan={8} className="border border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold">
+                        <td colSpan={8} className={`${td} font-bold`}>
                           {gradeFullLabel[grade]}
                         </td>
                       </tr>
                     )
 
+                    const renderBook = (book) => {
+                      const ordered = summaryOrderMap[book.id] || 0
+                      const r1 = summaryReceiptMap[book.id]?.[1] || 0
+                      const r2 = summaryReceiptMap[book.id]?.[2] || 0
+                      const recv = r1 + r2
+                      const shortage = ordered - recv
+                      const dist = summaryDistMap[book.id] || 0
+                      totalOrdered += ordered; totalR1 += r1; totalR2 += r2
+                      totalReceived += recv; totalShortage += shortage > 0 ? shortage : 0; totalDist += dist
+                      return (
+                        <tr key={`book-${book.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td className={td}>{book.title}</td>
+                          <td className={`${td} text-center`}>{ordered}</td>
+                          <td className={`${td} text-right`}>{Number(book.price || 0).toLocaleString()}</td>
+                          <td className={`${td} text-center`}>{r1}</td>
+                          <td className={`${td} text-center`}>{r2}</td>
+                          <td className={`${td} text-center`}>{recv}</td>
+                          <td className={`${td} text-center bg-red-50 dark:bg-red-900/20`}>{shortage > 0 ? shortage : 0}</td>
+                          <td className={`${td} text-center`}>{dist}</td>
+                        </tr>
+                      )
+                    }
+
                     if (isKindergarten) {
-                      // Kindergarten: no subject grouping
-                      booksInGrade.forEach(book => {
-                        const ordered = summaryOrderMap[book.id] || 0
-                        const r1 = summaryReceiptMap[book.id]?.[1] || 0
-                        const r2 = summaryReceiptMap[book.id]?.[2] || 0
-                        const totalReceived = r1 + r2
-                        const shortage = ordered - totalReceived
-                        const dist = summaryDistMap[book.id] || 0
-                        rows.push(
-                          <tr key={`book-${book.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 dark:text-gray-200">{book.title}</td>
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{ordered}</td>
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-right dark:text-gray-200">{Number(book.price || 0).toLocaleString()}</td>
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r1}</td>
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r2}</td>
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{totalReceived}</td>
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-red-50 dark:bg-red-900/20 dark:text-gray-200">{shortage > 0 ? shortage : 0}</td>
-                            <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/20 dark:text-gray-200">{dist}</td>
-                          </tr>
-                        )
-                      })
+                      booksInGrade.forEach(book => rows.push(renderBook(book)))
                     } else {
-                      // Group by subject
                       const subjectMap = {}
                       booksInGrade.forEach(book => {
                         const subj = book.subject || 'อื่นๆ'
                         if (!subjectMap[subj]) subjectMap[subj] = []
                         subjectMap[subj].push(book)
                       })
-
                       Object.entries(subjectMap).forEach(([subject, sBooks]) => {
-                        // Subject sub-header
                         rows.push(
                           <tr key={`subject-${grade}-${subject}`}>
-                            <td colSpan={8} className="border border-gray-200 dark:border-gray-700 px-3 py-2 pl-6 bg-blue-50 dark:bg-blue-900/30 font-semibold text-blue-800 dark:text-blue-300">
-                              {subject}
-                            </td>
+                            <td colSpan={8} className={`${td} pl-6 font-semibold`}>{subject}</td>
                           </tr>
                         )
-
-                        sBooks.forEach(book => {
-                          const ordered = summaryOrderMap[book.id] || 0
-                          const r1 = summaryReceiptMap[book.id]?.[1] || 0
-                          const r2 = summaryReceiptMap[book.id]?.[2] || 0
-                          const totalReceived = r1 + r2
-                          const shortage = ordered - totalReceived
-                          const dist = summaryDistMap[book.id] || 0
-                          rows.push(
-                            <tr key={`book-${book.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 dark:text-gray-200">{book.title}</td>
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{ordered}</td>
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-right dark:text-gray-200">{Number(book.price || 0).toLocaleString()}</td>
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r1}</td>
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{r2}</td>
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center dark:text-gray-200">{totalReceived}</td>
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-red-50 dark:bg-red-900/20 dark:text-gray-200">{shortage > 0 ? shortage : 0}</td>
-                              <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/20 dark:text-gray-200">{dist}</td>
-                            </tr>
-                          )
-                        })
+                        sBooks.forEach(book => rows.push(renderBook(book)))
                       })
                     }
                   })
+
+                  // Totals row
+                  rows.push(
+                    <tr key="totals" className="font-bold bg-gray-50 dark:bg-gray-700/50">
+                      <td className={`${td} font-bold`}>รวมทั้งหมด</td>
+                      <td className={`${td} text-center font-bold`}>{totalOrdered.toLocaleString()}</td>
+                      <td className={`${td} text-center font-bold`}>-</td>
+                      <td className={`${td} text-center font-bold`}>{totalR1.toLocaleString()}</td>
+                      <td className={`${td} text-center font-bold`}>{totalR2.toLocaleString()}</td>
+                      <td className={`${td} text-center font-bold`}>{totalReceived.toLocaleString()}</td>
+                      <td className={`${td} text-center font-bold bg-red-50 dark:bg-red-900/20`}>{totalShortage.toLocaleString()}</td>
+                      <td className={`${td} text-center font-bold`}>{totalDist.toLocaleString()}</td>
+                    </tr>
+                  )
+
                   return rows
                 })()}
               </tbody>
