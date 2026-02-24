@@ -55,12 +55,16 @@ export default function ReportsPage() {
 
   const fetchData = async () => {
     setLoading(true)
-    const [budgetRes, orderRes] = await Promise.all([
-      supabase.from('budgets').select('*').eq('year', selectedYear),
-      supabase.from('orders').select('*').eq('year', selectedYear),
-    ])
-    setBudgets(budgetRes.data || [])
-    setOrders(orderRes.data || [])
+    try {
+      const [budgetRes, orderRes] = await Promise.all([
+        supabase.from('budgets').select('*').eq('year', selectedYear),
+        supabase.from('orders').select('*').eq('year', selectedYear),
+      ])
+      setBudgets(budgetRes.data || [])
+      setOrders(orderRes.data || [])
+    } catch (err) {
+      console.error('Fetch data error:', err)
+    }
     setLoading(false)
   }
 
