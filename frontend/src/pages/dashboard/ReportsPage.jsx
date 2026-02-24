@@ -41,32 +41,44 @@ export default function ReportsPage() {
   const currentBuddhistYear = new Date().getFullYear() + 543
   const yearOptions = Array.from({ length: 5 }, (_, i) => (currentBuddhistYear - 2 + i).toString())
 
-  useEffect(() => { fetchData() }, [selectedYear])
+  useEffect(() => {
+    let isMounted = true
+    const fetchAll = async () => {
+      setLoading(true)
+      try {
+        const [budgetRes, orderRes] = await Promise.all([
+          supabase.from('budgets').select('*').eq('year', selectedYear),
+          supabase.from('orders').select('*').eq('year', selectedYear),
+        ])
+        if (isMounted) {
+          setBudgets(budgetRes.data || [])
+          setOrders(orderRes.data || [])
+        }
+      } catch (err) {
+        console.error('Fetch data error:', err)
+      }
+      if (isMounted) setLoading(false)
+    }
+    fetchAll()
+    return () => { isMounted = false }
+  }, [selectedYear])
 
   useEffect(() => { fetchSubjectGroups() }, [])
 
   useEffect(() => {
+    let isMounted = true
     if (pendingBooksYear) {
-      fetchPendingBooks()
+      fetchPendingBooksWithMount(isMounted)
     }
+    return () => { isMounted = false }
   }, [pendingBooksYear, pendingBooksGrade, pendingBooksSubject])
 
-  useEffect(() => { fetchSummaryReport() }, [selectedYear])
+  useEffect(() => {
+    let isMounted = true
+    fetchSummaryReportWithMount(isMounted)
+    return () => { isMounted = false }
+  }, [selectedYear])
 
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      const [budgetRes, orderRes] = await Promise.all([
-        supabase.from('budgets').select('*').eq('year', selectedYear),
-        supabase.from('orders').select('*').eq('year', selectedYear),
-      ])
-      setBudgets(budgetRes.data || [])
-      setOrders(orderRes.data || [])
-    } catch (err) {
-      console.error('Fetch data error:', err)
-    }
-    setLoading(false)
-  }
 
   // ดึงข้อมูลกลุ่มสาระการเรียนรู้
   const fetchSubjectGroups = async () => {
@@ -82,7 +94,7 @@ export default function ReportsPage() {
   }
 
   // ดึงข้อมูลหนังสือค้างส่ง
-  const fetchPendingBooks = async () => {
+  const fetchPendingBooksWithMount = async (isMounted) => {
     setLoadingPendingBooks(true)
     try {
       let query = supabase
@@ -105,6 +117,7 @@ export default function ReportsPage() {
       }
 
       const { data, error } = await query
+      if (!isMounted) return
 
       if (error) {
         console.error('Error fetching pending books:', error)
@@ -144,12 +157,12 @@ export default function ReportsPage() {
       }
     } catch (err) {
       console.error('Fetch pending books error:', err)
-      setPendingBooks([])
+      if (isMounted) setPendingBooks([])
     }
-    setLoadingPendingBooks(false)
+    if (isMounted) setLoadingPendingBooks(false)
   }
 
-  const fetchSummaryReport = async () => {
+  const fetchSummaryReportWithMount = async (isMounted) => {
     setLoadingSummary(true)
     try {
       const [booksRes, orderItemsRes, receiptsRes, distributionsRes] = await Promise.all([
@@ -158,6 +171,7 @@ export default function ReportsPage() {
         supabase.from('book_receipt_items').select('book_id, received_qty, book_receipts!inner(delivery_number)'),
         supabase.from('student_book_distributions').select('book_id').eq('academic_year', String(selectedYear))
       ])
+      if (!isMounted) return
 
       setSummaryBooks(booksRes.data || [])
 
@@ -183,7 +197,7 @@ export default function ReportsPage() {
     } catch (err) {
       console.error('Fetch summary error:', err)
     }
-    setLoadingSummary(false)
+    if (isMounted) setLoadingSummary(false)
   }
 
   const totalBudget = budgets.reduce((s, b) => s + Number(b.amount || 0), 0)
