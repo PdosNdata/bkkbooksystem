@@ -41,164 +41,137 @@ export default function ReportsPage() {
   const currentBuddhistYear = new Date().getFullYear() + 543
   const yearOptions = Array.from({ length: 5 }, (_, i) => (currentBuddhistYear - 2 + i).toString())
 
+  // Fetch all data on mount and when year changes
   useEffect(() => {
     let isMounted = true
-    const fetchAll = async () => {
+
+    const fetchAllData = async () => {
       setLoading(true)
+      setLoadingSummary(true)
+      setLoadingPendingBooks(true)
+
       try {
-        const [budgetRes, orderRes] = await Promise.all([
+        // Fetch budgets, orders, subject groups, and summary in parallel
+        const [budgetRes, orderRes, subjectRes, booksRes, orderItemsRes, receiptsRes, distributionsRes] = await Promise.all([
           supabase.from('budgets').select('*').eq('year', selectedYear),
           supabase.from('orders').select('*').eq('year', selectedYear),
+          supabase.from('typeofbooks').select('id, name').order('display_order', { ascending: true, nullsFirst: false }).order('name', { ascending: true }),
+          supabase.from('books').select('id, title, grade, subject, price').eq('is_active', true).order('grade').order('subject').order('title'),
+          supabase.from('order_items').select('book_id, quantity, orders!inner(year)').eq('orders.year', selectedYear),
+          supabase.from('book_receipt_items').select('book_id, received_qty, book_receipts!inner(delivery_number)'),
+          supabase.from('student_book_distributions').select('book_id').eq('academic_year', String(selectedYear))
         ])
-        if (isMounted) {
-          setBudgets(budgetRes.data || [])
-          setOrders(orderRes.data || [])
-        }
+
+        if (!isMounted) return
+
+        setBudgets(budgetRes.data || [])
+        setOrders(orderRes.data || [])
+        setSubjectGroups(subjectRes.data || [])
+        setSummaryBooks(booksRes.data || [])
+
+        // Build order map
+        const oMap = {}
+        ;(orderItemsRes.data || []).forEach(item => {
+          oMap[item.book_id] = (oMap[item.book_id] || 0) + (item.quantity || 0)
+        })
+        setSummaryOrderMap(oMap)
+
+        // Build receipt map
+        const rMap = {}
+        ;(receiptsRes.data || []).forEach(item => {
+          const dn = item.book_receipts?.delivery_number || 1
+          if (!rMap[item.book_id]) rMap[item.book_id] = {}
+          rMap[item.book_id][dn] = (rMap[item.book_id][dn] || 0) + (item.received_qty || 0)
+        })
+        setSummaryReceiptMap(rMap)
+
+        // Build distribution map
+        const dMap = {}
+        ;(distributionsRes.data || []).forEach(item => {
+          dMap[item.book_id] = (dMap[item.book_id] || 0) + 1
+        })
+        setSummaryDistMap(dMap)
+
       } catch (err) {
         console.error('Fetch data error:', err)
       }
-      if (isMounted) setLoading(false)
-    }
-    fetchAll()
-    return () => { isMounted = false }
-  }, [selectedYear])
 
-  useEffect(() => { fetchSubjectGroups() }, [])
-
-  useEffect(() => {
-    let isMounted = true
-    if (pendingBooksYear) {
-      fetchPendingBooksWithMount(isMounted)
-    }
-    return () => { isMounted = false }
-  }, [pendingBooksYear, pendingBooksGrade, pendingBooksSubject])
-
-  useEffect(() => {
-    let isMounted = true
-    fetchSummaryReportWithMount(isMounted)
-    return () => { isMounted = false }
-  }, [selectedYear])
-
-
-  // ดึงข้อมูลกลุ่มสาระการเรียนรู้
-  const fetchSubjectGroups = async () => {
-    const { data, error } = await supabase
-      .from('typeofbooks')
-      .select('id, name')
-      .order('display_order', { ascending: true, nullsFirst: false })
-      .order('name', { ascending: true })
-
-    if (!error && data) {
-      setSubjectGroups(data)
-    }
-  }
-
-  // ดึงข้อมูลหนังสือค้างส่ง
-  const fetchPendingBooksWithMount = async (isMounted) => {
-    setLoadingPendingBooks(true)
-    try {
-      let query = supabase
-        .from('book_stock')
-        .select(`
-          id,
-          book_id,
-          grade,
-          academic_year,
-          quantity,
-          available_quantity,
-          distributed_quantity,
-          books(id, title, price, subject, typeofbook_id, typeofbooks:typeofbook_id(id, name))
-        `)
-        .eq('academic_year', pendingBooksYear)
-        .gt('available_quantity', 0)
-
-      if (pendingBooksGrade) {
-        query = query.eq('grade', pendingBooksGrade)
+      if (isMounted) {
+        setLoading(false)
+        setLoadingSummary(false)
       }
+    }
 
-      const { data, error } = await query
-      if (!isMounted) return
+    fetchAllData()
+    return () => { isMounted = false }
+  }, [selectedYear])
 
-      if (error) {
-        console.error('Error fetching pending books:', error)
-        setPendingBooks([])
-      } else {
-        // กรองตามกลุ่มสาระถ้าเลือก
-        let filteredData = data || []
-        if (pendingBooksSubject) {
-          filteredData = filteredData.filter(item =>
-            item.books?.typeofbooks?.id === pendingBooksSubject
-          )
+  // Fetch pending books separately (depends on different filters)
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchPending = async () => {
+      if (!pendingBooksYear) return
+
+      setLoadingPendingBooks(true)
+      try {
+        let query = supabase
+          .from('book_stock')
+          .select(`
+            id, book_id, grade, academic_year, quantity, available_quantity, distributed_quantity,
+            books(id, title, price, subject, typeofbook_id, typeofbooks:typeofbook_id(id, name))
+          `)
+          .eq('academic_year', pendingBooksYear)
+          .gt('available_quantity', 0)
+
+        if (pendingBooksGrade) {
+          query = query.eq('grade', pendingBooksGrade)
         }
 
-        // แปลงข้อมูลเป็นรูปแบบที่ใช้แสดงผล
-        const booksData = filteredData
-          .filter(stock => stock.books)
-          .map(stock => ({
-            id: stock.id,
-            book_id: stock.book_id,
-            title: stock.books.title,
-            subject: stock.books.subject,
-            subjectGroup: stock.books.typeofbooks?.name || '-',
-            grade: stock.grade,
-            price: stock.books.price,
-            quantity: stock.quantity,
-            available_quantity: stock.available_quantity,
-            distributed_quantity: stock.distributed_quantity,
-          }))
-          .sort((a, b) => {
-            // เรียงตามชั้น แล้วตามชื่อหนังสือ
-            const gradeOrder = gradeOptions.indexOf(a.grade) - gradeOptions.indexOf(b.grade)
-            if (gradeOrder !== 0) return gradeOrder
-            return a.title.localeCompare(b.title, 'th')
-          })
+        const { data, error } = await query
+        if (!isMounted) return
 
-        setPendingBooks(booksData)
+        if (error) {
+          console.error('Error fetching pending books:', error)
+          setPendingBooks([])
+        } else {
+          let filteredData = data || []
+          if (pendingBooksSubject) {
+            filteredData = filteredData.filter(item => item.books?.typeofbooks?.id === pendingBooksSubject)
+          }
+
+          const booksData = filteredData
+            .filter(stock => stock.books)
+            .map(stock => ({
+              id: stock.id,
+              book_id: stock.book_id,
+              title: stock.books.title,
+              subject: stock.books.subject,
+              subjectGroup: stock.books.typeofbooks?.name || '-',
+              grade: stock.grade,
+              price: stock.books.price,
+              quantity: stock.quantity,
+              available_quantity: stock.available_quantity,
+              distributed_quantity: stock.distributed_quantity,
+            }))
+            .sort((a, b) => {
+              const gradeOrder = gradeOptions.indexOf(a.grade) - gradeOptions.indexOf(b.grade)
+              if (gradeOrder !== 0) return gradeOrder
+              return a.title.localeCompare(b.title, 'th')
+            })
+
+          setPendingBooks(booksData)
+        }
+      } catch (err) {
+        console.error('Fetch pending books error:', err)
+        if (isMounted) setPendingBooks([])
       }
-    } catch (err) {
-      console.error('Fetch pending books error:', err)
-      if (isMounted) setPendingBooks([])
+      if (isMounted) setLoadingPendingBooks(false)
     }
-    if (isMounted) setLoadingPendingBooks(false)
-  }
 
-  const fetchSummaryReportWithMount = async (isMounted) => {
-    setLoadingSummary(true)
-    try {
-      const [booksRes, orderItemsRes, receiptsRes, distributionsRes] = await Promise.all([
-        supabase.from('books').select('id, title, grade, subject, price').eq('is_active', true).order('grade').order('subject').order('title'),
-        supabase.from('order_items').select('book_id, quantity, orders!inner(year)').eq('orders.year', selectedYear),
-        supabase.from('book_receipt_items').select('book_id, received_qty, book_receipts!inner(delivery_number)'),
-        supabase.from('student_book_distributions').select('book_id').eq('academic_year', String(selectedYear))
-      ])
-      if (!isMounted) return
-
-      setSummaryBooks(booksRes.data || [])
-
-      const oMap = {}
-      ;(orderItemsRes.data || []).forEach(item => {
-        oMap[item.book_id] = (oMap[item.book_id] || 0) + (item.quantity || 0)
-      })
-      setSummaryOrderMap(oMap)
-
-      const rMap = {}
-      ;(receiptsRes.data || []).forEach(item => {
-        const dn = item.book_receipts?.delivery_number || 1
-        if (!rMap[item.book_id]) rMap[item.book_id] = {}
-        rMap[item.book_id][dn] = (rMap[item.book_id][dn] || 0) + (item.received_qty || 0)
-      })
-      setSummaryReceiptMap(rMap)
-
-      const dMap = {}
-      ;(distributionsRes.data || []).forEach(item => {
-        dMap[item.book_id] = (dMap[item.book_id] || 0) + 1
-      })
-      setSummaryDistMap(dMap)
-    } catch (err) {
-      console.error('Fetch summary error:', err)
-    }
-    if (isMounted) setLoadingSummary(false)
-  }
+    fetchPending()
+    return () => { isMounted = false }
+  }, [pendingBooksYear, pendingBooksGrade, pendingBooksSubject])
 
   const totalBudget = budgets.reduce((s, b) => s + Number(b.amount || 0), 0)
   const totalUsed = budgets.reduce((s, b) => s + Number(b.used_amount || 0), 0)
