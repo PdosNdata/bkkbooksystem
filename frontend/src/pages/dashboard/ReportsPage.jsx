@@ -612,7 +612,7 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-blue-600 text-white">
+                <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                   <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">รายการหนังสือ</th>
                   <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-28">จำนวนใบสั่งซื้อ<br/>ทั้งสิ้น</th>
                   <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ราคา</th>
@@ -620,7 +620,7 @@ export default function ReportsPage() {
                   <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-24">ขาดส่งจริง<br/>ทั้งหมด</th>
                   <th rowSpan={2} className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-24">แจกให้<br/>นักเรียน</th>
                 </tr>
-                <tr className="bg-blue-600 text-white">
+                <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                   <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ครั้งที่ 1</th>
                   <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ครั้งที่ 2</th>
                   <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-center font-medium w-20">ส่งทั้งหมด</th>
@@ -638,7 +638,7 @@ export default function ReportsPage() {
                     // Grade header row
                     rows.push(
                       <tr key={`grade-${grade}`}>
-                        <td colSpan={8} className="border border-gray-200 dark:border-gray-700 px-3 py-2 bg-blue-600 text-white font-bold">
+                        <td colSpan={8} className="border border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold">
                           {gradeFullLabel[grade]}
                         </td>
                       </tr>
