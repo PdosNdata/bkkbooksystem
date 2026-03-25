@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: bkk-booksystem-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install -g bun && bun install
+    startCommand: bun run src/index.ts
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
